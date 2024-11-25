@@ -63,6 +63,6 @@ visit the [Ubuntu support] page.
 [Juju]: https://juju.is
 [charm]: https://charmhub.io/k8s
 [snapd documentation]: https://snapcraft.io/docs/installing-snapd
-[Community page]: community.md
+[Community page]: /src/snap/reference/community.md
 [Ubuntu Pro]:  https://ubuntu.com/pro
 [Ubuntu support]: https://ubuntu.com/support
