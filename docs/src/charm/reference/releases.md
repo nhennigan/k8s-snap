@@ -1,2 +1,2 @@
-```{include} ../../snap/reference/releases.md
+```{include} ../../../releases.md
 ```
