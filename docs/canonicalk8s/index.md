@@ -20,10 +20,12 @@ Home <self>
 :titlesonly:
 :maxdepth: 6
 
+
 about.md
-Deploy from Snap package <src/snap/index.md>
-Deploy with Juju <src/charm/index.md>
-Deploy with Cluster API <src/capi/index.md>
+Tutorials </src/tutorials/index.md>
+How-to guides </src/how-to-guides/index.md>
+Explanation </src/explanation/index.md>
+Reference </src/reference/index.md>
 Community <community.md>
 Release notes <src/snap/reference/releases.md>
 
