@@ -10,7 +10,7 @@ how to configure and use key capabilities of {{product}}.
 
 ```{toctree}
 :titlesonly:
-
+new_proxy
 Use default DNS <default-dns.md>
 Use default network <default-network.md>
 Use default Ingress <default-ingress.md>

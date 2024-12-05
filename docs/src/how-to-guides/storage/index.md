@@ -16,4 +16,5 @@ Use default storage <storage.md>
 Use Ceph storage <ceph.md>
 Use cloud storage <cloud.md>
 ceph-csi
+new_ceph
 ```
