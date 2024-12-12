@@ -32,14 +32,18 @@ For deployment at scale, {{product}} is also available as a
 
 ````{grid} 1 1 2 2
 
-```{grid-item-card} [Tutorial](tutorial/index)
+```{grid-item-card} [Snap Tutorials](snap/index)
+[Install](snap/getting-started.md )
 
-**Start here!** A hands-on introduction to Canonical K8s for new users
+[Add and remove nodes](snap/add-remove-nodes.md )
+
+[Learn basic kubectlcommands](snap/kubectl.md)
+
 ```
 
-```{grid-item-card} [How-to guides](howto/index)
+```{grid-item-card} [Charm Tutorials](charm/index)
 
-**Step-by-step guides** covering key operations and common tasks
+[Install](charm/getting-started.md)
 ```
 
 ````
@@ -47,14 +51,12 @@ For deployment at scale, {{product}} is also available as a
 ````{grid} 1 1 2 2
 
 
-```{grid-item-card} [Reference](reference/index)
-
-**Technical information** - specifications, APIs, architecture
+```{grid-item-card} [CAPI Tutorials](capi/index)
+[Install](capi/getting-started.md)
 ```
 
-```{grid-item-card} [Explanation](explanation/index)
+```{grid-item-card} 
 
-**Discussion and clarification** of key topics
 ```
 
 ````
