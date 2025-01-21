@@ -102,6 +102,7 @@ and constructive feedback.
 
 <!-- LINKS -->
 
+
 [Code of Conduct]: https://ubuntu.com/community/ethos/code-of-conduct
 [community]: src/snap/reference/community
 [contribute]: src/snap/howto/contribute
