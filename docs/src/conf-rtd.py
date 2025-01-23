@@ -7,7 +7,7 @@ import time
 import ast
 import yaml
 
-sys.path.append('./')
+sys.path.append('.././')
 from custom_conf import *
 sys.path.append('.sphinx/')
 from build_requirements import *
@@ -192,7 +192,7 @@ html_js_files.extend(custom_html_js_files)
 #    except InvalidGitRepositoryError:
 #        cwd = os.getcwd()
 #        ghfolder = html_context['github_source'][:-1]
-#        
+#
 #        if ghfolder and cwd.endswith(ghfolder):
 #            repo = Repo(cwd.rpartition(ghfolder)[0])
 #        else:
