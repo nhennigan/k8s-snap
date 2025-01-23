@@ -246,4 +246,4 @@ custom_linkcheck_anchors_ignore_for_url = [
     'https://microk8s.io/docs/how-to-cis-harden'
 ]
 
-master_doc = 'index'
+master_doc = 'index.md'
