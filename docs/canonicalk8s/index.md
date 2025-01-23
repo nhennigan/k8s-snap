@@ -46,10 +46,10 @@ Canonical Kubernetes documentation <self>
 :maxdepth: 6
 
 src/about.md
-Deploy from Snap package <src/snap/index.md>
-Deploy with Juju <src/charm/index.md>
-Deploy with Cluster API <src/capi/index.md>
-Community <src/community.md>
+Deploy from Snap package </snap/index.md>
+Deploy with Juju </charm/index.md>
+Deploy with Cluster API </capi/index.md>
+Community </community.md>
 Release notes <src/releases.md>
 
 ```
