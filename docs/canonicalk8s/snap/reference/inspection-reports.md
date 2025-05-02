@@ -18,7 +18,7 @@ also accepts a few arguments that control how and what will be collected.
 See the following sections for more details.
 
 Check the following script to see how the inspection report gets generated:
-https://github.com/canonical/k8s-snap/blob/release-1.32/k8s/scripts/inspect.sh
+https://github.com/canonical/k8s-snap/blob/release-1.33/k8s/scripts/inspect.sh
 
 ## Using the built-in inspection command
 
