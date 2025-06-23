@@ -324,7 +324,7 @@ EPA capabilities.
 
    <!-- This uses a generic include for this branch to insert the standard
    install command-->
-   ```{literalinclude} ../../_parts/install.md
+   ```{literalinclude} ../../_parts/install_snap.md
    :start-after: <!-- snap start -->
    :end-before: <!-- snap end -->
    ```
@@ -356,7 +356,7 @@ sudo k8s kubectl get all -A
 
 1. Install the k8s snap on the second node
 
-```{literalinclude} ../../_parts/install.md
+```{literalinclude} ../../_parts/install_snap.md
 :start-after: <!-- snap start -->
 :end-before: <!-- snap end -->
 ```

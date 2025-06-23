@@ -25,10 +25,10 @@ sudo k8s join-cluster --help
 In this example, the name of the new worker node joining the cluster is
 specified through command line arguments.
 
-If we do not specify the node name upon creating a worker join token on 
+If we do not specify the node name upon creating a worker join token on
 the control plane node the worker node will appear in the cluster with
 the default hostname. In this example, we
-include the name of the worker node: `custom-worker`. To generate the 
+include the name of the worker node: `custom-worker`. To generate the
 join token for a worker add the `--worker` option.
 
 ```
@@ -37,7 +37,7 @@ sudo k8s get-join-token custom-worker --worker
 
 On the new worker machine, install the snap:
 
-```{literalinclude} ../../../_parts/install.md
+```{literalinclude} ../../../_parts/install_snap.md
 :start-after: <!-- snap start -->
 :end-before: <!-- snap end -->
 ```
@@ -70,7 +70,7 @@ In this example, the configuration file provided at cluster join will set the
 proxy mode of the worker machine to `ipvs`.
 
 A join token must be generated on the control plane node of the cluster.
-To generate the join token for a worker the `--worker` option is added. 
+To generate the join token for a worker the `--worker` option is added.
 We will not specify the node name in this example.
 
 ```
@@ -79,7 +79,7 @@ sudo k8s get-join-token --worker
 
 On the new worker machine, install the snap:
 
-```{literalinclude} ../../../_parts/install.md
+```{literalinclude} ../../../_parts/install_snap.md
 :start-after: <!-- snap start -->
 :end-before: <!-- snap end -->
 ```

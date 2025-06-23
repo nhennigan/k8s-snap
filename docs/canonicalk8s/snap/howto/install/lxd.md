@@ -35,7 +35,7 @@ lxc launch ubuntu:22.04 k8s-vm --vm -c limits.cpu=2 -c limits.memory=4GB
 
 Install {{product}} within the VM.
 
-```{literalinclude} ../../../_parts/install.md
+```{literalinclude} ../../../_parts/install_snap.md
 :start-after: <!-- lxd start -->
 :end-before: <!-- lxd end -->
 ```

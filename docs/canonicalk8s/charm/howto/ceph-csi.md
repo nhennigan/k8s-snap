@@ -15,7 +15,7 @@ configured to use VM containers with Ubuntu 22.04 as the base and adding the
 ``virt-type=virtual-machine`` constraint. In order for K8s to function properly,
 an adequate amount of resources must be allocated:
 
-```{literalinclude} ../../_parts/install.md
+```{literalinclude} ../../_parts/install_charm.md
 :start-after: <!-- juju vm start -->
 :end-before: <!-- juju vm end -->
 ```

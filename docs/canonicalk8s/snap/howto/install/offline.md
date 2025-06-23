@@ -18,7 +18,7 @@ workloads and {{product}} features.
 From a machine with access to the internet download the
 `k8s` and `core22` snap with:
 
-```{literalinclude} ../../../_parts/install.md
+```{literalinclude} ../../../_parts/install_snap.md
 :start-after: <!-- offline start -->
 :end-before: <!-- offline end -->
 :append: sudo snap download core22 --basename core22

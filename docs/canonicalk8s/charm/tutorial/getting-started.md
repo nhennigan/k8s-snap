@@ -62,7 +62,7 @@ minimums required. For the Kubernetes control plane (`k8s` charm), the
 recommendation is two CPU cores, 16GB of memory and 40GB of disk space. Now, we
 can go ahead and create a cluster:
 
-```{literalinclude} ../../_parts/install.md
+```{literalinclude} ../../_parts/install_charm.md
 :start-after: <!-- juju control constraints start -->
 :end-before: <!-- juju control constraints end -->
 ```
@@ -88,7 +88,7 @@ connection to a control-plane node to tell it what to do, but it also means
 more of its resources are available for running workloads. We can deploy a
 worker node in a similar way to the original K8s node:
 
-```{literalinclude} ../../_parts/install.md
+```{literalinclude} ../../_parts/install_charm.md
 :start-after: <!-- juju worker constraints start -->
 :end-before: <!-- juju worker constraints end -->
 ```

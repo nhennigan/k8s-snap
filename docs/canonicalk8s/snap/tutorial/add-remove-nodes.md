@@ -46,7 +46,7 @@ run commands.
 
 Install {{product}} on both VMs with the following command:
 
-```{literalinclude} ../../_parts/install.md
+```{literalinclude} ../../_parts/install_snap.md
 :start-after: <!-- snap start -->
 :end-before: <!-- snap end -->
 ```

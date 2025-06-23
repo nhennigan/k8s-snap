@@ -66,7 +66,7 @@ align with your requirements.
 
 Deploy the `k8s` charm with your custom configuration:
 
-```{literalinclude} /_parts/install.md
+```{literalinclude} /_parts/install_charm.md
 :start-after: <!-- juju controlplane custom config start -->
 :end-before: <!-- juju controlplane custom config end -->
 ```

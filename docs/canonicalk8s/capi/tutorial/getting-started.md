@@ -24,7 +24,7 @@ For more `clusterctl` versions refer to the
 The management cluster hosts the CAPI providers. You can use {{product}} as a
 management cluster:
 
-```{literalinclude} ../../_parts/install.md
+```{literalinclude} ../../_parts/install_snap.md
 :start-after: <!-- snap start -->
 :end-before: <!-- snap end -->
 :append: sudo k8s bootstrap
