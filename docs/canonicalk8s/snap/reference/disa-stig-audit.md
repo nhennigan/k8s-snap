@@ -1,22 +1,26 @@
-# How to assess DISA STIG for {{product}}
+# DISA STIG for {{product}}
 
 Security Technical Implementation Guides (STIGs) are developed by the Defense
 Information System Agency (DISA) for the U.S. Department of Defense (DoD).
 
 The [Kubernetes STIG] contains guidelines on how to check and remediate various
-potential security concerns for a Kubernetes deployment.
+potential security concerns for a Kubernetes deployment. Here we have tailored
+these checks to work for our {{product}} cluster that is deployed using the
+[deploying Canonical Kubernetes with FIPS and DISA STIG] guide.
 
-{{product}} aligns with many DISA STIG compliance recommendations by default.
-However, additional hardening steps are required to fully meet the standard.
 
-## Prerequisites
+<!-- {{product}} aligns with many DISA STIG compliance recommendations by default.
+However, additional hardening steps are required to fully meet the standard. -->
+
+<!-- ## Prerequisites
 
 This guide assumes the following:
 
-- You have a bootstrapped {{product}} cluster (see the [getting started] guide)
+- You have a bootstrapped {{product}} cluster using the DISA STIG bootstrap
+template (see the [disa-stig hardening] guide)
 - You have root or sudo access to the machine
 - You have reviewed the [post-deployment hardening] guide and have applied the
-  hardening steps that are relevant to your use-case
+  hardening steps that are relevant to your use-case -->
 
 ## Guideline classes overview
 
@@ -34,11 +38,13 @@ does not package, etc.
 administrator or a user policy needs to be followed.
 
 
-| Class | Guideline |
-| ------ | ----- |
-| `Deployment` (70) | V-242379, V-242380, V-242381, V-242382, V-242387, V-242388, V-242389, V-242391, V-242392, V-242397, V-242400, V-242405, V-242406, V-242407, V-242408, V-242409, V-242418, V-242419, V-242420, V-242421, V-242422, V-242423, V-242426, V-242427, V-242428, V-242429, V-242430, V-242431, V-242432, V-242433, V-242434, V-242436, V-242444, V-242445, V-242446, V-242447, V-242448, V-242449, V-242450, V-242451, V-242452, V-242453, V-242456, V-242457, V-242459, V-242460, V-242466, V-242467, V-245542, V-245543, V-245544, V-254801, V-242376, V-242377, V-242378, V-242384, V-242385, V-242390, V-242402, V-242403, V-242404, V-242424, V-242425, V-242438, V-242461, V-242462, V-242463, V-242464, V-242465, V-245541 |
-| `Not Applicable` (13) | V-242386, V-242393, V-242394, V-242395, V-242396, V-242398, V-242399, V-242437, V-242442, V-242443, V-242454, V-242455 |
-| `Manual` (8) | V-242383, V-242410, V-242411, V-242412, V-242413, V-242414, V-242415, V-242417, V-254800 |
+| Class                 | Guideline                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Deployment` (70)     | V-242379, V-242380, V-242381, V-242382, V-242387, V-242388, V-242389, V-242391, V-242392, V-242397, V-242400, V-242405, V-242406, V-242407, V-242408, V-242409, V-242418, V-242419, V-242420, V-242421, V-242422, V-242423, V-242426, V-242427, V-242428, V-242429, V-242430, V-242431, V-242432, V-242433, V-242434, V-242436, V-242444, V-242445, V-242446, V-242447, V-242448, V-242449, V-242450, V-242451, V-242452, V-242453, V-242456, V-242457, V-242459, V-242460, V-242466, V-242467, V-245542, V-245543, V-245544, V-254801, V-242376, V-242377, V-242378, V-242384, V-242385, V-242390, V-242402, V-242403, V-242404, V-242424, V-242425, V-242438, V-242461, V-242462, V-242463, V-242464, V-242465, V-245541 |
+| `Not Applicable` (13) | V-242386, V-242393, V-242394, V-242395, V-242396, V-242398, V-242399, V-242437, V-242442, V-242443, V-242454, V-242455                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `Manual` (8)          | V-242383, V-242410, V-242411, V-242412, V-242413, V-242414, V-242415, V-242417, V-254800                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+
+
 
 ## [V-242381]
 
@@ -619,6 +625,32 @@ The final line of the output will be `PASS`.
 > cryptographic keys, API tokens, etc).
 >
 
+### Remediation
+
+Canonical Kubernetes follows this rule by default, but it’s up to users to
+follow in pods they create.
+
+
+### Auditing (as root)
+
+The environment of each user-created pod should be inspected using the
+command below to ensure there is no sensitive information (e.g. passwords,
+cryptographic keys, API tokens, etc).
+
+```bash
+sudo k8s kubectl exec -it <pod-name> -n <namespace> -- env
+```
+
+When creating additional pods, deployments, stateful sets, and daemon sets,
+do not place or reference secrets in their environment. To verify that there
+are no secrets present you should check the output of:
+
+```bash
+sudo k8s kubectl get pods --all-namespaces -o yaml| grep -A5 "env:"
+sudo k8s kubectl get deployments --all-namespaces -o yaml| grep -A5 "env:"
+sudo k8s kubectl get daemonset --all-namespaces -o yaml| grep -A5 "env:"
+sudo k8s kubectl get statefulset --all-namespaces -o yaml| grep -A5 "env:"
+```
 
 
 ## [V-242434]
@@ -647,10 +679,10 @@ The final line of the output will be `PASS`.
 > This flag is not set by default in the k8s-snap, as it may prevent kubelet
 > from starting normally unless the kernel settings are as Kubelet expects.
 >
-> Please review the hardening guide for information on how to properly
+> Please review the disa-stig hardening guide for information on how to properly
 > configure the Node's Operating System for Kubelet.
 >
-> https://documentation.ubuntu.com/canonical-kubernetes/latest/snap/howto/security/hardening/
+> https://documentation.ubuntu.com/canonical-kubernetes/latest/snap/howto/security/disa-stig-hardening/
 >
 
 
@@ -1083,7 +1115,8 @@ configured
 > Administrator on a per-organization basis.
 >
 > Instructions on how to configure an `--admission-control-config-file` for the
-> Kube API Server of the k8s-snap can be found in the [hardening guide page].
+> Kube API Server of the k8s-snap can be found in the [disa-stig hardening]
+> guide.
 >
 
 
@@ -1384,10 +1417,10 @@ of
 
 **Comments:**
 
-> The k8s-snap sets the `--auto-tls` option to false and then generates 
-> the appropriate certificate and key files for TLS communication of clients 
-> with etcd upon setup. 
-> The command line arguments of the etcd service in the k8s-snap are defined 
+> The k8s-snap sets the `--auto-tls` option to false and then generates
+> the appropriate certificate and key files for TLS communication of clients
+> with etcd upon setup.
+> The command line arguments of the etcd service in the k8s-snap are defined
 > in the following file:
 
 >     /var/snap/k8s/common/args/etcd
@@ -1395,8 +1428,8 @@ of
 
 ### Remediation for Step 1
 
-Edit `/var/snap/k8s/common/args/etcd` in order to modify the `--auto-tls` 
-argument. Ensure it is set to `false` or `0`. 
+Edit `/var/snap/k8s/common/args/etcd` in order to modify the `--auto-tls`
+argument. Ensure it is set to `false` or `0`.
 
 Subsequently restart the etcd service:
 
@@ -1406,7 +1439,7 @@ sudo systemctl restart snap.k8s.etcd
 
 ### Auditing (as root) for Step 1
 
-Ensure that the argument `--auto-tls` for service etcd is set as appropriate 
+Ensure that the argument `--auto-tls` for service etcd is set as appropriate
 in the service’s argument file `/var/snap/k8s/common/args/etcd`.
 
 ```
@@ -1420,7 +1453,7 @@ The final line of the output will be `PASS`.
 
 ### Remediation for Step 2
 
-Edit `/var/snap/k8s/common/args/etcd` to set the argument of etcd service 
+Edit `/var/snap/k8s/common/args/etcd` to set the argument of etcd service
 `--key-file` to `/etc/kubernetes/pki/etcd/server.key`.
 
 Subsequently restart the etcd service with:
@@ -1431,7 +1464,7 @@ sudo systemctl restart snap.k8s.etcd
 
 ### Auditing (as root) for Step 2
 
-Ensure that the argument `--key-file` for service etcd is set as appropriate 
+Ensure that the argument `--key-file` for service etcd is set as appropriate
 in the service’s argument file `/var/snap/k8s/common/args/etcd`.
 
 ```
@@ -1439,7 +1472,7 @@ grep -E -q  '\-\-key-file=("/etc/kubernetes/pki/etcd/server\.key")' '/var/snap/k
 test $? -eq 0 && echo PASS || echo FAIL
 ```
 
-In the default configuration of the k8s-snap, resulting output lines will 
+In the default configuration of the k8s-snap, resulting output lines will
 start with `PASS`.
 
 
@@ -1447,7 +1480,7 @@ start with `PASS`.
 
 ### Remediation for Step 3
 
-Edit `/var/snap/k8s/common/args/etcd` to set the argument of etcd service 
+Edit `/var/snap/k8s/common/args/etcd` to set the argument of etcd service
 `--cert-file` to `/etc/kubernetes/pki/etcd/server.crt`
 
 Subsequently restart the etcd service with:
@@ -1458,7 +1491,7 @@ sudo systemctl restart snap.k8s.etcd
 
 ### Auditing (as root) for Step 3
 
-Ensure that the argument `--cert-file` for service etcd is set as appropriate 
+Ensure that the argument `--cert-file` for service etcd is set as appropriate
 in the service’s argument file `/var/snap/k8s/common/args/etcd`.
 
 ```
@@ -1466,7 +1499,7 @@ grep -E -q  '\-\-cert-file=("/etc/kubernetes/pki/etcd/server\.crt")' '/var/snap/
 test $? -eq 0 && echo PASS || echo FAIL
 ```
 
-In the default configuration of the k8s-snap, resulting output lines will 
+In the default configuration of the k8s-snap, resulting output lines will
 start with `PASS`.
 
 
@@ -1474,7 +1507,7 @@ start with `PASS`.
 
 ### Remediation for Step 4
 
-Edit `/var/snap/k8s/common/args/etcd` to set the argument of etcd service 
+Edit `/var/snap/k8s/common/args/etcd` to set the argument of etcd service
 `--trusted-ca-file` to `/etc/kubernetes/pki/etcd/ca.crt`
 
 Subsequently restart the etcd service with:
@@ -1485,7 +1518,7 @@ sudo systemctl restart snap.k8s.etcd
 
 ### Auditing (as root) for Step 4
 
-Ensure that the argument `--trusted-ca-file` for service etcd is set as appropriate 
+Ensure that the argument `--trusted-ca-file` for service etcd is set as appropriate
 in the service’s argument file `/var/snap/k8s/common/args/etcd`.
 
 ```
@@ -1493,7 +1526,7 @@ grep -E -q  '\-\-trusted-ca-file=("/etc/kubernetes/pki/etcd/ca\.crt")' '/var/sna
 test $? -eq 0 && echo PASS || echo FAIL
 ```
 
-In the default configuration of the k8s-snap, resulting output lines will 
+In the default configuration of the k8s-snap, resulting output lines will
 start with `PASS`.
 
 
@@ -1649,10 +1682,10 @@ of
 
 **Comments:**
 
-> The k8s-snap sets the `--peer-auto-tls` option to false and then generates 
-> the appropriate certificate and key files for TLS communication of etcd peer 
-> nodes upon setup. 
-> The command line arguments of the etcd service in the k8s-snap are defined 
+> The k8s-snap sets the `--peer-auto-tls` option to false and then generates
+> the appropriate certificate and key files for TLS communication of etcd peer
+> nodes upon setup.
+> The command line arguments of the etcd service in the k8s-snap are defined
 > in the following file:
 
 >     /var/snap/k8s/common/args/etcd
@@ -1660,8 +1693,8 @@ of
 
 ### Remediation for Step 1
 
-Edit `/var/snap/k8s/common/args/etcd` in order to modify the `--peer-auto-tls` 
-argument. Ensure it is set to `false` or `0`. 
+Edit `/var/snap/k8s/common/args/etcd` in order to modify the `--peer-auto-tls`
+argument. Ensure it is set to `false` or `0`.
 
 Subsequently restart the etcd service:
 
@@ -1671,7 +1704,7 @@ sudo systemctl restart snap.k8s.etcd
 
 ### Auditing (as root) for Step 1
 
-Ensure that the argument `--peer-auto-tls` for service etcd is set as 
+Ensure that the argument `--peer-auto-tls` for service etcd is set as
 appropriate in the service’s argument file `/var/snap/k8s/common/args/etcd`.
 
 ```
@@ -1686,7 +1719,7 @@ The final line of the output will be `PASS`.
 
 ### Remediation for Step 2
 
-Edit `/var/snap/k8s/common/args/etcd` to set the argument of etcd service 
+Edit `/var/snap/k8s/common/args/etcd` to set the argument of etcd service
 `--peer-key-file` to `/etc/kubernetes/pki/etcd/peer.key`
 
 Subsequently restart the etcd service with:
@@ -1697,7 +1730,7 @@ sudo systemctl restart snap.k8s.etcd
 
 ### Auditing (as root) for Step 2
 
-Ensure that the argument `--peer-key-file` for service etcd is set as appropriate 
+Ensure that the argument `--peer-key-file` for service etcd is set as appropriate
 in the service’s argument file `/var/snap/k8s/common/args/etcd`.
 
 ```
@@ -1705,7 +1738,7 @@ grep -E -q  '\-\-peer-key-file=("/etc/kubernetes/pki/etcd/peer\.key")' '/var/sna
 test $? -eq 0 && echo PASS || echo FAIL
 ```
 
-In the default configuration of the k8s-snap, resulting output lines will 
+In the default configuration of the k8s-snap, resulting output lines will
 start with `PASS`.
 
 
@@ -1713,7 +1746,7 @@ start with `PASS`.
 
 ### Remediation for Step 3
 
-Edit `/var/snap/k8s/common/args/etcd` to set the argument of etcd service 
+Edit `/var/snap/k8s/common/args/etcd` to set the argument of etcd service
 `--peer-cert-file` to `/etc/kubernetes/pki/etcd/peer.crt`.
 
 Subsequently restart the etcd service with:
@@ -1724,7 +1757,7 @@ sudo systemctl restart snap.k8s.etcd
 
 ### Auditing (as root) for Step 3
 
-Ensure that the argument `--peer-cert-file` for service etcd is set as 
+Ensure that the argument `--peer-cert-file` for service etcd is set as
 appropriate in the service’s argument file `/var/snap/k8s/common/args/etcd`.
 
 ```
@@ -1732,7 +1765,7 @@ grep -E -q  '\-\-peer-cert-file=("/etc/kubernetes/pki/etcd/peer\.crt")' '/var/sn
 test $? -eq 0 && echo PASS || echo FAIL
 ```
 
-In the default configuration of the k8s-snap, resulting output lines will 
+In the default configuration of the k8s-snap, resulting output lines will
 start with `PASS`.
 
 
@@ -1741,7 +1774,7 @@ start with `PASS`.
 
 ### Remediation for Step 4
 
-Edit `/var/snap/k8s/common/args/etcd` to set the argument of etcd service 
+Edit `/var/snap/k8s/common/args/etcd` to set the argument of etcd service
 `--peer-trusted-ca-file` to `/etc/kubernetes/pki/etcd/ca.crt`.
 
 Subsequently restart the etcd service with:
@@ -1752,7 +1785,7 @@ sudo systemctl restart snap.k8s.etcd
 
 ### Auditing (as root) for Step 4
 
-Ensure that the argument `--peer-trusted-ca-file` for service etcd is set as appropriate 
+Ensure that the argument `--peer-trusted-ca-file` for service etcd is set as appropriate
 in the service’s argument file `/var/snap/k8s/common/args/etcd`.
 
 ```
@@ -1760,7 +1793,7 @@ grep -E -q  '\-\-peer-trusted-ca-file=("/etc/kubernetes/pki/etcd/ca\.crt")' '/va
 test $? -eq 0 && echo PASS || echo FAIL
 ```
 
-In the default configuration of the k8s-snap, resulting output lines will 
+In the default configuration of the k8s-snap, resulting output lines will
 start with `PASS`.
 
 
@@ -1983,9 +2016,21 @@ The final line of the output will be `PASS`.
 >
 >     /var/snap/k8s/common/args/kube-controller-manager
 >
+> The necessary argument is already set when following the [disa-stig hardening]
+> guide.
 
 
 ### Remediation
+
+Pre deployment:
+
+Use the template presented in the [disa-stig hardening] guide to apply the
+argument automatically to the kube-controller-manager.
+
+Post-deployment:
+
+Alternatively, if you have already deployed the k8s-snap, you can manually
+apply the argument by editing the appropriate file.
 
 Edit `/var/snap/k8s/common/args/kube-controller-manager` in order to set the
 argument `--bind-address` for service `kube-controller-manager` as appropriate.
@@ -2212,6 +2257,16 @@ results
 > https://discuss.kubernetes.io/t/announce-security-release-of-kubernetes-kubectl-potential-directory-traversal-releases-1-11-9-1-12-7-1-13-5-and-1-14-0-cve-2019-1002101/5712
 >
 
+### Remediation
+
+This requirement can be satisfied by using the kubectl command built into the
+k8s snap (available via `k8s kubectl …`) or by installing the kubectl snap
+from tracks `1.13+`:
+
+```bash
+snap install kubectl --classic
+```
+
 
 
 ## [V-242398]
@@ -2312,9 +2367,21 @@ results
 
 > The k8s-snap does not set the `--feature-gate` flag on the `kube-apiserver`.
 >
+> The necessary argument is already set when following the [disa-stig hardening]
+> guide.
 
 
 ### Remediation
+
+Pre-deployment:
+
+Use the template presented in the [disa-stig hardening] guide to apply the
+argument automatically to the kube-apiserver.
+
+Post-deployment:
+
+Alternatively, if you have already deployed the k8s-snap, you can manually
+apply the argument by editing the appropriate file.
 
 Edit `/var/snap/k8s/common/args/kube-apiserver` in order to set the argument
 `--feature-gate` for service `kube-apiserver` as appropriate.
@@ -2384,14 +2451,21 @@ The final line of the output will be `PASS`.
 > the audit log is only sent to **stdout** (not studio) if the value is set to
 > '-'
 >
-> Please review the [post-deployment hardening] guide for a full description on
-> how to enable auditing for the kube-apiserver.
+> The necessary argument is already set when following the [disa-stig hardening]
+> guide.
 >
 > This finding is basically a duplicate of V-242465.
->
 
 
-### Remediation
+Pre-deployment:
+
+Use the template presented in the [disa-stig hardening] guide to apply the
+argument automatically to the kube-api-server.
+
+Post-deployment:
+
+Alternatively, if you have already deployed the k8s-snap, you can manually
+apply the argument by editing the appropriate file.
 
 Edit `/var/snap/k8s/common/args/kube-apiserver` in order to set the argument
 `--audit-log-path` for service `kube-apiserver` as appropriate.
@@ -2472,12 +2546,21 @@ the event
 >
 > The k8s-snap does not configure auditing by default.
 >
-> Please review the [post-deployment hardening] guide for a full description on
-> how to enable auditing for the kube-apiserver.
->
+> The necessary argument is already set when following the [disa-stig hardening]
+> guide.
 
 
 ### Remediation
+
+Pre-deployment:
+
+Use the template presented in the [disa-stig hardening] guide to apply the
+argument automatically to the kube-api-server.
+
+Post-deployment:
+
+Alternatively, if you have already deployed the k8s-snap, you can manually
+apply the argument by editing the appropriate file.
 
 Edit `/var/snap/k8s/common/args/kube-apiserver` in order to set the argument
 `--audit-policy-file` for service `kube-apiserver` as appropriate.
@@ -3123,7 +3206,11 @@ Category Assurance List (PPSM CAL)
 >
 > Please, consult the [ports and services] page on the ports, protocols and
 > services used by {{product}}.
-
+>
+> Update the PPSM list for your cluster anytime the list of ports,
+> protocols, and services used by your cluster changes. For instance, this
+> list will need to be updated each time a new service is exposed
+> externally.
 
 
 ## [V-242411]
@@ -3156,6 +3243,11 @@ Category Assurance List (PPSM CAL)
 >
 > Please, consult the [ports and services] page on the ports, protocols and
 > services used by {{product}}.
+>
+> Update the PPSM list for your cluster anytime the list of ports,
+> protocols, and services used by your cluster changes. For instance, this
+> list will need to be updated each time a new service is exposed
+> externally.
 
 
 
@@ -3189,6 +3281,11 @@ Category Assurance List (PPSM CAL)
 >
 > Please, consult the [ports and services] page on the ports, protocols and
 > services used by {{product}}.
+>
+> Update the PPSM list for your cluster anytime the list of ports,
+> protocols, and services used by your cluster changes. For instance, this
+> list will need to be updated each time a new service is exposed
+> externally.
 
 
 
@@ -3221,6 +3318,12 @@ Assurance List (PPSM CAL)
 >
 > Please, consult the [ports and services] page on the ports, protocols and
 > services used by {{product}}.
+>
+> Update the PPSM list for your cluster anytime the list of ports,
+> protocols, and services used by your cluster changes. For instance, this
+> list will need to be updated each time a new service is exposed
+> externally.
+
 
 ````
 
@@ -3236,6 +3339,13 @@ Assurance List (PPSM CAL)
 >
 > https://www.esd.whs.mil/portals/54/documents/dd/issuances/dodi/855101p.pdf
 >
+> Please, consult the [ports and services] page on the ports, protocols and
+> services used by {{product}}.
+>
+> Update the PPSM list for your cluster anytime the list of ports,
+> protocols, and services used by your cluster changes. For instance, this
+> list will need to be updated each time a new service is exposed
+> externally.
 
 ````
 
@@ -3754,8 +3864,8 @@ service
 
 ### Remediation
 
-Edit `/var/snap/k8s/common/args/etcd` in order to set the 
-`--client-cert-auth` argument to `true`. 
+Edit `/var/snap/k8s/common/args/etcd` in order to set the
+`--client-cert-auth` argument to `true`.
 
 Subsequently restart the etcd service:
 
@@ -3765,7 +3875,7 @@ sudo systemctl restart snap.k8s.etcd
 
 ### Auditing (as root)
 
-Ensure that the argument `--client-cert-auth` for service etcd is set as 
+Ensure that the argument `--client-cert-auth` for service etcd is set as
 appropriate in the service’s argument file `/var/snap/k8s/common/args/etcd`.
 ```
 grep -E -q  '\-\-client-cert-auth=("true")' '/var/snap/k8s/common/args/etcd'
@@ -4079,7 +4189,7 @@ service
 
 **Comments:**
 
-> This finding refers to the `--peer-client-cert-auth` command line argument 
+> This finding refers to the `--peer-client-cert-auth` command line argument
 > for the etcd service.
 >
 > The command line arguments of the etcd service in the k8s-snap are
@@ -4090,7 +4200,7 @@ service
 
 ### Remediation
 
-Edit `/var/snap/k8s/common/args/etcd` in order to set the 
+Edit `/var/snap/k8s/common/args/etcd` in order to set the
 `--peer-client-cert-auth` argument to `true`.
 
 Subsequently restart the etcd service:
@@ -4101,7 +4211,7 @@ sudo systemctl restart snap.k8s.etcd
 
 ### Auditing (as root)
 
-Ensure that the argument `--peer-client-cert-auth` for service etcd is set as 
+Ensure that the argument `--peer-client-cert-auth` for service etcd is set as
 appropriate in the service’s argument file `/var/snap/k8s/common/args/etcd`.
 ```
 grep -E -q  '\-\-peer-client-cert-auth=("true")' '/var/snap/k8s/common/args/etcd'
@@ -4205,7 +4315,7 @@ The final line of the output will be `PASS`.
 
 ### Remediation
 
-Edit `/var/snap/k8s/common/args/etcd` to set the argument of etcd service 
+Edit `/var/snap/k8s/common/args/etcd` to set the argument of etcd service
 `--key-file` to `/etc/kubernetes/pki/etcd/server.key`
 
 Subsequently restart the etcd service with:
@@ -4216,7 +4326,7 @@ sudo systemctl restart snap.k8s.etcd
 
 ### Auditing (as root)
 
-Ensure that the argument `--key-file` for service etcd is set as appropriate 
+Ensure that the argument `--key-file` for service etcd is set as appropriate
 in the service’s argument file `/var/snap/k8s/common/args/etcd`.
 
 ```
@@ -4224,7 +4334,7 @@ grep -E -q  '\-\-key-file=("/etc/kubernetes/pki/etcd/server\.key")' '/var/snap/k
 test $? -eq 0 && echo PASS || echo FAIL
 ```
 
-In the default configuration of the k8s-snap, resulting output lines will 
+In the default configuration of the k8s-snap, resulting output lines will
 start with `PASS`.
 
 ````
@@ -4388,7 +4498,7 @@ start with `PASS`.
 
 ### Remediation
 
-Edit `/var/snap/k8s/common/args/etcd` to set the argument of etcd service 
+Edit `/var/snap/k8s/common/args/etcd` to set the argument of etcd service
 `--cert-file` to `/etc/kubernetes/pki/etcd/server.crt`
 
 Subsequently restart the etcd service with:
@@ -4399,7 +4509,7 @@ sudo systemctl restart snap.k8s.etcd
 
 ### Auditing (as root)
 
-Ensure that the argument `--cert-file` for service etcd is set as appropriate 
+Ensure that the argument `--cert-file` for service etcd is set as appropriate
 in the service’s argument file `/var/snap/k8s/common/args/etcd`.
 
 ```
@@ -4407,7 +4517,7 @@ grep -E -q  '\-\-cert-file=("/etc/kubernetes/pki/etcd/server\.crt")' '/var/snap/
 test $? -eq 0 && echo PASS || echo FAIL
 ```
 
-In the default configuration of the k8s-snap, resulting output lines will 
+In the default configuration of the k8s-snap, resulting output lines will
 start with `PASS`.
 
 
@@ -4570,7 +4680,7 @@ start with `PASS`.
 
 ### Remediation
 
-Edit `/var/snap/k8s/common/args/kube-apiserver` to set the argument of 
+Edit `/var/snap/k8s/common/args/kube-apiserver` to set the argument of
 Kubernetes API server `--etcd-cafile` to `/etc/kubernetes/pki/etcd/ca.crt`
 
 Subsequently restart the etcd service with:
@@ -4581,8 +4691,8 @@ sudo systemctl restart snap.k8s.kube-apiserver
 
 ### Auditing (as root)
 
-Ensure that the argument `--etcd-cafile` for Kubernetes API server is set as 
-appropriate in the service’s argument file 
+Ensure that the argument `--etcd-cafile` for Kubernetes API server is set as
+appropriate in the service’s argument file
 `/var/snap/k8s/common/args/kube-apiserver`.
 
 ```
@@ -4590,7 +4700,7 @@ grep -E -q  '\-\-etcd-cafile=("/etc/kubernetes/pki/etcd/ca\.crt")' '/var/snap/k8
 test $? -eq 0 && echo PASS || echo FAIL
 ```
 
-In the default configuration of the k8s-snap, resulting output lines will 
+In the default configuration of the k8s-snap, resulting output lines will
 start with `PASS`.
 
 ````
@@ -4737,7 +4847,7 @@ start with `PASS`.
 
 **Comments:**
 
-> This finding refers to the `--etcd-certfile` command line argument for the 
+> This finding refers to the `--etcd-certfile` command line argument for the
 > Kube API Service.
 >
 > The command line arguments of the Kubernetes API Server in the k8s-snap are
@@ -4748,8 +4858,8 @@ start with `PASS`.
 
 ### Remediation
 
-Edit `/var/snap/k8s/common/args/kube-apiserver` to set the argument of 
-Kubernetes API server `--etcd-certfile` to 
+Edit `/var/snap/k8s/common/args/kube-apiserver` to set the argument of
+Kubernetes API server `--etcd-certfile` to
 `/etc/kubernetes/pki/apiserver-etcd-client.crt`
 
 Subsequently restart the etcd service with:
@@ -4760,8 +4870,8 @@ sudo systemctl restart snap.k8s.kube-apiserver
 
 ### Auditing (as root)
 
-Ensure that the argument `--etcd-certfile` for Kubernetes API server is set as 
-appropriate in the service’s argument file 
+Ensure that the argument `--etcd-certfile` for Kubernetes API server is set as
+appropriate in the service’s argument file
 `/var/snap/k8s/common/args/kube-apiserver`.
 
 ```
@@ -4769,7 +4879,7 @@ grep -E -q  '\-\-etcd-certfile=("/etc/kubernetes/pki/apiserver-etcd-client\.crt"
 test $? -eq 0 && echo PASS || echo FAIL
 ```
 
-In the default configuration of the k8s-snap, resulting output lines will 
+In the default configuration of the k8s-snap, resulting output lines will
 start with `PASS`.
 
 
@@ -4922,7 +5032,7 @@ start with `PASS`.
 
 **Comments:**
 
-> This finding refers to the `--etcd-keyfile` command line argument for the 
+> This finding refers to the `--etcd-keyfile` command line argument for the
 > Kube API Service.
 >
 > The command line arguments of the Kubernetes API Server in the k8s-snap are
@@ -4933,8 +5043,8 @@ start with `PASS`.
 
 ### Remediation
 
-Edit `/var/snap/k8s/common/args/kube-apiserver` to set the argument of 
-Kubernetes API server `--etcd-keyfile` to 
+Edit `/var/snap/k8s/common/args/kube-apiserver` to set the argument of
+Kubernetes API server `--etcd-keyfile` to
 `/etc/kubernetes/pki/apiserver-etcd-client.key`
 
 Subsequently restart the etcd service with:
@@ -4945,8 +5055,8 @@ sudo systemctl restart snap.k8s.kube-apiserver
 
 ### Auditing (as root)
 
-Ensure that the argument `--etcd-keyfile` for Kubernetes API server is set as 
-appropriate in the service’s argument file 
+Ensure that the argument `--etcd-keyfile` for Kubernetes API server is set as
+appropriate in the service’s argument file
 `/var/snap/k8s/common/args/kube-apiserver`.
 
 ```
@@ -4954,7 +5064,7 @@ grep -E -q  '\-\-etcd-keyfile=("/etc/kubernetes/pki/apiserver-etcd-client\.key")
 test $? -eq 0 && echo PASS || echo FAIL
 ```
 
-In the default configuration of the k8s-snap, resulting output lines will 
+In the default configuration of the k8s-snap, resulting output lines will
 start with `PASS`.
 
 
@@ -5118,7 +5228,7 @@ secure etcd communication.
 
 ### Remediation
 
-Edit `/var/snap/k8s/common/args/etcd` to set the argument of etcd service 
+Edit `/var/snap/k8s/common/args/etcd` to set the argument of etcd service
 `--peer-cert-file` to `/etc/kubernetes/pki/etcd/peer.crt`.
 
 Subsequently restart the etcd service with:
@@ -5129,7 +5239,7 @@ sudo systemctl restart snap.k8s.etcd
 
 ### Auditing (as root)
 
-Ensure that the argument `--peer-cert-file` for service etcd is set as 
+Ensure that the argument `--peer-cert-file` for service etcd is set as
 appropriate in the service’s argument file `/var/snap/k8s/common/args/etcd`.
 
 ```
@@ -5137,7 +5247,7 @@ grep -E -q  '\-\-peer-cert-file=("/etc/kubernetes/pki/etcd/peer\.crt")' '/var/sn
 test $? -eq 0 && echo PASS || echo FAIL
 ```
 
-In the default configuration of the k8s-snap, resulting output lines will 
+In the default configuration of the k8s-snap, resulting output lines will
 start with `PASS`.
 
 
@@ -5236,7 +5346,7 @@ secure etcd communication.
 
 ### Remediation
 
-Edit `/var/snap/k8s/common/args/etcd` to set the argument of etcd service 
+Edit `/var/snap/k8s/common/args/etcd` to set the argument of etcd service
 `--peer-key-file` to `/etc/kubernetes/pki/etcd/peer.key`.
 
 Subsequently restart the etcd service with:
@@ -5247,7 +5357,7 @@ sudo systemctl restart snap.k8s.etcd
 
 ### Auditing (as root)
 
-Ensure that the argument `--peer-key-file` for service etcd is set as appropriate 
+Ensure that the argument `--peer-key-file` for service etcd is set as appropriate
 in the service’s argument file `/var/snap/k8s/common/args/etcd`.
 
 ```
@@ -5255,7 +5365,7 @@ grep -E -q  '\-\-peer-key-file=("/etc/kubernetes/pki/etcd/peer\.key")' '/var/sna
 test $? -eq 0 && echo PASS || echo FAIL
 ```
 
-In the default configuration of the k8s-snap, resulting output lines will 
+In the default configuration of the k8s-snap, resulting output lines will
 start with `PASS`.
 
 ````
@@ -5604,7 +5714,7 @@ through this file.
 **Comments:**
 
 > This finding refers to checking the ownership of all etcd-related files under
-> /var/lib/etcd/*. However, k8s-snap stores these file under a different 
+> /var/lib/etcd/*. However, k8s-snap stores these file under a different
 > directory.
 >
 > The state directory for etcd within the k8s-snap is located under:
@@ -6608,8 +6718,8 @@ Plane would be compromised.
 
 **Comments:**
 
-> This finding refers to checking the ownership of all etcd-related files 
-> and directories under /var/lib/etcd/*. However, k8s-snap stores these file 
+> This finding refers to checking the ownership of all etcd-related files
+> and directories under /var/lib/etcd/*. However, k8s-snap stores these file
 > under a different directory.
 >
 > The state directory for etcd within the k8s-snap is located under:
@@ -6775,12 +6885,21 @@ investigation.
 >
 > The k8s-snap does not configure auditing by default.
 >
-> Please review the [post-deployment hardening] guide for a full description on
-> how to enable auditing for the kube-apiserver.
->
+> The necessary argument is already set when following the [disa-stig hardening]
+> guide.
 
 
 ### Remediation
+
+Pre-deployment:
+
+Use the template presented in the [disa-stig hardening] guide to apply the
+argument automatically to the kube-apiserver.
+
+Post-deployment:
+
+Alternatively, if you have already deployed the k8s-snap, you can manually
+apply the argument by editing the appropriate file.
 
 Edit `/var/snap/k8s/common/args/kube-apiserver` in order to set the argument
 `--audit-policy-file` for service `kube-apiserver` as appropriate.
@@ -6832,12 +6951,21 @@ file size is to set these limits.
 >
 > The k8s-snap does not configure auditing by default.
 >
-> Please review the [post-deployment hardening] guide for a full description on
-> how to enable auditing for the kube-apiserver.
->
+> The necessary argument is already set when following the [disa-stig hardening]
+> guide.
 
 
 ### Remediation
+
+Pre-deployment:
+
+Use the template presented in the [disa-stig hardening] guide to apply the
+argument automatically to the kube-apiserver.
+
+Post-deployment:
+
+Alternatively, if you have already deployed the k8s-snap, you can manually
+apply the argument by editing the appropriate file.
 
 Edit `/var/snap/k8s/common/args/kube-apiserver` in order to set the argument
 `--audit-log-maxsize` for service `kube-apiserver` as appropriate.
@@ -6887,12 +7015,21 @@ evidence for cybersecurity investigations.
 >
 > The k8s-snap does not configure auditing by default.
 >
-> Please review the [post-deployment hardening] guide for a full description on
-> how to enable auditing for the kube-apiserver.
->
+> The necessary argument is already set when following the [disa-stig hardening]
+> guide.
 
 
 ### Remediation
+
+Pre-deployment:
+
+Use the template presented in the [disa-stig hardening] guide to apply the
+argument automatically to the kube-apiserver.
+
+Post-deployment:
+
+Alternatively, if you have already deployed the k8s-snap, you can manually
+apply the argument by editing the appropriate file.
 
 Edit `/var/snap/k8s/common/args/kube-apiserver` in order to set the argument
 `--audit-log-maxbackup` for service `kube-apiserver` as appropriate.
@@ -6943,12 +7080,21 @@ evidence for cybersecurity investigations.
 >
 > The k8s-snap does not configure auditing by default.
 >
-> Please review the [post-deployment hardening] guide for a full description on
-> how to enable auditing for the kube-apiserver.
->
+> The necessary argument is already set when following the [disa-stig hardening]
+> guide.
 
 
 ### Remediation
+
+Pre-deployment:
+
+Use the template presented in the [disa-stig hardening] guide to apply the
+argument automatically to the kube-apiserver.
+
+Post-deployment:
+
+Alternatively, if you have already deployed the k8s-snap, you can manually
+apply the argument by editing the appropriate file.
 
 Edit `/var/snap/k8s/common/args/kube-apiserver` in order to set the argument
 `--audit-log-maxage` for service `kube-apiserver` as appropriate.
@@ -6998,14 +7144,23 @@ events in the audit log the log path value must be set.
 >
 > The k8s-snap does not configure auditing by default.
 >
-> Please review the [post-deployment hardening] guide for a full description on
-> how to enable auditing for the kube-apiserver.
+> The necessary argument is already set when following the [disa-stig hardening]
+> guide.
 >
 > This finding is basically a duplicate of V-242402.
->
 
 
 ### Remediation
+
+Pre-deployment:
+
+Use the template presented in the [disa-stig hardening] guide to apply the
+argument automatically to the kube-apiserver.
+
+Post-deployment:
+
+Alternatively, if you have already deployed the k8s-snap, you can manually
+apply the argument by editing the appropriate file.
 
 Edit `/var/snap/k8s/common/args/kube-apiserver` in order to set the argument
 `--audit-log-path` for service `kube-apiserver` as appropriate.
@@ -7160,9 +7315,21 @@ must never be set to "0" and should be defined at "5m" (the default is 4hr).
 >
 >     /var/snap/k8s/common/args/kubelet
 >
+> The necessary argument is already set when following the [disa-stig hardening]
+> guide.
 
 
 ### Remediation
+
+Pre-deployment:
+
+Use the template presented in the [disa-stig hardening] guide to apply the
+argument automatically to the kubelet.
+
+Post-deployment:
+
+Alternatively, if you have already deployed the k8s-snap, you can manually
+apply the argument by editing the appropriate file.
 
 Edit `/var/snap/k8s/common/args/kubelet` in order to set the argument
 `--streaming-connection-idle-timeout` for service `kubelet` as appropriate.
@@ -7189,7 +7356,7 @@ The final line of the output will be `PASS`.
 
 
 <!-- Links -->
-[getting started]: ../../tutorial/getting-started
+[disa-stig hardening]: disa-stig-hardening.md
 [ports and services]:/snap/reference/ports-and-services.md
 [post-deployment hardening]: hardening.md
 [Kubernetes STIG]:https://stigviewer.com/stigs/kubernetes/
