@@ -6,12 +6,9 @@ Out of the box {{product}} complies with the majority of the recommended
 CIS security configurations. Since implementing all security recommendations
 would come at the expense of compatibility and/or performance we expect
 cluster administrators to follow post deployment hardening steps based on their
-needs. This guide covers:
-
-  * Post-deployment hardening steps you could consider for your {{product}}
-  * Using [kube-bench] to automatically check whether your Kubernetes
-    clusters are configured according to the [CIS Kubernetes Benchmark]
-  * Manually configuring and auditing each CIS hardening recommendation
+needs. This guide covers using [kube-bench] to automatically check whether
+your Kubernetes clusters are configured according to the
+[CIS Kubernetes Benchmark]
 
 
 ## Prerequisites
@@ -24,10 +21,10 @@ This guide assumes the following:
   hardening steps that relevant to your use-case
 
 
-## Critical post-deployment hardening steps
+<!-- ## Critical post-deployment hardening steps
 
 By completing these steps, you can ensure your cluster achieves does not fail
-any of the CIS hardening recommendations.
+any of the CIS hardening recommendations. -->
 
 <!-- POINT TO HARDENING STEPS GUIDE -->
 

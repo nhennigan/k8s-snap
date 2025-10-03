@@ -34,5 +34,5 @@ To assess compliance to the CIS hardening guidelines, please see the [CIS
 assessment page].
 
 <!-- Links -->
-[DISA STIG assessment page]: disa-stig-assessment.md
-[CIS assessment page]: cis-assessment.md
+[DISA STIG assessment page]: /snap/reference/disa-stig-audit.md
+[CIS assessment page]: /snap/reference/cis-audit.md
