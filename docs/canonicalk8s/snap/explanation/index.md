@@ -60,15 +60,9 @@ load-balancer
 Understand how security plays a vital role in {{product}} and what has been
 done to strive for compliance with industry standards.
 
-TODO - remove this
 ```{toctree}
 :titlesonly:
-Security <security/index>
-```
-
-```{toctree}
-:titlesonly:
-security
+Security <security.md>
 ```
 
 ---
