@@ -304,13 +304,18 @@ compliance.
 ### Kubernetes DISA STIG
 
 Security Technical Implementation Guides (STIGs) are developed by the Defense
-Information System Agency (DISA) for the U.S. Department of Defense (DoD). The
-[Kubernetes STIG] contains guidelines on how to check and remediate various
-potential security concerns for a Kubernetes deployment.
+Information System Agency (DISA) and are comprehensive frameworks of security
+requirements designed to protect U.S. Department of Defense (DoD) systems and
+networks from cybersecurity threats.
+The [Kubernetes STIG] contains guidelines on how to check and remediate various
+potential security concerns for a Kubernetes deployment, both on the host and
+within the cluster itself.
 
 In our [deploy with DISA STIG] guide, {{product}} provides configuration files
 to harden your cluster and host set up in accordance with DISA STIG Kubernetes
-guidelines.
+guidelines. {{product}} aligns with many DISA STIG compliance recommendations by
+default. However, additional hardening steps are required to fully meet the
+standard.
 
 ### FIPS compliance
 
