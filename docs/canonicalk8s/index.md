@@ -42,14 +42,19 @@ Canonical Kubernetes documentation <self>
 :hidden:
 :titlesonly:
 :maxdepth: 6
-
-about.md
-Deploy from Snap package </snap/index.md>
-Deploy with Juju </charm/index.md>
-Deploy with Cluster API </capi/index.md>
+What is Canonical Kubernetes? <about.md>
+Tutorial </tutorial/index.md>
+How-to guides <howto/index.md>
+Reference </reference/index.md>
+Explanation </explanation/index.md>
 Community </community.md>
-Release notes </releases.md>
+Release notes </releases/index.md>
 ```
+
+<!-- Deploy from Snap package </snap/index.md>
+Deploy with Juju </charm/index.md>
+Deploy with Cluster API </capi/index.md> -->
+
 
 ````{grid} 3
 
