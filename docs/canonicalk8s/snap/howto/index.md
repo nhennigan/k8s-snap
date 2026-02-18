@@ -10,6 +10,15 @@ adapt the steps to fit your specific requirements.
 Overview <self>
 ```
 
++## Combo
++
++```{toctree}
++:titlesonly:
++3proxy
++3upgrade-hybrid
++3upgrade
++```
+
 ## Installation
 
 Installation follows a very similar pattern on all platforms, but some minor
