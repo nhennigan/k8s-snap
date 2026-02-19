@@ -10,14 +10,14 @@ adapt the steps to fit your specific requirements.
 Overview <self>
 ```
 
-+## Combo
-+
-+```{toctree}
-+:titlesonly:
-+3proxy
-+3upgrade-hybrid
-+3upgrade
-+```
+## Combo
+
+```{toctree}
+:titlesonly:
+3proxy
+3upgrade-hybrid
+3upgrade
+```
 
 ## Installation
 

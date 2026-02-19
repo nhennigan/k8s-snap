@@ -93,12 +93,6 @@ Machine  State    Address         Inst id              Base          AZ         
 <!-- markdownlint-restore -->
 ````
 
-````{tab-item} CAPI
-:sync: key3
-
-Content Tab 3
-````
-
 `````
 
 ## Patch upgrade
@@ -151,12 +145,6 @@ This outputs a list of applications in the model:
 
 If the `can-upgrade-to` revision is `null`, the charm is on the most
 stable release within this channel.
-````
-
-````{tab-item} CAPI
-:sync: key3
-
-Content Tab 3
 ````
 
 `````
@@ -239,12 +227,6 @@ applications appear in the same model.
 
 ````
 
-````{tab-item} CAPI
-:sync: key3
-
-Content Tab 3
-````
-
 `````
 
 
@@ -281,12 +263,6 @@ version of **Kubernetes** is listed in the application's **Version**
 It is recommended that you run a [cluster validation][cluster-validation]
 to ensure that the cluster is fully functional.
 
-````
-
-````{tab-item} CAPI
-:sync: key3
-
-Content Tab 3
 ````
 
 `````
@@ -340,12 +316,6 @@ stable release within this channel.  Continue with the
 [Pre Upgrade Check](#the-pre-upgrade-check).
 
 Otherwise, complete the [Upgrade Patch](upgrade-patch) instructions first.
-````
-
-````{tab-item} CAPI
-:sync: key3
-
-Content Tab 3
 ````
 
 `````
@@ -438,12 +408,6 @@ applications appear in the same model.
 
 ````
 
-````{tab-item} CAPI
-:sync: key3
-
-Content Tab 3
-````
-
 `````
 
 
@@ -479,12 +443,6 @@ version of **Kubernetes** is listed in the application's **Version**
 Run a [cluster validation][cluster-validation]
 to ensure that the cluster is fully functional.
 
-````
-
-````{tab-item} CAPI
-:sync: key3
-
-Content Tab 3
 ````
 
 `````
