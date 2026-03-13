@@ -36,20 +36,26 @@ project's needs with
 :hidden:
 :titlesonly:
 Canonical Kubernetes documentation <self>
+about.md
+Tutorial <tutorial/getting-started.md>
+How-to <howto/index.md>
+Reference <reference/index.md>
+Explanation <explanation/index.md>
+Community </community.md>
+Release notes </releases/index.md>
 ```
 
-```{toctree}
+<!-- ```{toctree}
 :hidden:
 :titlesonly:
 :maxdepth: 6
 
-about.md
+
 Deploy from Snap package </snap/index.md>
 Deploy with Juju </charm/index.md>
 Deploy with Cluster API </capi/index.md>
-Community </community.md>
-Release notes </releases/index.md>
-```
+
+``` -->
 
 ````{grid} 3
 

@@ -1,4 +1,4 @@
-# How-to guides
+# Cluster API how-to guides
 
 If you have a specific goal, but are already familiar with Kubernetes, our
 How-to guides are more specific and contain less background information.

@@ -19,6 +19,7 @@ method that best suits your orchestration needs.
 architecture
 installation-methods.md
 clustering
+capi-ck8s.md
 ```
 
 ## Snaps
@@ -39,6 +40,7 @@ management.
 :titlesonly:
 high-availability
 Upgrades <upgrade.md>
+in-place-upgrades.md
 package-management
 epa
 roles

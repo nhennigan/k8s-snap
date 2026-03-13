@@ -1,4 +1,4 @@
-# How-to guides
+# Charm how-to guides
 
 If you have a specific goal, and are already familiar with Kubernetes, our
 How-to guides are more specific and contain less background information.

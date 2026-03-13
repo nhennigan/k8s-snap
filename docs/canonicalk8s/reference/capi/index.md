@@ -1,4 +1,4 @@
-# Reference
+# Cluster API reference
 
 Our Reference section is for when you need to check specific details or
 information such as the command reference or release notes.
@@ -8,49 +8,28 @@ information such as the command reference or release notes.
 Overview <self>
 ```
 
-## Charms
+## Annotations
 
-Learn about the `k8s` and `k8s-worker` charms, their configurations and actions.
-
-```{toctree}
-:titlesonly:
-Charms <charms>
-Configuration options <charm-configurations>
-Actions <actions>
-Availability Zones <az>
-```
-
-## Networking
+A list of annotations that can be applied to CAPI resources to reflect
+additional metadata.
 
 ```{toctree}
 :titlesonly:
-Ports and services <ports-and-services>
-proxy
+annotations
 ```
 
-## Security
+## Providers configurations
+
+{{product}} bootstrap and control plane providers can be configured in order for
+the workload cluster to reach the desired state.
 
 ```{toctree}
 :titlesonly:
-Security <security>
+configs
+
 ```
 
-## Release notes
-
-New features, bug fixes, deprecations and more are included in the release
-notes for each version.
-
-
-- [Release notes]
-
-## Troubleshooting
-
-Common issues faced by users and their solutions.
-
-```{toctree}
-:titlesonly:
-troubleshooting
-```
+---
 
 ## Other documentation types
 
@@ -70,4 +49,3 @@ your knowledge and get the most out of Kubernetes.
 [Tutorials section]: ../tutorial/index
 [How-to guides]: ../howto/index
 [Explanation section]: ../explanation/index
- [Release notes]: /releases/charm/index

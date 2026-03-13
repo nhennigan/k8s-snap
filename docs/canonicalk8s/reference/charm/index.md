@@ -1,4 +1,4 @@
-# Reference
+# Charm reference
 
 Our Reference section is for when you need to check specific details or
 information such as the command reference or release notes.
@@ -8,30 +8,16 @@ information such as the command reference or release notes.
 Overview <self>
 ```
 
-## System components
+## Charms
+
+Learn about the `k8s` and `k8s-worker` charms, their configurations and actions.
 
 ```{toctree}
 :titlesonly:
-etcd
-dqlite
-```
-
-## Command reference
-
-Commands provided by the {{product}} snap.
-
-```{toctree}
-:titlesonly:
-commands
-```
-
-## Cluster configuration
-
-Configuration files used during cluster creation.
-
-```{toctree}
-:titlesonly:
-config-files/index
+Charms <charms>
+Configuration options <charm-configurations>
+Actions <actions>
+Availability Zones <az>
 ```
 
 ## Release notes
@@ -39,47 +25,8 @@ config-files/index
 New features, bug fixes, deprecations and more are included in the release
 notes for each version.
 
+
 - [Release notes]
-- [Upgrade notes]
-
-## Security
-
-```{toctree}
-:titlesonly:
-Security <security>
-certificates
-DISA STIG audit <disa-stig-audit.md>
-CIS audit <cis-audit.md>
-```
-
-## Annotations
-
-A list of annotations that can be applied to a node on cluster bootstrap.
-
-```{toctree}
-:titlesonly:
-annotations
-```
-
-## Networking
-
-```{toctree}
-:titlesonly:
-proxy
-ports-and-services
-```
-
-## Troubleshooting
-
-Common issues faced by users and their solutions.
-
-```{toctree}
-:titlesonly:
-troubleshooting
-inspection-reports
-```
-
----
 
 ## Other documentation types
 
@@ -99,6 +46,4 @@ your knowledge and get the most out of Kubernetes.
 [Tutorials section]: ../tutorial/index
 [How-to guides]: ../howto/index
 [Explanation section]: ../explanation/index
-[Release notes]:/releases/snap/index.md
-[Upgrade notes]: /releases/snap/upgrading.md
-
+ [Release notes]: /releases/charm/index

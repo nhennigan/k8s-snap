@@ -1,4 +1,4 @@
-# Reference
+# Snap reference
 
 Our Reference section is for when you need to check specific details or
 information such as the command reference or release notes.
@@ -8,33 +8,57 @@ information such as the command reference or release notes.
 Overview <self>
 ```
 
+## System components
+
+```{toctree}
+:titlesonly:
+etcd
+dqlite
+```
+
+## Command reference
+
+Commands provided by the {{product}} snap.
+
+```{toctree}
+:titlesonly:
+commands
+```
+
+## Cluster configuration
+
+Configuration files used during cluster creation.
+
+```{toctree}
+:titlesonly:
+config-files/index
+```
+
+## Security
+
+```{toctree}
+:titlesonly:
+certificates
+DISA STIG audit <disa-stig-audit.md>
+CIS audit <cis-audit.md>
+```
+
 ## Annotations
 
-A list of annotations that can be applied to CAPI resources to reflect
-additional metadata.
+A list of annotations that can be applied to a node on cluster bootstrap.
 
 ```{toctree}
 :titlesonly:
 annotations
 ```
 
-## Providers configurations
+## Troubleshooting
 
-{{product}} bootstrap and control plane providers can be configured in order for
-the workload cluster to reach the desired state.
-
-```{toctree}
-:titlesonly:
-configs
-
-```
-
-## Networking
+Common issues faced by users and their solutions.
 
 ```{toctree}
 :titlesonly:
-Ports and services <ports-and-services>
-
+inspection-reports
 ```
 
 ---
@@ -57,3 +81,5 @@ your knowledge and get the most out of Kubernetes.
 [Tutorials section]: ../tutorial/index
 [How-to guides]: ../howto/index
 [Explanation section]: ../explanation/index
+[Release notes]:/releases/snap/index.md
+[Upgrade notes]: /releases/snap/upgrading.md

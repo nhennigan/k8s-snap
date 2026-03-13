@@ -10,36 +10,31 @@ adapt the steps to fit your specific requirements.
 Overview <self>
 ```
 
-## Installation
+## Snap
 
-Installation follows a very similar pattern on all platforms, but some minor
-differences must be addressed in each case. You may also want to customize the
-installation of your {{product}} nodes.
+
 
 ```{toctree}
 :titlesonly:
-Install <install/index>
+Snap <./snap/index.md>
 ```
 
-## Networking
+## Charm
 
-{{product}} comes with default networking features for a fully functioning
-cluster. More advanced features can be enabled by a few configuration steps.
+
 
 ```{toctree}
 :titlesonly:
-networking/index
+Charm <./charm/index.md>
 ```
 
-## Storage
+## Cluster API
 
-Specific storage needs of your cluster can be met by setting up persistent
-storage or replacing the default datastore with an external one such as `etcd`.
+
 
 ```{toctree}
 :titlesonly:
-storage/index
-Use an external datastore <external-datastore>
+CAPI <./capi/index.md>
 ```
 
 ## Security and compliance
