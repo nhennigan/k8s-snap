@@ -4,6 +4,8 @@ myst:
     description: Learn how to deploy your first Canonical Kubernetes cluster using the k8s snap and execute typical cluster operations in this tutorial.
 ---
 
+(tutorials-index)=
+
 # Getting started
 
 {{product}} is a distribution of Kubernetes which includes all

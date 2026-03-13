@@ -23,6 +23,67 @@ your needs. If you would like to jump straight in, head to the
 
 ---
 
+## Core Kubernetes features
+
+**Networking**: Overview • Configure default networking features  • Configure firewall • Configure dual stack  • Configure IPv6 only  • Ports and services • Proxy environment variables 
+
+**Security**:  About   • Cluster hardening • Report an issue • Use intermediate CAs with Vault  • Refresh certificates
+
+**Storage**: Use default storage • Deploy Ceph • Cluster datastore •  External datastore
+
+**Cluster management**:  Upgrade explanation • Manage upgrades • Node roles • High availability  • Clustering •  Package management with Helm  •  Choose a channel 
+
+**Observability**: Deploy COS 
+
+**Image management**: Manage images 
+
+**Troubleshooting**: Troubleshoot your cluster •  Get support
+
+**Disaster recovery**:  Recover after quorum loss • Inspection reports • Backup 
+and restore
+
+### k8s snap 
+
+The `k8s` snap is a self-contained, secure and dependency-free Linux app package
+used to deploy and manage a {{product}} cluster. If you are new to Kubernetes, 
+start here. 
+
+**Installation**: k8s snap • Custom bootstrap config • Multipass  •  LXD  • 
+Air-gapped environments  • Development environments  • Custom worker config  • 
+Uninstall the snap 
+
+**Configuration**: Configuration files • Annotations • Commands 
+
+**Security compliance**: DISA STIG • CIS • FIPS 
+
+**Hardware enablement**: EPA explanation •  Set up Enhanced Platform Awareness 
+
+### k8s charms
+
+The `k8s` charms take care of installing, configuring and managing {{product}} 
+on cloud instances managed by Juju.
+
+**Installation**: k8s charms • LXD • Terraform • Custom config
+
+**Charm integrations**: OpenStack • etcd • Ceph-CSI • COS
+
+**Configuration**:  Configure the cluster •  Configuration options • Actions • 
+Charmhub links 
+
+### Cluster API
+
+Using Cluster API's declarative tooling, deploy and manage multiple {{product}} 
+clusters.
+
+**Installation**: With CAPI •  Custom config• Custom bootstrap config 
+
+**Cluster lifecycle**:  About CAPI and Canonical Kubernetes •  In place 
+upgrades explanation  • Migrate the management cluster 
+
+**Configuration**:  Annotations • Providers configs  • Availability zones 
+
+
+
 ## In this documentation
 <!-- markdownlint-disable -->
 {{product}} can be deployed and managed as a standalone snap, as a charm as part of a
@@ -44,18 +105,6 @@ Explanation <explanation/index.md>
 Community </community.md>
 Release notes </releases/index.md>
 ```
-
-<!-- ```{toctree}
-:hidden:
-:titlesonly:
-:maxdepth: 6
-
-
-Deploy from Snap package </snap/index.md>
-Deploy with Juju </charm/index.md>
-Deploy with Cluster API </capi/index.md>
-
-``` -->
 
 ````{grid} 3
 
@@ -82,7 +131,18 @@ Using Cluster API's declarative tooling, deploy and manage multiple {{product}} 
 
 ````
 
----
+## How the documentation is organized
+
+The Canonical Kubernetes documentation embodies the Diátaxis framework.
+
+- The {ref}`Tutorial <tutorials-index>` is a lesson that steps through the main 
+process of deploying and using the Canonical Kuberentes snap.
+- {ref}`How-to guides <how-to-guides-index>` contain directions for running and 
+manaing your cluster.
+- {ref}`References <reference-index>` describe the structure and function of the
+individual components in Canonical Kubernetes.
+- {ref}`Explanations <explanation-index>` aid in understanding the concepts and 
+relationships of Canonical Kubernetes as a system.
 
 ## Project and community
 

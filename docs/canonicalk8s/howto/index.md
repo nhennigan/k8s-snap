@@ -1,3 +1,5 @@
+(how-to-guides-index)=
+
 # How-to guides
 
 If you have a specific goal, but are already familiar with Kubernetes, our

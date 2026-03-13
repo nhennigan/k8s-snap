@@ -1,3 +1,5 @@
+(explanation-index)=
+
 # Explanation
 
 For a better understanding of how {{product}} works and related
