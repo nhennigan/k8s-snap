@@ -22,8 +22,8 @@ Instructions on how to upgrade between versions on {{product}}
 ```{toctree}
 :titlesonly:
 :maxdepth: 2
-Upgrade minor revision </charm/howto/upgrade-minor.md>
-Upgrade patch revision </charm/howto/upgrade-patch.md>
+Upgrade minor revision </howto/charm/upgrade-minor.md>
+Upgrade patch revision </howto/charm/upgrade-patch.md>
 ```
 
 ## Release policy and schedule

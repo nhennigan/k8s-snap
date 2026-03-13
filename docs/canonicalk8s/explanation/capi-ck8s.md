@@ -109,7 +109,7 @@ the control plane nodes.
 
 ## {{product}} CAPI architecture diagram
 
-```{figure} ../../assets/capi-ck8s.svg
+```{figure} /assets/capi-ck8s.svg
    :width: 100%
    :alt: Deployment of components
 

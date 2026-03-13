@@ -33,6 +33,14 @@ Charm <./charm/index.md>
 CAPI <./capi/index.md>
 ```
 
+## Networking 
+
+```{toctree}
+:titlesonly:
+Configure proxy settings <proxy.md>
+```
+
+
 ## Cluster upgrades and refreshes
 
 ```{toctree}
@@ -50,8 +58,6 @@ identified and solved.
 :titlesonly:
 Get support <support>
 ```
-
-
 
 ## Contribute
 

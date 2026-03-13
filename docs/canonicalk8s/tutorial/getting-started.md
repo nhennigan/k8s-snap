@@ -33,7 +33,7 @@ an isolated working environment.
 
 Install the {{product}} `k8s` snap with:
 
-```{literalinclude} ../../_parts/install.md
+```{literalinclude} /_parts/install.md
 :start-after: <!-- snap start -->
 :end-before: <!-- snap end -->
 ```

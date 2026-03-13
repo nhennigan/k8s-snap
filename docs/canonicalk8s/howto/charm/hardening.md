@@ -26,7 +26,7 @@ the same steps manually *or* use charm settings to specify the list of
 service arguments, for example through `kube-apiserver-extra-args`.
 ```
 
-```{include} /snap/howto/security/hardening.md
+```{include} /howto/snap/security/hardening.md
 :start-after: <!-- Charm start here -->
 :end-before: <!-- Charm end here -->
 ```

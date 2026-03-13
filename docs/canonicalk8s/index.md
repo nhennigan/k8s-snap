@@ -17,29 +17,29 @@ development and innovation without having to worry about the infrastructure.
 Whether you are deploying a small cluster to get accustomed to Kubernetes or a
 huge enterprise level deployment across the globe, {{product}} can cater to
 your needs. If you would like to jump straight in, head to the
-[snap getting started tutorial!](/snap/tutorial/getting-started.md)
+[tutorial!](/snap/tutorial/getting-started.md)
 
 ![Illustration depicting working on components and clouds][logo]
 
 ---
 
-## Core Kubernetes features
+## In this documentation
 
-**Networking**: Overview • Configure default networking features  • Configure firewall • Configure dual stack  • Configure IPv6 only  • Ports and services • Proxy environment variables 
+### Core Kubernetes features
 
-**Security**:  About   • Cluster hardening • Report an issue • Use intermediate CAs with Vault  • Refresh certificates
-
-**Storage**: Use default storage • Deploy Ceph • Cluster datastore •  External datastore
-
-**Cluster management**:  Upgrade explanation • Manage upgrades • Node roles • High availability  • Clustering •  Package management with Helm  •  Choose a channel 
-
-**Observability**: Deploy COS 
-
-**Image management**: Manage images 
-
-**Troubleshooting**: Troubleshoot your cluster •  Get support
-
-**Disaster recovery**:  Recover after quorum loss • Inspection reports • Backup 
+- **Networking**: Overview • Configure default networking features  • Configure 
+firewall • Configure dual stack  • Configure IPv6 only  • Ports and services • 
+Proxy environment variables 
+- **Security**:  About   • Cluster hardening • Report an issue • Use intermediate 
+CAs with Vault  • Refresh certificates
+- **Storage**: Use default storage • Deploy Ceph • Cluster datastore •  External 
+datastore
+- **Cluster management**:  Upgrade explanation • Manage upgrades • Node roles • 
+High availability  • Clustering •  Package management with Helm  •  Choose a channel 
+- **Observability**: Deploy COS 
+- **Image management**: Manage images 
+- **Troubleshooting**: Troubleshoot your cluster •  Get support
+- **Disaster recovery**:  Recover after quorum loss • Inspection reports • Backup 
 and restore
 
 ### k8s snap 
@@ -48,26 +48,21 @@ The `k8s` snap is a self-contained, secure and dependency-free Linux app package
 used to deploy and manage a {{product}} cluster. If you are new to Kubernetes, 
 start here. 
 
-**Installation**: k8s snap • Custom bootstrap config • Multipass  •  LXD  • 
+- **Installation**: k8s snap • Custom bootstrap config • Multipass  •  LXD  • 
 Air-gapped environments  • Development environments  • Custom worker config  • 
 Uninstall the snap 
-
-**Configuration**: Configuration files • Annotations • Commands 
-
-**Security compliance**: DISA STIG • CIS • FIPS 
-
-**Hardware enablement**: EPA explanation •  Set up Enhanced Platform Awareness 
+- **Configuration**: Configuration files • Annotations • Commands 
+- **Security compliance**: DISA STIG • CIS • FIPS 
+- **Hardware enablement**: EPA explanation •  Set up Enhanced Platform Awareness 
 
 ### k8s charms
 
 The `k8s` charms take care of installing, configuring and managing {{product}} 
 on cloud instances managed by Juju.
 
-**Installation**: k8s charms • LXD • Terraform • Custom config
-
-**Charm integrations**: OpenStack • etcd • Ceph-CSI • COS
-
-**Configuration**:  Configure the cluster •  Configuration options • Actions • 
+- **Installation**: k8s charms • LXD • Terraform • Custom config
+- **Charm integrations**: OpenStack • etcd • Ceph-CSI • COS
+- **Configuration**:  Configure the cluster •  Configuration options • Actions • 
 Charmhub links 
 
 ### Cluster API
@@ -75,16 +70,12 @@ Charmhub links
 Using Cluster API's declarative tooling, deploy and manage multiple {{product}} 
 clusters.
 
-**Installation**: With CAPI •  Custom config• Custom bootstrap config 
-
-**Cluster lifecycle**:  About CAPI and Canonical Kubernetes •  In place 
+- **Installation**: With CAPI •  Custom config• Custom bootstrap config 
+- **Cluster lifecycle**:  About CAPI and Canonical Kubernetes •  In place 
 upgrades explanation  • Migrate the management cluster 
-
-**Configuration**:  Annotations • Providers configs  • Availability zones 
-
+- **Configuration**:  Annotations • Providers configs  • Availability zones 
 
 
-## In this documentation
 <!-- markdownlint-disable -->
 {{product}} can be deployed and managed as a standalone snap, as a charm as part of a
 Juju cluster or with Cluster API. Find out more about which {{product}}
@@ -105,7 +96,7 @@ Explanation <explanation/index.md>
 Community </community.md>
 Release notes </releases/index.md>
 ```
-
+<!-- 
 ````{grid} 3
 
 ```{grid-item-card}
@@ -129,7 +120,7 @@ The `k8s` charms take care of installing, configuring and managing {{product}} o
 Using Cluster API's declarative tooling, deploy and manage multiple {{product}} clusters.
 ```
 
-````
+```` -->
 
 ## How the documentation is organized
 
