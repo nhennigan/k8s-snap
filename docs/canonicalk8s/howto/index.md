@@ -12,16 +12,12 @@ Overview <self>
 
 ## Snap
 
-
-
 ```{toctree}
 :titlesonly:
 Snap <./snap/index.md>
 ```
 
 ## Charm
-
-
 
 ```{toctree}
 :titlesonly:
@@ -30,20 +26,9 @@ Charm <./charm/index.md>
 
 ## Cluster API
 
-
-
 ```{toctree}
 :titlesonly:
 CAPI <./capi/index.md>
-```
-
-## Security and compliance
-
-Harden your cluster according to industry standards.
-
-```{toctree}
-:titlesonly:
-security/index
 ```
 
 ## Cluster upgrades and refreshes
@@ -51,22 +36,6 @@ security/index
 ```{toctree}
 :titlesonly:
 Manage upgrades <upgrades>
-```
-
-## Manage images
-
-Manage cluster images directly through containerd.
-
-```{toctree}
-:titlesonly:
-Manage images <image-management.md>
-```
-
-## Cluster back up and restore
-
-```{toctree}
-:titlesonly:
-Back up and restore <backup-restore>
 ```
 
 ## Monitoring and troubleshooting
@@ -77,21 +46,10 @@ identified and solved.
 
 ```{toctree}
 :titlesonly:
-Set up cluster observability  <observability>
-Recover a cluster after quorum loss <restore-quorum>
-Troubleshooting <troubleshooting>
 Get support <support>
 ```
 
-## Enhanced Platform Awareness
 
-EPA utilizes server hardware capabilities in the {{product}} cluster. It
-exposes technologies such as HugePages, CPU pinning, SR-IOV and more.
-
-```{toctree}
-:titlesonly:
-Set up Enhanced Platform Awareness <epa>
-```
 
 ## Contribute
 

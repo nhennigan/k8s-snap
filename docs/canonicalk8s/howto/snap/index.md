@@ -85,7 +85,6 @@ identified and solved.
 Set up cluster observability  <observability>
 Recover a cluster after quorum loss <restore-quorum>
 Troubleshooting <troubleshooting>
-Get support <support>
 ```
 
 ## Enhanced Platform Awareness
@@ -96,15 +95,6 @@ exposes technologies such as HugePages, CPU pinning, SR-IOV and more.
 ```{toctree}
 :titlesonly:
 Set up Enhanced Platform Awareness <epa>
-```
-
-## Contribute
-
-Contribute to the {{product}} project! Add to the code, documentation or both!
-
-```{toctree}
-:titlesonly:
-Contribute <contribute>
 ```
 
 ---
