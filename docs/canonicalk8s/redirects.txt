@@ -75,4 +75,4 @@
 ## Removed 
 "snap/howto/two-node-ha" "index"
 ## For GA, renamed 
-"snap/howto/networking/load-balancer" snap/howto/networking/default-loadbalancer"
+"snap/howto/networking/load-balancer" "snap/howto/networking/default-loadbalancer"
