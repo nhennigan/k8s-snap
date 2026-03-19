@@ -8,7 +8,7 @@
 
 ## Issue
 
-<!-- Include a link to the Github issue number if applicable. -->
+<!-- Include a link to the GitHub issue number if applicable. -->
 
 ## Backport
 
@@ -24,7 +24,7 @@
 - [ ] Documentation updated
 - [ ] CLA signed
 - [ ] Backport label added if necessary 
-- [ ] Release notes label applied if necessary
+- [ ] Confirm whether the `release-notes` label should be kept or removed
 
 If any item on the checklist is not complete, please provide justification why.
 
