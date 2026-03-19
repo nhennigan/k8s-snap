@@ -15,7 +15,7 @@
 "reference/roadmap" "index"
 "snap/reference/roadmap" "index"
 
-# Condense files redirects
+# Condense referene files redirects
 "charm/reference/architecture" "charm/explanation/architecture"
 "snap/reference/architecture" "snap/explanation/architecture"
 "snap/reference/config-files/control-plane-join-config" "snap/reference/config-files/node-join-config"
