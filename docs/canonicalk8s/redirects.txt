@@ -2,7 +2,8 @@
 #     "<old path>" "<current path>"
 # Paths must be represented as source files relative to the root of the `docs/canonicalk8s` dir.
 
-# Home page redirect 
+# Top level redirect 
+## In version 1.36, moved to top level 
 "snap/explanation/about" "about"
 "charm/explanation/about" "about"
 "capi/explanation/about" "about"
@@ -10,7 +11,9 @@
 "snap/reference/community" "community"
 "charm/reference/community" "community"
 "capi/reference/community" "community"
+## Pre GA, removed
 "reference/roadmap" "index"
+"snap/reference/roadmap" "index"
 
 # Condense files redirects
 "charm/reference/architecture" "charm/explanation/architecture"
@@ -21,28 +24,36 @@
 "charm/reference/troubleshooting" "charm/howto/troubleshooting"
 
 # Security rework redirects
+## In versions 1.32 and 1.33 the file is named disa-stig-assessment
+"snap/howto/security/disa-stig-hardening" "snap/howto/security/disa-stig-assessment"
+## In versions 1.34+ file is named disa-stig-audit and live in reference
 "snap/howto/security/disa-stig-assessment" "snap/reference/disa-stig-audit"
-"snap/explanation/security/security-overview" "snap/explanation/security"
-"snap/explanation/security/index" "snap/explanation/security"
-"snap/explanation/security/crypto" "snap/explanation/security/#cryptography"
-"snap/explanation/security/cis" "snap/explanation/security/#security-compliance"
-"snap/explanation/security/certificates" "snap/explanation/security/#certificates"
-"snap/explanation/security/auth" "snap/explanation/security/#authentication-and-authorization"
 
+## In version 1.34, the security explanation pages were combined
+"snap/explanation/security/security-overview" "snap/explanation/security"
+"snap/explanation/security/crypto" "snap/explanation/security"
+"snap/explanation/security/cis" "snap/explanation/security"
+"snap/explanation/security/certificates" "snap/explanation/security"
+"snap/explanation/security/auth" "snap/explanation/security"
+"snap/howto/intermediate-ca" "snap/howto/security/intermediate-ca"
+"snap/howto/refresh-certs" "snap/howto/security/refresh-certs"
+# For GA, snap explanation secuirty pages were grouped under security 
+"snap/explanation/certificates" "snap/explanation/security/certificates"
+"snap/explanation/cis" "snap/explanation/security/cis"
 
 # Networking redirects
-"snap/howto/proxy" "snap/howto/networking/proxy/"
-"snap/explanation/load-balancer" "snap/explanation/networking/#load-balancer"
-"snap/explanation/default-dns" "snap/explanation/networking/#dns"
-"snap/explanation/ingress" "snap/explanation/networking/#ingress"
-
-"capi/explanation/ingress" "capi/explanation/networking/#ingress"
-"capi/explanation/load-balancer" "capi/explanation/networking/#load-balancer"
-
-"charm/explanation/ingress" "charm/explanation/networking/#ingress"
-"charm/explanation/load-balancer" "charm/explanation/networking/#load-balancer"
+"snap/howto/proxy" "snap/howto/networking/proxy"
+## In version 1.36, networking explanation pages were combined
+"snap/explanation/load-balancer" "snap/explanation/networking"
+"snap/explanation/default-dns" "snap/explanation/networking"
+"snap/explanation/ingress" "snap/explanation/networking"
+"capi/explanation/ingress" "capi/explanation/networking"
+"capi/explanation/load-balancer" "capi/explanation/networking"
+"charm/explanation/ingress" "charm/explanation/networking"
+"charm/explanation/load-balancer" "charm/explanation/networking"
 
 # Release notes redirects
+## In version 1.36,  moved to top level
 "snap/reference/releases" "releases/snap"
 "snap/reference/versions/1.35" "releases/snap/1.35"
 "snap/reference/versions/1.34" "releases/snap/1.34"
@@ -57,3 +68,11 @@
 "charm/reference/versions/1.32" "releases/charm/1.32"
 
 "capi/reference/releases" "releases/snap"
+
+# Others 
+## For GA, moved under config files folder
+"snap/reference/bootstrap-config-reference" "snap/reference/config-files/bootstrap-config"
+## Removed 
+"snap/howto/two-node-ha" "index"
+## For GA, renamed 
+"snap/howto/networking/load-balancer" snap/howto/networking/default-loadbalancer"
