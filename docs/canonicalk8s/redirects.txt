@@ -15,7 +15,7 @@
 "reference/roadmap" "index"
 "snap/reference/roadmap" "index"
 
-# Condense referene files redirects
+# Condense reference files redirects
 "charm/reference/architecture" "charm/explanation/architecture"
 "snap/reference/architecture" "snap/explanation/architecture"
 "snap/reference/config-files/control-plane-join-config" "snap/reference/config-files/node-join-config"
@@ -37,7 +37,7 @@
 "snap/explanation/security/auth" "snap/explanation/security"
 "snap/howto/intermediate-ca" "snap/howto/security/intermediate-ca"
 "snap/howto/refresh-certs" "snap/howto/security/refresh-certs"
-# For GA, snap explanation secuirty pages were grouped under security 
+# For GA, snap explanation security pages were grouped under security 
 "snap/explanation/certificates" "snap/explanation/security/certificates"
 "snap/explanation/cis" "snap/explanation/security/cis"
 
