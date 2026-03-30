@@ -1,5 +1,7 @@
 # Getting started
 
+<!-- SPREAD SUITE: snap_clean -->
+
 {{product}} is a distribution of Kubernetes which includes all
 the necessary tools and services needed to easily deploy and manage a cluster.
 As the upstream Kubernetes does not come with all that is required

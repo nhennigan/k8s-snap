@@ -41,6 +41,8 @@ jobs:
 
           rm -rf tests/spread-generated
           mkdir -p tests/spread-generated
+          # Create all suite directories so spread doesn't fail reading spread.yaml
+          mkdir -p tests/spread-generated/{snap_clean,snap_bootstrapped,charm_clean,charm_bootstrapped}
 
           mapfile -t docs_files < <(
             find docs/canonicalk8s -type f \
@@ -77,7 +79,9 @@ jobs:
 
             rel="${file#docs/canonicalk8s/}"
             rel="${rel%.*}"
-            out_dir="tests/spread-generated/${suite}/${rel}"
+            # Flatten: use sanitized path with slashes replaced to avoid intermediate dirs
+            task_name=$(echo "$rel" | sed 's|/|-|g')
+            out_dir="tests/spread-generated/${suite}/${task_name}"
 
             mkdir -p "$out_dir"
             python3 workflow-scripts/spread/create_spread_task_file.py \

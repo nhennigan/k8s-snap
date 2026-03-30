@@ -5,8 +5,8 @@ on:
     paths:
       - docs/canonicalk8s/snap/tutorial/**
       - docs/canonicalk8s/snap/howto/**
-      - docs/canonicalk8s/charm/tutorial/**
-      - docs/canonicalk8s/charm/howto/**
+      # - docs/canonicalk8s/charm/tutorial/**
+      # - docs/canonicalk8s/charm/howto/**
 
 permissions:
   contents: read
@@ -46,6 +46,8 @@ jobs:
 
           rm -rf tests/spread-generated
           mkdir -p tests/spread-generated
+          # Create all suite directories so spread doesn't fail reading spread.yaml
+          mkdir -p tests/spread-generated/{snap_clean,snap_bootstrapped,charm_clean,charm_bootstrapped}
 
           mapfile -t changed_files < <(
             git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.sha }}" \
@@ -82,7 +84,9 @@ jobs:
 
             rel="${file#docs/canonicalk8s/}"
             rel="${rel%.*}"
-            out_dir="tests/spread-generated/${suite}/${rel}"
+            # Flatten: use sanitized path with slashes replaced to avoid intermediate dirs
+            task_name=$(echo "$rel" | sed 's|/|-|g')
+            out_dir="tests/spread-generated/${suite}/${task_name}"
 
             mkdir -p "$out_dir"
             python3 workflow-scripts/spread/create_spread_task_file.py \

@@ -523,6 +523,7 @@ def write_task_yaml(commands, output_path="task.yaml", retry_lib_path=None):
         retry_lib_path: Optional shell library path to source
     """
     output_file = Path(output_path)
+    output_file.parent.mkdir(parents=True, exist_ok=True)
     
     with output_file.open('w', encoding='utf-8') as f:
         # Write the header

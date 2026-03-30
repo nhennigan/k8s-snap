@@ -68,31 +68,46 @@ backends:
 suites:
   tests/spread-generated/snap_clean/:
     summary: docs tests that run from a clean VM and perform install/bootstrap in-task
+    restore-each: |
+      sudo snap remove k8s --purge || true
+      sudo rm -rf /var/snap/k8s || true
     systems:
       - ubuntu-24.04-64
 
   tests/spread-generated/snap_bootstrapped/:
     summary: docs tests that assume a bootstrapped snap cluster
-    prepare: |
-      sudo snap install k8s --classic --channel=1.33-classic/stable
+    prepare-each: |
+      sudo snap install k8s --classic --channel=1.35-classic/stable
       sudo k8s bootstrap --timeout 10m
       sudo k8s status --wait-ready --timeout 3m
+    restore-each: |
+      sudo snap remove k8s --purge || true
+      sudo rm -rf /var/snap/k8s || true
     systems:
       - ubuntu-24.04-64
 
   tests/spread-generated/charm_clean/:
     summary: charm docs tests that run from a clean VM and perform setup in-task
+    prepare-each: |
+      sudo snap install --classic concierge || true
+      sudo concierge prepare -p machine || true
+      juju add model juju-k8s
+      wget https://raw.githubusercontent.com/canonical/k8s-snap/main/tests/integration/lxd-profile.yaml -O k8s.profile
+      cat k8s.profile | lxc profile edit juju-myk8s
+    restore-each: |
+      juju destroy-controller concierge-lxd \
+        --destroy-all-models --no-prompt --force || true
     systems:
       - ubuntu-24.04-64
 
   tests/spread-generated/charm_bootstrapped/:
     summary: charm docs tests that assume a pre-deployed charm-based cluster
     prepare: |
-      sudo snap install juju --classic
-      sudo snap install lxd
-      sudo lxd init --auto
-      sg lxd -c 'juju bootstrap localhost charm-docs-controller'
-      sg lxd -c 'juju add-model charm-docs-model'
+      sudo snap install --classic concierge
+      sudo concierge prepare -p machine
+      juju deploy k8s --channel=1.35/stable \
+      --base="ubuntu@24.04" \
+      --constraints='cores=2 mem=16G root-disk=40G'
     systems:
       - ubuntu-24.04-64
 

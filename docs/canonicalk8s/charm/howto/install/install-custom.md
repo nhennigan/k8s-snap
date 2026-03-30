@@ -105,7 +105,7 @@ Deploy the `k8s` charm with your custom configuration:
 <!-- SPREAD SKIP END -->
 
 <!-- SPREAD
-juju deploy k8s --config ./k8s-config.yaml --channel=1.35/stable \
+juju deploy k8s --config k8s-config.yaml --channel=1.35/stable \
     --base="ubuntu@24.04"
 -->
 
@@ -119,11 +119,6 @@ Monitor the installation progress:
 juju status --watch 1s
 ```
 <!-- SPREAD SKIP END -->
-
-
-<!-- SPREAD
-juju status
--->
 
 Wait for the unit to reach the `active/idle` state, indicating that the
 {{product}} cluster is ready.
