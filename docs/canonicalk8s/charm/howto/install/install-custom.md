@@ -1,5 +1,7 @@
 # How to install with custom configuration
 
+<!-- SPREAD SUITE: charm_clean -->
+
 This guide will walk you through deploying {{product}} using Juju with custom
 configuration options.
 
@@ -17,6 +19,7 @@ Before deploying the charm, create a YAML file with your desired configuration
 options. Here's an example configuration, which for this guide we'll save as
 `k8s-config.yaml`:
 
+<!-- SPREAD SKIP -->
 ```yaml
 k8s:
   # Specify the datastore type
@@ -51,10 +54,38 @@ k8s:
   local-storage-enabled: true
   local-storage-reclaim-policy: "Retain"
 ```
+<!-- SPREAD SKIP END -->
+
+<!-- SPREAD
+cat <<EOF > k8s-config.yaml
+k8s:
+  bootstrap-datastore: etcd
+
+  bootstrap-pod-cidr: "192.168.0.0/16"
+  bootstrap-service-cidr: "10.152.183.0/24"
+
+  dns-enabled: true
+  gateway-enabled: true
+  ingress-enabled: true
+  metrics-server-enabled: true
+
+  dns-cluster-domain: "cluster.local"
+  dns-upstream-nameservers: "8.8.8.8 8.8.4.4"
+
+  node-labels: >-
+    environment=production
+    node-role.kubernetes.io/worker=-
+    zone=us-east-1
+
+  local-storage-enabled: true
+  local-storage-reclaim-policy: "Retain"
+EOF
+-->
+
 
 You can find a full list of configuration options in the
 [charm configurations] page.
-
+<!-- SPREAD SKIP -->
 ```{note}
 Remember that some configuration options can only be set during initial
 deployment and cannot be changed afterward. Always review the
@@ -71,13 +102,28 @@ Deploy the `k8s` charm with your custom configuration:
 :end-before: <!-- juju controlplane custom config end -->
 ```
 
+<!-- SPREAD SKIP END -->
+
+<!-- SPREAD
+juju deploy k8s --config ./k8s-config.yaml --channel=1.35/stable \
+    --base="ubuntu@24.04"
+-->
+
+
 ## Bootstrap the cluster
 
 Monitor the installation progress:
 
+<!-- SPREAD SKIP -->
 ```bash
 juju status --watch 1s
 ```
+<!-- SPREAD SKIP END -->
+
+
+<!-- SPREAD
+juju status
+-->
 
 Wait for the unit to reach the `active/idle` state, indicating that the
 {{product}} cluster is ready.
