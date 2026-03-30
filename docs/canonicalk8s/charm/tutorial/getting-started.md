@@ -1,5 +1,7 @@
 # Getting started
 
+<!-- SPREAD SUITE: charm_clean -->
+
 The {{product}} `k8s` charm takes care of installing and configuring
 Kubernetes on cloud instances managed by Juju. Operating Kubernetes through
 this charm makes it significantly easier to manage at scale, on remote cloud
@@ -62,16 +64,28 @@ minimums required. For the Kubernetes control plane (`k8s` charm), the
 recommendation is two CPU cores, 16GB of memory and 40GB of disk space. Now, we
 can go ahead and create a cluster:
 
+<!-- SPREAD SKIP -->
 ```{literalinclude} ../../_parts/install.md
 :start-after: <!-- juju control constraints start -->
 :end-before: <!-- juju control constraints end -->
 ```
+<!-- SPREAD SKIP END -->
+
+<!-- SPREAD
+juju deploy k8s --channel=1.35/stable \
+    --base="ubuntu@24.04" \
+    --constraints='cores=2 mem=16G root-disk=40G'
+export TERM=xterm-256color
+juju wait-for machine 0
+-->
+
 
 At this point, Juju will fetch the charm from Charmhub, create a new instance
 according to your specification and configure and install the Kubernetes
 components (i.e. the `k8s` snap ). This may take a few minutes depending on
 your cloud. You can monitor progress by watching the Juju status output:
 
+<!-- SPREAD SKIP -->
 ```
 juju status --watch 2s
 ```
@@ -92,6 +106,14 @@ worker node in a similar way to the original K8s node:
 :start-after: <!-- juju worker constraints start -->
 :end-before: <!-- juju worker constraints end -->
 ```
+<!-- SPREAD SKIP END -->
+
+<!-- SPREAD
+juju deploy k8s-worker --channel=1.35/stable \
+    --base="ubuntu@24.04" \
+    --constraints='cores=2 mem=16G root-disk=40G'
+juju wait-for machine 1
+-->
 
 Once again, this will take a few minutes. In this case though, the `k8s-worker`
 application won't settle into a 'Ready' status. That is because it requires a
