@@ -29,3 +29,5 @@ subunit.html
 subunit.out
 
 .benchmark
+
+/tests/spread-generated/

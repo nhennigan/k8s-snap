@@ -1,3 +1,5 @@
+<!-- SPREAD SUITE: snap_clean -->
+
 # How to install with a custom bootstrap configuration
 
 When creating a {{ product }} cluster that differs from the default
@@ -10,13 +12,14 @@ to modify the configuration of the first node of your cluster.
 Please consult the [reference page] for all of the
 available configuration options and their defaults.
 
+<!-- SPREAD SKIP -->
 ``` {note}
 Most of these configuration options are set during the initial bootstrapping
 and cannot be modified afterward. Runtime changes may be unsupported and
 could require deploying a new cluster. Refer to the reference page to
 determine if an option allows later modifications.
 ```
-
+<!-- SPREAD SKIP END -->
 ## Interactive mode
 
 The interactive mode allows for the selection of the built-in features, the pod
@@ -24,6 +27,10 @@ CIDR and the Service CIDR.
 
 To bootstrap interactively, run:
 
+<!-- SPREAD
+sudo snap install k8s --classic --channel=1.33-classic/stable
+-->
+<!-- SPREAD SKIP -->
 ```
 sudo k8s bootstrap --timeout 10m --interactive
 ```
@@ -57,6 +64,8 @@ by default.
 
 For this example, create a custom bootstrap configuration file that enables
 the network feature:
+
+<!-- SPREAD SKIP END -->
 
 ```yaml
 cat <<EOF > bootstrap.yaml

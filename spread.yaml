@@ -1,0 +1,98 @@
+project: k8s-snap
+
+path: /k8s-snap
+
+backends:
+  multipass:
+    type: adhoc
+    allocate: |
+      # instance_name="example-multipass-vm"
+      
+      # # Launch only if it doesn't exist to avoid the "already exists" error
+      # if ! multipass info "$instance_name" >/dev/null 2>&1; then
+      #     multipass launch --cpus 4 --disk 10G --memory 8G --name "$instance_name" 24.04
+      # fi
+
+      # PUB_KEY=$(cat ~/.ssh/id_rsa.pub) 
+      # # INJECT YOUR KEY: This ensures the 'ubuntu' user accepts your host's key
+      # multipass exec "$instance_name" -- bash -c "mkdir -p ~/.ssh && chmod 700 ~/.ssh && echo '$PUB_KEY' > ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
+      # # multipass transfer ~/.ssh/id_rsa.pub "$instance_name":.ssh/authorized_keys
+      # # multipass exec "$instance_name" -- bash -c "chmod 600 ~/.ssh/authorized_keys"
+
+      # # Get the IP
+      # ip=$(multipass info --format csv "$instance_name" | tail -1 | cut -d\, -f3)
+      
+      # # Use the 'ubuntu' user which the log shows is already working with keys
+      # # This ensures Spread and Multipass are 'in sync'
+      # ADDRESS "$ip"
+      multipass_image=24.04
+      instance_name="example-multipass-vm"
+
+      # Launch Multipass VM
+      multipass launch --cpus 4 --disk 20G --memory 8G --name "${instance_name}" "${multipass_image}"
+
+      # Enable PasswordAuthentication for root over SSH.
+      multipass exec "$instance_name" -- \
+        sudo sh -c "echo root:${SPREAD_PASSWORD} | sudo chpasswd"
+      multipass exec "$instance_name" -- \
+        sudo sh -c \
+        "if [ -d /etc/ssh/sshd_config.d/ ]
+        then
+          echo 'PasswordAuthentication yes' > /etc/ssh/sshd_config.d/10-spread.conf
+          echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config.d/10-spread.conf
+        else
+          sed -i /etc/ssh/sshd_config -E -e 's/^#?PasswordAuthentication.*/PasswordAuthentication yes/' -e 's/^#?PermitRootLogin.*/PermitRootLogin yes/'
+        fi"
+      multipass exec "$instance_name" -- \
+        sudo systemctl restart ssh
+
+      # multipass exec "$instance_name" -- bash -c "mkdir -p ~/.ssh && chmod 700 ~/.ssh"
+      # multipass transfer ~/.ssh/id_rsa.pub "$instance_name":.ssh/authorized_keys
+      # multipass exec "$instance_name" -- bash -c "chmod 600 ~/.ssh/authorized_keys"
+
+      # Get the IP from the instance
+      ip=$(multipass info --format csv "$instance_name" | tail -1 | cut -d\, -f3)
+      ADDRESS "$ip"
+    connect-attempts: 15
+    # ssh-keys: [~/.ssh/id_rsa]
+
+    discard: |
+      instance_name="example-multipass-vm"
+      multipass delete --purge "${instance_name}"
+
+    systems:
+      - ubuntu-24.04-64:
+          workers: 1
+          username: root
+
+suites:
+  tests/spread-generated/snap_clean/:
+    summary: docs tests that run from a clean VM and perform install/bootstrap in-task
+    systems:
+      - ubuntu-24.04-64
+
+  tests/spread-generated/snap_bootstrapped/:
+    summary: docs tests that assume a bootstrapped snap cluster
+    prepare: |
+      sudo snap install k8s --classic --channel=1.33-classic/stable
+      sudo k8s bootstrap --timeout 10m
+      sudo k8s status --wait-ready --timeout 3m
+    systems:
+      - ubuntu-24.04-64
+
+  tests/spread-generated/charm_clean/:
+    summary: charm docs tests that run from a clean VM and perform setup in-task
+    systems:
+      - ubuntu-24.04-64
+
+  tests/spread-generated/charm_bootstrapped/:
+    summary: charm docs tests that assume a pre-deployed charm-based cluster
+    prepare: |
+      sudo snap install juju --classic
+      sudo snap install lxd
+      sudo lxd init --auto
+      sg lxd -c 'juju bootstrap localhost charm-docs-controller'
+      sg lxd -c 'juju add-model charm-docs-model'
+    systems:
+      - ubuntu-24.04-64
+
