@@ -1,3 +1,5 @@
+<!-- SPREAD SUITE: snap_bootstrapped -->
+
 # How to use default DNS
 
 {{product}} includes a default DNS (Domain Name System) which is
@@ -10,8 +12,8 @@ default DNS in the [networking explanation] documentation.
 
 This guide assumes the following:
 
-- You have root or sudo access to the machine.
-- You have a bootstrapped {{product}} cluster (see the [Getting
+- Root or sudo access to the machine.
+- A bootstrapped {{product}} cluster (see the [Getting
   Started][getting-started-guide] guide).
 
 ## Check DNS status
@@ -54,6 +56,7 @@ You should see three options:
 
 Set a new DNS server IP for forwarding known entries:
 
+<!-- SPREAD SKIP -->
 ```
 sudo k8s set dns.upstream-nameservers=<new-ips>
 ```
@@ -82,6 +85,8 @@ if you desire a custom solution:
 a suitable custom DNS solution is in place before disabling. You can re-enable
 DNS at any point, and your cluster will return to normal functionality.
 ```
+
+<!-- SPREAD SKIP END -->
 
 ```
 sudo k8s disable dns
