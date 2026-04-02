@@ -2,6 +2,7 @@
 
 <!-- SPREAD SUITE: snap_clean -->
 
+
 When creating a {{ product }} cluster that differs from the default
 configuration you can choose to use a custom bootstrap configuration.
 The CLI interactive mode or a custom bootstrap configuration file allow you
