@@ -30,6 +30,7 @@ To bootstrap interactively, run:
 <!-- SPREAD
 sudo snap install k8s --classic --channel=1.33-classic/stable
 -->
+
 <!-- SPREAD SKIP -->
 ```
 sudo k8s bootstrap --timeout 10m --interactive
@@ -76,10 +77,15 @@ EOF
 ```
 
 Then, apply the bootstrap configuration file:
-
+<!-- SPREAD SKIP -->
 ```
 sudo k8s bootstrap --file /path/to/bootstrap.yaml
 ```
+<!-- SPREAD SKIP END -->
+
+<!-- SPREAD
+sudo k8s bootstrap --file bootstrap.yaml
+-->
 
 To verify any changes to the built-in features run:
 

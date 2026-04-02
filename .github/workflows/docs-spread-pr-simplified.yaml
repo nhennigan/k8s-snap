@@ -1,0 +1,99 @@
+name: Docs Spread PR (Simplified)
+
+on:
+  pull_request:
+    paths:
+      - docs/canonicalk8s/snap/tutorial/**
+      - docs/canonicalk8s/snap/howto/**
+      - docs/canonicalk8s/charm/tutorial/**
+      - docs/canonicalk8s/charm/howto/**
+
+permissions:
+  contents: read
+
+jobs:
+  docs-spread-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+
+      - name: Generate tasks for changed docs
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          rm -rf tests/spread-generated
+          mkdir -p tests/spread-generated
+
+          mapfile -t changed_files < <(
+            git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.sha }}" \
+            | grep -E '^docs/canonicalk8s/(snap|charm)/(tutorial|howto)/.*\.(md|markdown|rst|rest)$' \
+            || true
+          )
+
+          if [[ ${#changed_files[@]} -eq 0 ]]; then
+            echo "No docs files needing spread tests changed in this PR."
+            echo "NO_SUITES=true" >> "$GITHUB_ENV"
+            exit 0
+          fi
+
+          for file in "${changed_files[@]}"; do
+            if ! grep -Eq '<!--\s*SPREAD SUITE:\s*[a-z_]+\s*-->|^\.\.\s*SPREAD SUITE:\s*[a-z_]+\s*$' "$file"; then
+              echo "Skipping $file (no SPREAD SUITE marker)"
+              continue
+            fi
+
+            python3 docs/tools/create_spread_task_file.py \
+              "$file" \
+              tests/spread-generated \
+              --spread-config spread.yaml
+          done
+
+          mapfile -t suites < <(find tests/spread-generated -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort)
+
+          if [[ ${#suites[@]} -eq 0 ]]; then
+            echo "No docs files with SPREAD SUITE markers changed in this PR."
+            echo "NO_SUITES=true" >> "$GITHUB_ENV"
+            exit 0
+          fi
+
+          {
+            echo "SPREAD_SUITES<<EOF"
+            printf "%s\n" "${suites[@]}"
+            echo "EOF"
+          } >> "$GITHUB_ENV"
+
+      - name: Install spread
+        if: env.NO_SUITES != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          go install github.com/snapcore/spread/cmd/spread@latest
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+
+      - name: Run spread suites
+        if: env.NO_SUITES != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo adduser --gecos "" --disabled-password ubuntu || true
+          echo "ubuntu:ubuntu" | sudo chpasswd || true
+
+          while IFS= read -r suite; do
+            [[ -z "$suite" ]] && continue
+            echo "Running docs suite: $suite"
+            spread -vv "multipass:ubuntu-24.04-64:tests/spread-generated/${suite}/"
+          done <<< "$SPREAD_SUITES"

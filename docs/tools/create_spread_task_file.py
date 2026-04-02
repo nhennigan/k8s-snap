@@ -20,11 +20,12 @@ For reStructuredText:
 
 All command blocks (both code blocks and SPREAD blocks) within SPREAD SKIP ranges are excluded
 from the output.
+SPREAD SUITE markers (<!-- SPREAD SUITE: suite_name -->) route task output to
+suite-specific directories when provided.
 """
 
 import sys
 import re
-import os
 import argparse
 import logging
 from pathlib import Path
@@ -237,120 +238,107 @@ def extract_rst_spread_skip_comments(content):
     return spread_skip_ranges
 
 
-def extract_markdown_spread_check_markers(content, spread_skip_ranges):
+def extract_spread_suite(file_path):
     """
-    Extract SPREAD CHECK markers from markdown content.
+    Extract SPREAD SUITE marker from a markdown or reStructuredText file.
 
-    Marker format:
-      <!-- SPREAD CHECK: expected output -->
-
-    Args:
-        content: Markdown content as string
-        spread_skip_ranges: Exclusion ranges from SPREAD SKIP markers
+    Marker formats:
+      Markdown: <!-- SPREAD SUITE: suite_name -->
+      RST:      .. SPREAD SUITE: suite_name
 
     Returns:
-        List of tuples (position, expected_output)
+        suite name string, or None if marker is not present
+
+    Raises:
+        ValueError: if marker appears multiple times with different values
     """
-    markers = []
-    pattern = r'<!--\s*SPREAD CHECK:\s*(.*?)\s*-->'
+    content = Path(file_path).read_text(encoding='utf-8')
 
-    for match in re.finditer(pattern, content):
-        position = match.start()
-        is_excluded = any(start <= position < end for start, end in spread_skip_ranges)
-        if not is_excluded:
-            expected = match.group(1).strip()
-            if expected:
-                markers.append((position, expected))
+    markdown_pattern = r'<!--\s*SPREAD SUITE:\s*([a-z_]+)\s*-->'
+    rst_pattern = r'^\.\.\s*SPREAD SUITE:\s*([a-z_]+)\s*$'
 
-    return markers
+    markdown_matches = [m.group(1).strip() for m in re.finditer(markdown_pattern, content)]
+    rst_matches = [m.group(1).strip() for m in re.finditer(rst_pattern, content, re.MULTILINE)]
 
+    matches = markdown_matches + rst_matches
+    if not matches:
+        return None
 
-def extract_rst_spread_check_markers(content, spread_skip_ranges):
+    unique_matches = list(dict.fromkeys(matches))
+    if len(unique_matches) > 1:
+        raise ValueError(
+            f"File '{file_path}' contains multiple different SPREAD SUITE markers: {', '.join(unique_matches)}"
+        )
+
+    return unique_matches[0]
+
+def detect_allowed_spread_suites(spread_config_path):
     """
-    Extract SPREAD CHECK markers from reStructuredText content.
+    Detect suite marker values from spread.yaml first-level suite keys.
 
-    Marker format:
-      .. SPREAD CHECK: expected output
+    For each suite key such as "tests/spread-generated/snap_clean/", this returns
+    marker candidates including both:
+      - "tests/spread-generated/snap_clean"
+      - "snap_clean"
+    """
+    content = Path(spread_config_path).read_text(encoding='utf-8')
+    lines = content.splitlines()
+
+    suites_indent = None
+    in_suites = False
+    detected = set()
+
+    for raw_line in lines:
+        if not raw_line.strip() or raw_line.lstrip().startswith('#'):
+            continue
+
+        indent = len(raw_line) - len(raw_line.lstrip(' '))
+        stripped = raw_line.strip()
+
+        if not in_suites:
+            if stripped == 'suites:':
+                in_suites = True
+                suites_indent = indent
+            continue
+
+        if indent <= suites_indent:
+            break
+
+        if indent != suites_indent + 2 or not stripped.endswith(':'):
+            continue
+
+        suite_key = stripped[:-1].strip().strip('"\'')
+        suite_key = suite_key.rstrip('/')
+        if not suite_key:
+            continue
+
+        detected.add(suite_key)
+        basename = Path(suite_key).name
+        if basename:
+            detected.add(basename)
+
+    return sorted(detected)
+
+
+def get_allowed_spread_suites(spread_config_path):
+    """
+    Get allowed suite markers from the provided spread.yaml config file.
 
     Args:
-        content: reStructuredText content as string
-        spread_skip_ranges: Exclusion ranges from SPREAD SKIP markers
+        spread_config_path: Path to spread.yaml (required)
 
     Returns:
-        List of tuples (position, expected_output)
+        List of allowed suite names, or empty list if file not found
     """
-    markers = []
-    pattern = r'^\.\. SPREAD CHECK:\s*(.*)$'
+    if not spread_config_path:
+        return []
 
-    for match in re.finditer(pattern, content, re.MULTILINE):
-        position = match.start()
-        is_excluded = any(start <= position < end for start, end in spread_skip_ranges)
-        if not is_excluded:
-            expected = match.group(1).strip()
-            if expected:
-                markers.append((position, expected))
+    config_file = Path(spread_config_path)
+    if not config_file.is_file():
+        return []
 
-    return markers
-
-
-def shell_escape_single_quoted(value):
-    return value.replace("'", "'\"'\"'")
-
-
-def shell_escape_double_quoted(value):
-    escaped = value.replace('\\', '\\\\')
-    escaped = escaped.replace('"', '\\"')
-    escaped = escaped.replace('$', '\\$')
-    escaped = escaped.replace('`', '\\`')
-    return escaped
-
-
-def normalize_command(command):
-    lines = [line.strip() for line in command.splitlines() if line.strip()]
-    return " ".join(lines)
-
-
-def wrap_repeat_check(command, expected_output):
-    normalized_command = normalize_command(command)
-    command_escaped = shell_escape_double_quoted(normalized_command)
-    expected_escaped = shell_escape_single_quoted(expected_output)
-    return f'repeat_checks "{command_escaped}" \'{expected_escaped}\''
-
-
-def apply_spread_checks(code_blocks, check_markers):
-    """
-    Apply SPREAD CHECK markers to the next code block in document order.
-
-    Args:
-        code_blocks: List of tuples (position, command)
-        check_markers: List of tuples (position, expected_output)
-
-    Returns:
-        List of tuples (position, command), where marked commands are wrapped
-        with repeat_checks.
-    """
-    wrapped_blocks = []
-    marker_index = 0
-    pending_expected = None
-
-    sorted_markers = sorted(check_markers, key=lambda x: x[0])
-    sorted_blocks = sorted(code_blocks, key=lambda x: x[0])
-
-    for block_position, command in sorted_blocks:
-        while marker_index < len(sorted_markers) and sorted_markers[marker_index][0] < block_position:
-            pending_expected = sorted_markers[marker_index][1]
-            marker_index += 1
-
-        if pending_expected:
-            wrapped_blocks.append((block_position, wrap_repeat_check(command, pending_expected)))
-            pending_expected = None
-        else:
-            wrapped_blocks.append((block_position, command))
-
-    if marker_index < len(sorted_markers) or pending_expected:
-        logging.warning("Some SPREAD CHECK marker(s) did not map to a following code block")
-
-    return wrapped_blocks
+    suites = detect_allowed_spread_suites(config_file)
+    return suites
 
 
 def extract_commands_from_rst(file_path):
@@ -370,9 +358,6 @@ def extract_commands_from_rst(file_path):
     
     # Extract SPREAD SKIP ranges
     spread_skip_ranges = extract_rst_spread_skip_comments(content)
-
-    # Extract SPREAD CHECK markers
-    spread_check_markers = extract_rst_spread_check_markers(content, spread_skip_ranges)
     
     # Find all code blocks in RST:
     # - Match a ".. code-block::" directive line (with any trailing options),
@@ -417,9 +402,6 @@ def extract_commands_from_rst(file_path):
         
         if code_content:
             code_blocks.append((match_start, code_content))
-    
-    # Apply SPREAD CHECK wrappers to code blocks
-    code_blocks = apply_spread_checks(code_blocks, spread_check_markers)
 
     # Filter SPREAD blocks to exclude those within SPREAD SKIP ranges
     filtered_spread_blocks = []
@@ -455,9 +437,6 @@ def extract_commands_from_markdown(file_path):
     
     # Extract SPREAD SKIP ranges
     spread_skip_ranges = extract_markdown_spread_skip_comments(content)
-
-    # Extract SPREAD CHECK markers
-    spread_check_markers = extract_markdown_spread_check_markers(content, spread_skip_ranges)
     
     # First, find all blocks with 4+ backticks to identify excluded regions
     excluded_ranges = []
@@ -493,9 +472,6 @@ def extract_commands_from_markdown(file_path):
         # Add non-empty code content with its position
         if code_content.strip():
             code_blocks.append((match_start, code_content.strip()))
-    
-    # Apply SPREAD CHECK wrappers to code blocks
-    code_blocks = apply_spread_checks(code_blocks, spread_check_markers)
 
     # Filter SPREAD blocks to exclude those within SPREAD SKIP ranges
     filtered_spread_blocks = []
@@ -513,16 +489,16 @@ def extract_commands_from_markdown(file_path):
     
     return commands
 
-def write_task_yaml(commands, output_path="task.yaml", retry_lib_path=None):
+def write_task_yaml(commands, output_path="task.yaml"):
     """
     Write extracted commands to a task.yaml file.
     
     Args:
         commands: List of command strings to write
         output_path: Path to the output YAML file
-        retry_lib_path: Optional shell library path to source
     """
     output_file = Path(output_path)
+    output_file.parent.mkdir(parents=True, exist_ok=True)
     
     with output_file.open('w', encoding='utf-8') as f:
         # Write the header
@@ -531,9 +507,6 @@ def write_task_yaml(commands, output_path="task.yaml", retry_lib_path=None):
         f.write("kill-timeout: 30m\n")
         f.write("\n")
         f.write("execute: |\n")
-
-        if retry_lib_path:
-            f.write(f"  source {retry_lib_path}\n")
         
         # Write each command with 2-space indentation
         for command in commands:
@@ -555,46 +528,6 @@ def extract_commands(file_path):
     )
 
 
-def is_included_for_batch(file_path, include_paths, exclude_paths):
-    normalized_path = f"/{str(file_path).replace(os.sep, '/').lower()}/"
-
-    for excluded in exclude_paths:
-        token = f"/{excluded.lower().strip('/')}/"
-        if token in normalized_path:
-            return False
-
-    for included in include_paths:
-        token = f"/{included.lower().strip('/')}/"
-        if token in normalized_path:
-            return True
-
-    return False
-
-
-def generate_batch_tasks(input_root, output_root, include_paths, exclude_paths, retry_lib_path=None):
-    generated_count = 0
-
-    for file_path in sorted(input_root.rglob('*')):
-        if not file_path.is_file() or file_path.suffix.lower() not in SUPPORTED_EXTENSIONS:
-            continue
-
-        if not is_included_for_batch(file_path, include_paths, exclude_paths):
-            continue
-
-        commands = extract_commands(file_path)
-        relative_path = file_path.relative_to(input_root)
-        task_output = output_root / relative_path.with_suffix('') / 'task.yaml'
-        task_output.parent.mkdir(parents=True, exist_ok=True)
-        write_task_yaml(commands, task_output, retry_lib_path=retry_lib_path)
-        logging.info(f"Commands written to {task_output}")
-        generated_count += 1
-
-    if generated_count == 0:
-        logging.warning("No files matched the batch include/exclude filters")
-    else:
-        logging.info(f"Generated {generated_count} task file(s)")
-
-
 def main():
     parser = argparse.ArgumentParser(
         description="Extract commands from markdown and reStructuredText files and generate task.yaml for Spread tests.",
@@ -602,9 +535,14 @@ def main():
         epilog="""
 Examples:
   %(prog)s docs/tutorial.md
-  %(prog)s docs/tutorial.rst
   %(prog)s docs/tutorial.md tests/spread/tutorial/task.yaml
-  %(prog)s docs/tutorial.rst tests/spread/tutorial/
+  %(prog)s docs/tutorial.md tests/spread-generated/ --spread-config spread.yaml
+
+Behavior:
+  - Automatically detects SPREAD SUITE markers in input files
+  - If marker present: outputs to <output>/<suite>/task.yaml
+  - If no marker: outputs to <output>/task.yaml (or <output> if directory)
+  - With --spread-config: validates marker values against allowed suites
 
 Special Markers:
   SPREAD blocks (always included):
@@ -622,47 +560,31 @@ Special Markers:
     RST:      .. SPREAD SKIP
               .. Content to skip
               .. SPREAD SKIP END
+
+  SPREAD SUITE marker (optional routing target):
+    Markdown: <!-- SPREAD SUITE: snap_clean -->
+    RST:      .. SPREAD SUITE: snap_clean
         """
     )
     
     parser.add_argument(
-        'input_path',
-        help='Path to a markdown/reStructuredText file, or a root directory when using --batch'
+        'markdown_file',
+        help='Path to the markdown or reStructuredText file to extract commands from'
     )
     
     parser.add_argument(
         'output_path',
         nargs='?',
         default='task.yaml',
-        help='Path to the output YAML file or directory (default: task.yaml). In --batch mode this must be a directory.'
+        help='Path to the output YAML file or directory (default: task.yaml)'
     )
 
     parser.add_argument(
-        '--batch',
-        action='store_true',
-        help='Generate task files for multiple docs under input_path using include/exclude path filters'
-    )
-
-    parser.add_argument(
-        '--include-path',
-        nargs='+',
-        default=['tutorial', 'howto'],
-        help='Path segments to include in --batch mode (default: tutorial howto)'
-    )
-
-    parser.add_argument(
-        '--exclude-path',
-        nargs='+',
-        default=['reference', 'explanation', '_build', '_parts'],
-        help='Path segments to exclude in --batch mode (default: reference explanation _build _parts)'
-    )
-
-    parser.add_argument(
-        '--retry-lib',
+        '--spread-config',
         default=None,
-        help='Optional shell path to source at top of execute block (e.g. $SPREAD_PATH/tests/lib/repeat_checks.sh)'
+        help='Optional path to spread.yaml for validating SPREAD SUITE marker values'
     )
-    
+
     parser.add_argument(
         '-v', '--verbose',
         action='store_true',
@@ -684,42 +606,52 @@ Special Markers:
         format='%(levelname)s: %(message)s'
     )
     
-    input_path = Path(args.input_path)
+    file_path = Path(args.markdown_file)
     output_path = Path(args.output_path)
     
     try:
-        if args.batch:
-            if not input_path.is_dir():
-                logging.error("When using --batch, input_path must be a directory")
-                sys.exit(1)
+        # Extract commands from input file
+        commands = extract_commands(file_path)
+        logging.info(f"Found {len(commands)} command block(s) in {file_path}")
 
-            output_path.mkdir(parents=True, exist_ok=True)
-            generate_batch_tasks(
-                input_root=input_path,
-                output_root=output_path,
-                include_paths=args.include_path,
-                exclude_paths=args.exclude_path,
-                retry_lib_path=args.retry_lib,
-            )
+        for i, command in enumerate(commands, 1):
+            logging.debug(f"Command block {i}: {command}")
+
+        # Extract SPREAD SUITE marker (if present)
+        marker_suite = extract_spread_suite(file_path)
+
+        # Determine output file path
+        output_file = None
+        if marker_suite:
+            # Validate marker if --spread-config provided
+            if args.spread_config:
+                allowed_suites = get_allowed_spread_suites(args.spread_config)
+                if not allowed_suites:
+                    raise ValueError(
+                        f"Could not read allowed suites from {args.spread_config}"
+                    )
+                if marker_suite not in allowed_suites:
+                    raise ValueError(
+                        f"Unsupported SPREAD SUITE marker '{marker_suite}' in {file_path}. "
+                        f"Allowed values: {', '.join(allowed_suites)}"
+                    )
+
+            # Route output under suite directory
+            task_stem = file_path.stem
+            output_file = output_path / marker_suite / task_stem / "task.yaml"
         else:
-            # If output_path is a directory, append task.yaml
+            # No marker: use standard output path
             if output_path.is_dir() or str(output_path).endswith('/'):
                 output_file = output_path / "task.yaml"
             else:
                 output_file = output_path
 
-            commands = extract_commands(input_path)
-            logging.info(f"Found {len(commands)} command block(s) in {input_path}")
-
-            for i, command in enumerate(commands, 1):
-                logging.debug(f"Command block {i}: {command}")
-
-            # Write commands to task.yaml
-            write_task_yaml(commands, output_file, retry_lib_path=args.retry_lib)
-            logging.info(f"Commands written to {output_file}")
+        # Write commands to task.yaml
+        write_task_yaml(commands, output_file)
+        logging.info(f"Commands written to {output_file}")
         
     except FileNotFoundError:
-        logging.error(f"File '{input_path}' not found.")
+        logging.error(f"File '{file_path}' not found.")
         sys.exit(1)
     except Exception as e:
         logging.error(f"{e}")
@@ -728,5 +660,3 @@ Special Markers:
 
 if __name__ == "__main__":
     main()
-
-

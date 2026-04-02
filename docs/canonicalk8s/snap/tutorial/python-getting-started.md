@@ -29,9 +29,10 @@ Install the {{product}} `k8s` snap with:
 ```
 
 <!-- SPREAD SKIP END -->
-```
+
+<!-- SPREAD
 sudo snap install k8s --classic --channel=1.33-classic/stable
-```
+-->
 
 This may take a few moments as the snap installs all the necessary Kubernetes
 components for a fully functioning cluster such as the networking, storage, etc.
