@@ -96,7 +96,14 @@ jobs:
       - name: Install tox
         run: sudo apt-get install -y tox
       - name: Generate test prefix
-        run: echo "test_prefix=${{ inputs.os }}-${{ inputs.arch }}" | sed 's/[:\.\]/-/g' >> $GITHUB_ENV
+        env:
+          INPUT_OS: ${{ inputs.os }}
+          INPUT_ARCH: ${{ inputs.arch }}
+        run: |
+          sanitized_os=$(printf '%s' "$INPUT_OS" | tr -d '\r\n')
+          sanitized_arch=$(printf '%s' "$INPUT_ARCH" | tr -d '\r\n')
+          test_prefix=$(printf '%s' "${sanitized_os}-${sanitized_arch}" | sed 's/[:\.\]/-/g')
+          printf '%s\n' "test_prefix=${test_prefix}" >> "$GITHUB_ENV"
       - name: Download performance results
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
