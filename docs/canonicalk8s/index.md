@@ -25,11 +25,7 @@ huge enterprise level deployment across the globe, {{product}} can cater to
 your needs. If you would like to jump straight in, head to the
 [snap getting started tutorial!](/snap/tutorial/getting-started.md)
 
-![Illustration depicting working on components and clouds][logo]
-
----
-
-## In this documentation
+## How this documentation is organized
 <!-- markdownlint-disable -->
 {{product}} can be deployed and managed as a standalone snap, as a charm as part of a
 Juju cluster or with Cluster API. Find out more about which {{product}}
@@ -82,7 +78,53 @@ Using Cluster API's declarative tooling, deploy and manage multiple {{product}} 
 
 ````
 
----
+## In this documentation
+
+
+### Getting started 
+
+|                    |                                                                     |
+|--------------------|---------------------------------------------------------------------|
+| **Getting started** | [Tutorial]( snap/tutorial/getting-started) • [What is Canonical Kubernetes?](about) • [Snap, charm or CAPI?](snap/explanation/installation-methods)|
+
+### Core Kubernetes features
+
+|                    |                                                                     |
+|--------------------|---------------------------------------------------------------------|
+| **Deployment** | [`k8s` snap install options](snap/howto/install/index) • [`k8s` charms install options](charm/howto/install/index) • [Provision with Cluster API](capi/howto/provision.md)|
+| **Networking** | [Networking overview](snap/explanation/networking) • [Configure default networking features](snap/howto/networking/index) • [Enable dual stack](snap/howto/networking/dualstack) • [Deploy IPv6 only cluster](snap/howto/networking/ipv6) • [Ports and services](snap/reference/ports-and-services) • [Proxy environment variables](snap/reference/proxy.md) | • |
+| **Storage** | [Use default storage](snap/howto/storage/storage) • [Cluster datastore](reference/dqlite.md) |
+| **Security** | [Security overview](snap/explanation/security) • [Cluster hardening](snap/howto/security/hardening) • [Report and issue](snap/howto/security/report-security-issue) |
+| **Cluster management** | [Upgrade your cluster](snap/howto/upgrades) • [Understand upgrades](snap/explanation/upgrade) • [Node roles](snap/explanation/roles) • [High availability](snap/explanation/high-availability) • [Clustering](snap/explanation/clustering.md) • [Choose a channel](snap/explanation/channels) • [Architecture](snap/explanation/architecture) |
+| **Troubleshooting** | [Troubleshoot your cluster](snap/howto/troubleshooting) • [Get support](snap/reference/inspection-reports) |
+| **Disaster recovery** | [Recover after quorum loss](snap/howto/restore-quorum) • [Inspection report](snap/reference/inspection-reports) |
+
+### k8s snap
+
+<!-- |                    |                                                                     |
+|--------------------|---------------------------------------------------------------------|
+| **Deployment** | [`k8s` snap install](snap/howto/install/snap) • [Air-gapped environments install](snap/howto/install/offline) • [Development environments install](snap/howto/install/dev-env) • [Custom bootstrap config install](snap/howto/install/custom-bootstrap-config) • [Custom worker config install](snap/howto/install/custom-worker) | -->
+
+|                    |                                                                     |
+|--------------------|---------------------------------------------------------------------|
+| **Security compliance** | [DISA STIG](snap/howto/install/disa-stig) • [FIPS](snap/howto/install/fips) • [CIS](snap/howto/security/cis-assessment) | 
+| **Configuration** | [Annotations](snap/reference/annotations) • [Commands](snap/reference/commands) • [Configuration files](snap/reference/config-files/index)   | 
+
+### k8s charms 
+
+|                    |                                                                     |
+|--------------------|---------------------------------------------------------------------|
+| **Charm integrations** | [Openstack](charm/howto/openstack) • [etcd](charm/howto/etcd) • [Ceph CSI](charm/howto/ceph-csi) • [COS Lite](charm/howto/cos-lite.md) |
+| **Configuration** | [Configure the cluster](charm/howto/configure-cluster) • [Configuration options](charm/reference/charm-configurations)• [Actions](charm/reference/actions) • [Charmhub links](charm/reference/charms) | 
+
+### Cluster API
+
+|                    |                                                                     |
+|--------------------|---------------------------------------------------------------------|
+| **Cluster lifecycle** | [CAPI and Canonical Kubernetes](capi/explanation/capi-k8s) • [In place upgrades explanation](capi/explanation/in-place-upgrades)|
+
+
+<!-- | **Deployment** | [CAPI install](capi/howto/provision.md) • [Custom bootstap config install](capi/howto/custom-ck8s.md) • TODO CUSTOM K8S| -->
 
 ## Project and community
 

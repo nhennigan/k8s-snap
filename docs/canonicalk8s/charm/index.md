@@ -34,6 +34,12 @@ Kubernetes deployment. You can find out more about {{product}} on the
 [what is Canonical Kubernetes page][] or see a more detailed explanation in our 
 [architecture documentation][arch].
 
+## In this documentation 
+
+|                    |                                                                     |
+|--------------------|---------------------------------------------------------------------|
+| **Deployment** | [`k8s` charms install](howto/install/charm) • [Terraform install](howto/install/install-terraform.md) • [Custom bootstap config install](howto/install/install-custom) • [Custom worker config install](howto/install/custom-workers) • [LXD VMs](howto/install/install-lxd) |
+
 ## How this documentation is organized
 
 This documentation embodies the [Diátaxis framework].
