@@ -29,6 +29,18 @@ networks, load balancers, and VPCs, as well as the cluster configuration are
 all defined in the same way that cluster operators are already familiar with.
 {{product}} supports deploying and operating Kubernetes through CAPI.
 
+## In this documentation 
+
+|                                                                     |                                                                     |
+|---------------------------------------------------------------------|---------------------------------------------------------------------|
+| **Getting started** | [Tutorial]( tutorial/getting-started) • [What is Canonical Kubernetes?](/about)|
+| **Deployment** | [Provision a cluster](howto/provision) • [Custom bootstrap config install](howto/custom-bootstrap-config) • [Custom k8s version install](howto/custom-ck8s) |
+| **Networking** |  [Overview](explanation/networking) • [Ports and services](reference/ports-and-services) |
+| **Security and compliance** |  [Explanation](explanation/security)  • [Refresh external certs](howto/refresh-certs) |
+| **Cluster management** | [Understanding upgrades](explanation/in-place-upgrade) • [Manage in place upgrades](howto/in-place-upgrades) • [Rollout upgrades](howto/rollout-upgrades) • [Clustering](explanation/clustering) • [Migrate the cluster](howto/migrate-management)|
+| **Troubleshooting** | [Troubleshoot your cluster](howto/troubleshooting) |
+| **Configuration** | [Annotations](reference/annotations.md)  • [Config files](reference/configs) |
+
 ## How this documentation is organized
 
 This documentation embodies the [Diátaxis framework].

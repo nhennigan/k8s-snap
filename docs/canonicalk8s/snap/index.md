@@ -35,7 +35,7 @@ For deployment at scale, {{product}} is also available as a
 <!-- ## In this documentation  -->
 
 <!-- All docs currently  -->
-
+<!-- 
 |                    |                                                                     |
 |--------------------|---------------------------------------------------------------------|
 | **Getting started** | [Tutorial]( tutorial/getting-started) • [What is Canonical Kubernetes?](about)|
@@ -45,11 +45,11 @@ For deployment at scale, {{product}} is also available as a
 | **Storage** |  [Use default storage](howto/storage/storage) • [Deploy Ceph](howto/storage/ceph) • [Cluster datastore](reference/dqlite.md) • [External datastore](howto/external-datastore)  |
 | **Cluster management** | [Understanding upgrades](explanation/upgrade) • [Managing upgrades](howto/upgrades) • [Node roles](explanation/roles) • [High availablity](explanation/high-availability) • [Clustering](explanation/clustering) • [Choose a channel](explanation/channels) • [Helm](explanation/package-management) • [Image management](howto/image-management) • [Architecture](explanation/architecture)|
 | **Troubleshooting** | [Troubleshoot your cluster](howto/troubleshooting) • [Get support](howto/support) |
-| **Observability** | [Deploy COS](howto/observability) |
+| **Observability** | [Deploy Prometheus and Grafana](howto/observability) |
 | **Disaster recovery** | [Recover after quorum loss](howto/restore-quorum) • [Inspection reports](reference/inspection-reports) • [Back and restore](howto/backup-restore)|
 | **Hardware enablement** |  [EPA explanation](explanation/epa) • [Enhanced Platform Awareness setup](howto/epa) |
 | **Configuration** | [Annotations](reference/annotations.md)  • [Commands](reference/commands.md) • [Config files](reference/config-files/index) |
-
+ -->
 
 ## In this documentation 
 
@@ -57,7 +57,7 @@ For deployment at scale, {{product}} is also available as a
 <!--  -->
 |                                                                     |                                                                     |
 |---------------------------------------------------------------------|---------------------------------------------------------------------|
-| **Getting started** | [Tutorial]( tutorial/getting-started) • [What is Canonical Kubernetes?](about)|
+| **Getting started** | [Tutorial]( tutorial/getting-started) • [What is Canonical Kubernetes?](/about)|
 | **Deployment** | [`k8s` snap install](howto/install/snap) • [Air-gapped environments install](howto/install/offline) • [Development environments install](howto/install/dev-env) • [Custom bootstrap config install](howto/install/custom-bootstrap-config) • [Custom worker config install](howto/install/custom-worker) • [Multipass VMs](howto/install/multipass) • [LXD VMs](howto/install/lxd.md) • [Uninstall](howto/install/uninstall)|
 | **Networking** |  [Overview](explanation/networking) • [Configure default networking features](howto/networking/index.md) • [Install a firewall](howto/networking/ufw) • [Enable dual stack](howto/networking/dualstack) • [Deploy IPv6 only clusters](howto/networking/ipv6) • [Ports and services](reference/ports-and-services) • [Proxy environment variables](reference/proxy.md) |
 | **Security and compliance** |  [Explanation](explanation/security.md) • [Harden your cluster](howto/security/hardening)  • [Report an issue](howto/security/report-security-issue.md) •  [Refresh Kubernetes certs](howto/security/refresh-certs) • [Refresh external certs](howto/security/refresh-external-certs) • [DISA STIG](howto/install/disa-stig) • [FIPS](howto/install/fips) • [CIS](howto/security/cis-assessment)|

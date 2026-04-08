@@ -38,7 +38,15 @@ Kubernetes deployment. You can find out more about {{product}} on the
 
 |                    |                                                                     |
 |--------------------|---------------------------------------------------------------------|
+| **Getting started** | [Tutorial]( tutorial/getting-started) • [What is Canonical Kubernetes?](/about)|
 | **Deployment** | [`k8s` charms install](howto/install/charm) • [Terraform install](howto/install/install-terraform.md) • [Custom bootstap config install](howto/install/install-custom) • [Custom worker config install](howto/install/custom-workers) • [LXD VMs](howto/install/install-lxd) |
+| **Networking** |  [Overview](explanation/networking) • [Ports and services](reference/ports-and-services) • [Proxy environment variables](reference/proxy.md) |
+| **Security and compliance** |  [Explanation](explanation/security.md) • [Harden your cluster](howto/security/hardening) • [Report an issue](howto/report-security-issue.md) • [Custom registry](howto/custom-registry) |
+| **Storage** | [Cluster datastore](reference/dqlite.md) |
+| **Cluster management** | [Understanding upgrades](explanation/upgrade) • [Upgrade minor version](howto/upgrade-minor) • [Upgrade patch version](howto/upgrade-patch) • [Validate cluster upgrades](howto/validate) • [Node roles](explanation/roles) • [High availablity](explanation/high-availability) • [Clustering](explanation/clustering) • [Choose a channel](explanation/channels) • [Architecture](explanation/architecture)|
+| **Troubleshooting** | [Troubleshoot your cluster](howto/troubleshooting) |
+| **Configuration** | [Configure the cluster](howto/configure-cluster) • [Actions](reference/actions)  • [CharmHub links](reference/charms) • [Config files](reference/config-files/index) • [Availability zones](reference/az)|
+| **Charm integrations** | [Openstack](charm/howto/openstack) • [etcd](charm/howto/etcd) • [Ceph CSI](charm/howto/ceph-csi) • [COS Lite](charm/howto/cos-lite.md) |
 
 ## How this documentation is organized
 
