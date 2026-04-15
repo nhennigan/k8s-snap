@@ -33,14 +33,14 @@ jobs:
       - name: Build docs
         run: |
           for dir in compare base; do
-            pushd ${dir}/docs
+            pushd ${dir}/docs/canonicalk8s
             make html
             popd
           done
       - name: Generate current URLs list
         run: |
           for dir in compare base; do
-            pushd ${dir}/docs
+            pushd ${dir}/docs/canonicalk8s
             find ./_build/ -name '*.html' \
             | sed 's|/_build||;s|/index.html$|/|;s|.html$||' \
             | sort > urls.txt

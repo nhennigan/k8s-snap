@@ -260,7 +260,7 @@ linkcheck_ignore = [
     'https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/',
     'https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/',
     'https://developer.hashicorp.com/vault/docs',
-    ' https://assets.ubuntu.com/v1/843c77b6-juju-at-a-glace.svg',
+    'https://assets.ubuntu.com/v1/843c77b6-juju-at-a-glace.svg',
     ]
 
 
