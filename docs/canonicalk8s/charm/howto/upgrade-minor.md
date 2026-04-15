@@ -20,9 +20,11 @@ whether to a patch or minor version.
 Determine which version of each application is currently deployed by running:
 
 <!-- markdownlint-disable -->
+
 ```sh
 juju status
 ```
+
 <!-- markdownlint-restore -->
 
 The ‘App’ section of the output lists each application and its
@@ -32,6 +34,7 @@ under the column titled ‘Rev’. The charms may be updated in
 between new versions of the application.
 
 <!-- markdownlint-disable -->
+
 ```
 Model       Controller  Cloud/Region   Version  SLA          Timestamp
 my-cluster  canonicaws  aws/us-east-1  3.6.0    unsupported  16:02:18-05:00
@@ -49,6 +52,7 @@ Machine  State    Address         Inst id              Base          AZ         
 1        started  3.238.230.3     i-05439714c88bea35f  ubuntu@22.04  us-east-1f  running
 2        started  34.229.202.243  i-07ecf97ed29860334  ubuntu@22.04  us-east-1c  running
 ```
+
 <!-- markdownlint-restore -->
 
 ## Before you begin
@@ -190,9 +194,11 @@ applications appear in the same model.
 Once an upgrade is complete, confirm the successful upgrade by running:
 
 <!-- markdownlint-disable -->
+
 ```sh
 juju status
 ```
+
 <!-- markdownlint-restore -->
 
 ... should indicate that all units are active/idle and the correct

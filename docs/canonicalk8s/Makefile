@@ -119,6 +119,7 @@ lint-md: pymarkdownlnt-install
 			--recurse \
 			--exclude=$(SPHINX_DIR)/** \
 			--exclude=$(DOCS_VENVDIR)/** \
+			--exclude="_parts/**" \
 			$(DOCS_SOURCEDIR); \
 	status=$$?; \
 	if [ $$status -eq 1 ]; then \
