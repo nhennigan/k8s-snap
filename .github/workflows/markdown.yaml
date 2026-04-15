@@ -17,8 +17,8 @@ jobs:
         with:
           fetch-depth: 0
       - name: Create venv
-        working-directory: "docs"
+        working-directory: "docs/canonicalk8s"
         run: make install
       - name: Lint markdown
-        working-directory: "docs"
+        working-directory: "docs/canonicalk8s"
         run: make lint-md

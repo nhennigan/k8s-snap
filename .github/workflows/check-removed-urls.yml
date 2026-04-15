@@ -3,7 +3,8 @@ name: Check for removed URLs
 on:
   workflow_call:
   pull_request:
-    - 'docs/**'
+    paths:
+      - 'docs/**'
 
 permissions:
   contents: read
