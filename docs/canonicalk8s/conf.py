@@ -158,12 +158,12 @@ html_context = {
     },
 }
 
-html_extra_path = []
+# html_extra_path = []
 
 # Allow opt-in build of the OpenAPI "Hello" example so docs stay clean by default.
-if os.getenv("OPENAPI", ""):
-    tags.add("openapi")
-    html_extra_path.append("how-to/assets/openapi.yaml")
+# if os.getenv("OPENAPI", ""):
+#     tags.add("openapi")
+#     html_extra_path.append("how-to/assets/openapi.yaml")
 
 # TODO: To enable the edit button on pages, uncomment and change the link to a
 # public repository on GitHub or Launchpad. Any of the following link domains
@@ -181,7 +181,7 @@ html_theme_options = {
 # TODO: If your documentation is hosted on https://docs.ubuntu.com/,
 #       uncomment and update as needed.
 
-# slug = 'canonical-kubernetes'
+slug = 'canonical-kubernetes'
 
 #######################
 # Sitemap configuration: https://sphinx-sitemap.readthedocs.io/
@@ -231,11 +231,22 @@ templates_path = ["_templates"]
 # To set up redirects in the Read the Docs project dashboard:
 # https://docs.readthedocs.io/en/stable/guides/redirects.html
 
+# Internal redirects
+# Handled by rediraffe 
+
 rediraffe_redirects = "redirects.txt"
 
 # Strips '/index.html' from destination URLs when building with 'dirhtml'
 rediraffe_dir_only = True
 
+# External redirects 
+# Docs for sphinx_reredirect: https://documatt.gitlab.io/sphinx-reredirects/usage.html
+# For example: 'explanation/old-name.html': '../how-to/prettify.html',
+
+# NOTE: If undefined, set to None, or empty,
+#       the sphinx_reredirects extension will be disabled.
+redirects = {
+}
 
 ###########################
 # Link checker exceptions #
