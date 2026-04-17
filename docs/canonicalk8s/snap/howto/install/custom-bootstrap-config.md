@@ -2,7 +2,6 @@
 
 <!-- SPREAD SUITE: snap_clean -->
 
-
 When creating a {{ product }} cluster that differs from the default
 configuration you can choose to use a custom bootstrap configuration.
 The CLI interactive mode or a custom bootstrap configuration file allow you
@@ -96,5 +95,9 @@ To verify any changes to the built-in features run:
 ```sh
 sudo k8s status
 ```
+
+<!-- SPREAD
+sudo k8s status --wait-ready --timeout 3m 
+-->
 
 <!-- LINKS -->

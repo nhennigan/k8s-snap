@@ -5,8 +5,8 @@ on:
     paths:
       - docs/canonicalk8s/snap/tutorial/**
       - docs/canonicalk8s/snap/howto/**
-      # - docs/canonicalk8s/charm/tutorial/**
-      # - docs/canonicalk8s/charm/howto/**
+      - docs/canonicalk8s/charm/tutorial/**
+      - docs/canonicalk8s/charm/howto/**
 
 permissions:
   contents: read
@@ -47,6 +47,7 @@ jobs:
           rm -rf tests/spread-generated
           mkdir -p tests/spread-generated
 
+          # Get changed docs files 
           mapfile -t changed_files < <(
             git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.sha }}" \
             | grep -E '^docs/canonicalk8s/(snap|charm)/(tutorial|howto)/.*\.(md|markdown|rst|rest)$' \
@@ -59,8 +60,7 @@ jobs:
             exit 0
           fi
 
-          generated_any=false
-
+          # Generate the task.yamls only if they have been marked with SPREAD SUITE
           for file in "${changed_files[@]}"; do
             if ! grep -Eq '<!--\s*SPREAD SUITE:\s*[a-z_]+\s*-->|^\.\.\s*SPREAD SUITE:\s*[a-z_]+\s*$' "$file"; then
               echo "Skipping $file (no SPREAD SUITE marker)"
@@ -69,25 +69,20 @@ jobs:
 
             python3 workflow-scripts/spread/create_spread_task_file.py \
               "$file" \
-              tests/spread-generated \
-              --spread-config spread.yaml
-
-            generated_any=true
+              tests/spread-generated
           done
 
-          if [[ "$generated_any" != true ]]; then
+          if ! find tests/spread-generated -name "task.yaml" | grep -q .; then
             echo "No docs files with SPREAD SUITE markers changed in this PR."
             echo "NO_SUITES=true" >> "$GITHUB_ENV"
             exit 0
           fi
 
-          mapfile -t suites < <(find tests/spread-generated -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort)
-
-          if [[ ${#suites[@]} -eq 0 ]]; then
-            echo "No spread suites generated."
-            echo "NO_SUITES=true" >> "$GITHUB_ENV"
-            exit 0
-          fi
+          mapfile -t suites < <(
+            find tests/spread-generated -name "task.yaml" -printf '%P\n' \
+            | cut -d/ -f1 \
+            | sort -u
+          )
 
           {
             echo "SPREAD_SUITES<<EOF"
