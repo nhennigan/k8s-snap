@@ -2,6 +2,7 @@
 
 ```{versionadded} release-1.34
 ```
+<!-- SPREAD SUITE: disa_stig_chain -->
 
 DISA Security Technical Implementation Guides (STIGs) provide hardening
 guidelines for meeting regulations from the U.S. Government and Department of
@@ -34,7 +35,7 @@ happen when enabling UFW with the default configuration.
 
 The [USG tool] which is part of the PRO tool set can be run to automatically 
 apply most other [DISA STIG host OS] recommendations. To install the USG tool:
-
+<!-- SPREAD SKIP -->
 ```
 sudo pro enable usg
 sudo apt update
@@ -68,7 +69,7 @@ Reboot to apply the changes:
 ```
 sudo reboot
 ```
-
+<!-- SPREAD SKIP END --> 
 After rebooting, you can re-run `sudo usg audit disa_stig` to verify host
 compliance. You may need to create a tailoring file to disable certain rules
 and document exceptions
@@ -105,7 +106,7 @@ kernel.panic_on_oops=1
 EOF
 sudo sysctl --system
 ```
-
+<!-- SPREAD SKIP -->
 ```{note}
 Ensure that the configuration in `/etc/sysctl.d/99-kubelet.conf` is not
 overridden by another configuration file with higher precedence.
@@ -279,3 +280,5 @@ recommendations and details how they apply to {{product}}.
 [DISA STIG configuration files]: /snap/reference/config-files/disa-stig-config.md
 [DISA STIG audit]: /snap/reference/disa-stig-audit.md
 [configuration yaml files]: https://github.com/canonical/k8s-snap/tree/main/k8s/resources/configurations/disa-stig
+
+<!-- SPREAD SKIP END -->

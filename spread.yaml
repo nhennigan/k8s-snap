@@ -66,6 +66,13 @@ backends:
           username: root
 
 suites:
+  tests/spread-generated/disa_stig_chain/:
+    summary: docs tests that run from a clean VM and a series of disa stig tasks
+    restore-each: |
+      sudo snap remove k8s --purge || true
+      sudo rm -rf /var/snap/k8s || true
+    systems:
+      - ubuntu-24.04-64
   tests/spread-generated/snap_clean/:
     summary: docs tests that run from a clean VM and perform install/bootstrap in-task
     restore-each: |

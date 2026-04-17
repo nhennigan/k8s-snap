@@ -97,6 +97,50 @@ jobs:
             generated_any=true
           done
 
+          # DISA scenario: if any scenario source doc changes, build one ordered
+          # scenario task from all required docs (including unchanged dependencies).
+          scenario_trigger=false
+          for file in "${changed_files[@]}"; do
+            case "$file" in
+              docs/canonicalk8s/snap/howto/install/fips.md|\
+              docs/canonicalk8s/snap/howto/networking/ufw.md|\
+              docs/canonicalk8s/snap/howto/install/disa-stig.md|\
+              docs/canonicalk8s/snap/reference/disa-stig-audit.md)
+                scenario_trigger=true
+                break
+                ;;
+            esac
+          done
+
+          if [[ "$scenario_trigger" == true ]]; then
+            scenario_tmp_dir="/tmp/disa-stig-scenario"
+            rm -rf "$scenario_tmp_dir"
+            mkdir -p "$scenario_tmp_dir"
+
+            scenario_docs=(
+              "docs/canonicalk8s/snap/howto/install/fips.md"
+              "docs/canonicalk8s/snap/howto/networking/ufw.md"
+              "docs/canonicalk8s/snap/howto/install/disa-stig.md"
+              "docs/canonicalk8s/snap/reference/disa-stig-audit.md"
+            )
+
+            scenario_tasks=()
+            for doc in "${scenario_docs[@]}"; do
+              task_file="$scenario_tmp_dir/$(basename "${doc%.*}").task.yaml"
+              python3 workflow-scripts/spread/create_spread_task_file.py "$doc" "$task_file"
+              scenario_tasks+=("$task_file")
+            done
+
+            python3 docs/tools/combine_spread_tasks.py \
+              --output tests/spread-generated/snap_clean/chain-disa-stig/task.yaml \
+              --summary "DISA STIG chain scenario" \
+              --kill-timeout "30m" \
+              "${scenario_tasks[@]}"
+
+            suites_seen["snap_clean"]=1
+            generated_any=true
+          fi
+
           if [[ "$generated_any" != true ]]; then
             echo "No docs files with SPREAD SUITE markers changed in this PR."
             echo "NO_SUITES=true" >> "$GITHUB_ENV"
