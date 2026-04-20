@@ -1,3 +1,5 @@
+<!-- SPREAD SKIP -->
+
 # DISA STIG for {{product}}
 
 Security Technical Implementation Guides (STIGs) are developed by the Defense
@@ -82,6 +84,8 @@ Restart the `kube-controller-manager` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--tls-min-version` for service
@@ -94,6 +98,8 @@ test $? -eq 0 && echo PASS || echo FAIL
 ```
 
 The final line of the output will be `PASS`.
+
+<!-- SPREAD SKIP -->
 
 ### [V-242377]
 
@@ -144,6 +150,8 @@ Restart the `kube-scheduler` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--tls-min-version` for service `kube-scheduler` is
@@ -157,6 +165,8 @@ test $? -eq 0 && echo PASS || echo FAIL
 
 The final line of the output will be `PASS`.
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242378]
 
@@ -204,6 +214,8 @@ Restart the `kube-apiserver` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--tls-min-version` for service `kube-apiserver` is
@@ -216,6 +228,8 @@ test $? -eq 0 && echo PASS || echo FAIL
 ```
 
 The final line of the output will be `PASS`.
+
+<!-- SPREAD SKIP -->
 
 ### [V-242379]
 
@@ -262,6 +276,8 @@ Restart the etcd service:
 sudo systemctl restart snap.k8s.etcd
 ```
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root) for Step 1**
 
 The argument `--auto-tls` for service etcd is set as appropriate
@@ -273,6 +289,8 @@ test $? -eq 0 && echo PASS || echo FAIL
 ```
 
 The final line of the output will be `PASS`.
+
+<!-- SPREAD SKIP -->
 
 **Step 2/4**
 
@@ -288,6 +306,8 @@ Restart the etcd service:
 sudo systemctl restart snap.k8s.etcd
 ```
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root) for Step 2**
 
 The argument `--key-file` for service etcd is set as appropriate
@@ -301,6 +321,8 @@ test $? -eq 0 && echo PASS || echo FAIL
 In the default configuration of the k8s-snap, resulting output lines will
 start with `PASS`.
 
+
+<!-- SPREAD SKIP -->
 
 **Step 3/4**
 
@@ -316,6 +338,8 @@ Restart the etcd service:
 sudo systemctl restart snap.k8s.etcd
 ```
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root) for Step 3**
 
 The argument `--cert-file` for service etcd is set as appropriate
@@ -330,6 +354,8 @@ In the default configuration of the k8s-snap, resulting output lines will
 start with `PASS`.
 
 
+<!-- SPREAD SKIP -->
+
 **Step 4/4**
 
 **Remediation for Step 4**
@@ -343,6 +369,8 @@ Restart the etcd service:
 ```
 sudo systemctl restart snap.k8s.etcd
 ```
+
+<!-- SPREAD SKIP END -->
 
 **Auditing (as root) for Step 4**
 
@@ -360,6 +388,8 @@ start with `PASS`.
 
 
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242380]
 
@@ -408,6 +438,8 @@ Restart the etcd service:
 sudo systemctl restart snap.k8s.etcd
 ```
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root) for Step 1**
 
 The argument `--peer-auto-tls` for service etcd is set as
@@ -419,6 +451,8 @@ test $? -eq 0 && echo PASS || echo FAIL
 ```
 
 The final line of the output will be `PASS`.
+
+<!-- SPREAD SKIP -->
 
 **Step 2/4**
 
@@ -434,6 +468,8 @@ Restart the etcd service:
 sudo systemctl restart snap.k8s.etcd
 ```
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root) for Step 2**
 
 The argument `--peer-key-file` for service etcd is set as appropriate
@@ -448,6 +484,8 @@ In the default configuration of the k8s-snap, resulting output lines will
 start with `PASS`.
 
 
+<!-- SPREAD SKIP -->
+
 **Step 3/4**
 
 **Remediation for Step 3**
@@ -460,6 +498,8 @@ Restart the etcd service:
 ```
 sudo systemctl restart snap.k8s.etcd
 ```
+
+<!-- SPREAD SKIP END -->
 
 **Auditing (as root) for Step 3**
 
@@ -475,6 +515,8 @@ In the default configuration of the k8s-snap, resulting output lines will
 start with `PASS`.
 
 
+<!-- SPREAD SKIP -->
+
 **Step 4/4**
 
 
@@ -488,6 +530,8 @@ Restart the etcd service:
 ```
 sudo systemctl restart snap.k8s.etcd
 ```
+
+<!-- SPREAD SKIP END -->
 
 **Auditing (as root) for Step 4**
 
@@ -504,6 +548,8 @@ start with `PASS`.
 
 
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242381]
 
@@ -551,6 +597,8 @@ Restart the `kube-controller-manager` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--use-service-account-credentials` for service
@@ -565,6 +613,8 @@ test $? -eq 0 && echo PASS || echo FAIL
 In the default configuration of the `k8s-snap`, resulting output lines will
 start with `PASS`.
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242382]
 
@@ -625,6 +675,8 @@ Restart the `kube-apiserver` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--authorization-mode` for service `kube-apiserver` is
@@ -643,6 +695,8 @@ start with `PASS`.
 
 
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242387]
 
@@ -692,6 +746,8 @@ Restart the `kubelet` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--read-only-port` for service `kubelet` is set as
@@ -708,6 +764,8 @@ In the default configuration of the `k8s-snap`, resulting output lines will
 start with `PASS`.
 
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242388]
 
@@ -760,6 +818,8 @@ Restart the `kube-apiserver` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--insecure-bind-address` for service `kube-apiserver`
@@ -777,6 +837,8 @@ In the default configuration of the `k8s-snap`, resulting output lines will
 start with `UNSET`.
 
 The final line of the output will be `PASS`.
+
+<!-- SPREAD SKIP -->
 
 ### [V-242389]
 
@@ -825,6 +887,8 @@ Restart the `kube-apiserver` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--secure-port` for service `kube-apiserver` is set as
@@ -842,6 +906,8 @@ In the default configuration of the `k8s-snap`, resulting output lines will
 start with `PASS`.
 
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242390]
 
@@ -896,6 +962,8 @@ Restart the `kube-apiserver` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--anonymous-auth` for service `kube-apiserver` is set
@@ -910,6 +978,8 @@ test $? -eq 0 && echo PASS || echo FAIL
 The final line of the output will be `PASS`.
 
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242391]
 
@@ -967,6 +1037,8 @@ Restart the `kubelet` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--anonymous-auth` for service `kubelet` is set as
@@ -980,6 +1052,8 @@ test $? -eq 0 && echo PASS || echo FAIL
 In the default configuration of the `k8s-snap`, resulting output lines will
 start with `PASS`.
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242392]
 
@@ -1031,6 +1105,8 @@ Restart the `kubelet` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--authorization-mode` for service `kubelet` is set as
@@ -1047,6 +1123,8 @@ In the default configuration of the `k8s-snap`, resulting output lines will
 start with `UNSET`.
 
 The final line of the output will be `PASS`.
+
+<!-- SPREAD SKIP -->
 
 ### [V-242395]
 
@@ -1182,6 +1260,8 @@ Restart the `kubelet` service :
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--pod-manifest-path` for service `kubelet` is set as
@@ -1199,6 +1279,8 @@ start with `UNSET`.
 
 The final line of the output will be `PASS`.
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242404]
 
@@ -1245,6 +1327,8 @@ Restart the `kubelet` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--hostname-override` for service `kubelet` is set as
@@ -1260,6 +1344,8 @@ test $? -eq 0 && echo PASS || echo FAIL
 The final line of the output will be `PASS`.
 
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242405]
 
@@ -1296,6 +1382,8 @@ Ensure all of the following paths have correct ownership by running:
 
 
     chown -R 0:0 /etc/containerd /etc/containerd/config.toml
+
+<!-- SPREAD SKIP END -->
 
 **Auditing (as root)**
 
@@ -1339,6 +1427,8 @@ In the default configuration of the `k8s-snap`, resulting output lines will
 start with `PASS`.
 
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242406]
 
@@ -1386,6 +1476,8 @@ Ensure all of the following paths have correct ownership by running:
     chown -R 0:0 /var/snap/k8s/common/args/kubelet
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root) for Step 1**
 
 All files exist and have the correct ownership.
@@ -1400,6 +1492,8 @@ start with `PASS`.
 
 
 
+
+<!-- SPREAD SKIP -->
 
 **Step 2/2**
 
@@ -1427,6 +1521,8 @@ Restart the `kubelet` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root) for Step 2**
 
 The argument `--config` for service `kubelet` is set as appropriate
@@ -1447,6 +1543,8 @@ The final line of the output will be `PASS`.
 
 
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242407]
 
@@ -1496,6 +1594,8 @@ Ensure all of the following paths have correct permissions by running:
     chmod -R 644 /var/snap/k8s/common/args/kubelet
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root) for Step 1**
 
 All required files have permissions '644' (or stricter):
@@ -1510,6 +1610,8 @@ start with `PASS`.
 
 
 
+
+<!-- SPREAD SKIP -->
 
 **Step 2/2**
 
@@ -1537,6 +1639,8 @@ Restart the `kubelet` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root) for Step 2**
 
 The argument `--config` for service `kubelet` is set as appropriate
@@ -1557,6 +1661,8 @@ The final line of the output will be `PASS`.
 
 
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242408]
 
@@ -1596,6 +1702,8 @@ Ensure all of the following paths have correct permissions by running:
 chmod -R 644 /var/snap/k8s/common/args /var/snap/k8s/common/args/conf.d /var/snap/k8s/common/args/kube-apiserver /var/snap/k8s/common/args/kube-controller-manager /var/snap/k8s/common/args/k8sd /var/snap/k8s/common/args/kube-proxy /var/snap/k8s/common/args/kube-scheduler /var/snap/k8s/common/args/kubelet /var/snap/k8s/common/args/containerd /var/snap/k8s/common/args/etcd /var/snap/k8s/common/args/conf.d/auth-token-webhook.conf
 ```
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 All required files have permissions '644' (or stricter):
@@ -1619,6 +1727,8 @@ start with `PASS`.
 
 
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242409]
 
@@ -1663,6 +1773,8 @@ Restart the `kube-controller-manager` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--profiling` for service `kube-controller-manager` is
@@ -1677,6 +1789,8 @@ test $? -eq 0 && echo PASS || echo FAIL
 In the default configuration of the `k8s-snap`, resulting output lines will
 start with `PASS`.
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242418]
 
@@ -1726,6 +1840,8 @@ Restart the `kube-apiserver` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--tls-cipher-suites` for service `kube-apiserver` is
@@ -1741,6 +1857,8 @@ In the default configuration of the `k8s-snap`, resulting output lines will
 start with `PASS`.
 
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242419]
 
@@ -1796,6 +1914,8 @@ Restart the `kube-apiserver` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--client-ca-file` for service `kube-apiserver` is set
@@ -1812,6 +1932,8 @@ start with `PASS`.
 
 
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242420]
 
@@ -1871,6 +1993,8 @@ Restart the `kubelet` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--client-ca-file` for service `kubelet` is set as
@@ -1886,6 +2010,8 @@ start with `PASS`.
 
 
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242421]
 
@@ -1942,6 +2068,8 @@ Restart the `kube-controller-manager` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--root-ca-file` for service `kube-controller-manager`
@@ -1958,6 +2086,8 @@ start with `PASS`.
 
 
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242422]
 
@@ -2016,6 +2146,8 @@ Restart the `kube-apiserver` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root) for Step 1**
 
 The argument `--tls-cert-file` for service `kube-apiserver` is set
@@ -2032,6 +2164,8 @@ start with `PASS`.
 
 
 
+
+<!-- SPREAD SKIP -->
 
 **Step 2/2**
 
@@ -2061,6 +2195,8 @@ Restart the `kube-apiserver` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root) for Step 2**
 
 The argument `--tls-private-key-file` for service `kube-apiserver`
@@ -2077,6 +2213,8 @@ start with `PASS`.
 
 
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242423]
 
@@ -2128,6 +2266,8 @@ Restart the etcd service:
 sudo systemctl restart snap.k8s.etcd
 ```
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--client-cert-auth` for service etcd is set as
@@ -2140,6 +2280,8 @@ test $? -eq 0 && echo PASS || echo FAIL
 ```
 
 The final line of the output will be `PASS`.
+
+<!-- SPREAD SKIP -->
 
 ### [V-242424]
 
@@ -2201,6 +2343,8 @@ Restart the `kubelet` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--tls-private-key-file` for service `kubelet` is set
@@ -2215,6 +2359,8 @@ test $? -eq 0 && echo PASS || echo FAIL
 The final line of the output will be `PASS`.
 
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242425]
 
@@ -2275,6 +2421,8 @@ Restart the `kubelet` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--tls-cert-file` for service `kubelet` is set as
@@ -2288,6 +2436,8 @@ test $? -eq 0 && echo PASS || echo FAIL
 The final line of the output will be `PASS`.
 
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242426]
 
@@ -2343,6 +2493,8 @@ Restart the etcd service:
 sudo systemctl restart snap.k8s.etcd
 ```
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--peer-client-cert-auth` for service etcd is set as
@@ -2356,6 +2508,8 @@ test $? -eq 0 && echo PASS || echo FAIL
 The final line of the output will be `PASS`.
 
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242427]
 
@@ -2407,6 +2561,8 @@ Restart the etcd service:
 sudo systemctl restart snap.k8s.etcd
 ```
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--key-file` for service etcd is set as appropriate
@@ -2421,6 +2577,8 @@ In the default configuration of the k8s-snap, resulting output lines will
 start with `PASS`.
 
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242428]
 
@@ -2471,6 +2629,8 @@ Restart the etcd service:
 sudo systemctl restart snap.k8s.etcd
 ```
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--cert-file` for service etcd is set as appropriate
@@ -2487,6 +2647,8 @@ start with `PASS`.
 
 
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242429]
 
@@ -2538,6 +2700,8 @@ Restart the etcd service:
 sudo systemctl restart snap.k8s.kube-apiserver
 ```
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--etcd-cafile` for Kubernetes API server is set as
@@ -2553,6 +2717,8 @@ In the default configuration of the k8s-snap, resulting output lines will
 start with `PASS`.
 
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242430]
 
@@ -2604,6 +2770,8 @@ Restart the etcd service:
 sudo systemctl restart snap.k8s.kube-apiserver
 ```
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--etcd-certfile` for Kubernetes API server is set as
@@ -2620,6 +2788,8 @@ start with `PASS`.
 
 
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242431]
 
@@ -2671,6 +2841,8 @@ Restart the etcd service:
 sudo systemctl restart snap.k8s.kube-apiserver
 ```
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--etcd-keyfile` for Kubernetes API server is set as
@@ -2687,6 +2859,8 @@ start with `PASS`.
 
 
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242432]
 
@@ -2737,6 +2911,8 @@ Restart the etcd service:
 sudo systemctl restart snap.k8s.etcd
 ```
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--peer-cert-file` for service etcd is set as
@@ -2752,6 +2928,8 @@ start with `PASS`.
 
 
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242433]
 
@@ -2802,6 +2980,8 @@ Restart the etcd service:
 sudo systemctl restart snap.k8s.etcd
 ```
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--peer-key-file` for service etcd is set as appropriate
@@ -2817,6 +2997,8 @@ start with `PASS`.
 
 
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242436]
 
@@ -2871,6 +3053,8 @@ Restart the `kube-apiserver` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--disable-admission-plugins` for service
@@ -2889,6 +3073,8 @@ start with `UNSET`.
 
 The final line of the output will be `PASS`.
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242438]
 
@@ -2933,6 +3119,8 @@ Restart the `kube-apiserver` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--request-timeout` for service `kube-apiserver` is
@@ -2946,6 +3134,8 @@ test $? -eq 0 && echo PASS || echo FAIL
 
 The final line of the output will be `PASS`.
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242442]
 
@@ -3064,6 +3254,8 @@ Ensure all of the following paths have correct ownership by running:
 
     chown -R 0:0 /etc/kubernetes /etc/kubernetes/pki /etc/kubernetes/kubelet.conf /etc/kubernetes/scheduler.conf /etc/kubernetes/proxy.conf /etc/kubernetes/admin.conf /etc/kubernetes/controller.conf /etc/kubernetes/pki/etcd /etc/kubernetes/pki/apiserver-etcd-client.crt /etc/kubernetes/pki/apiserver-etcd-client.key /etc/kubernetes/pki/etcd/ca.crt /etc/kubernetes/pki/etcd/peer.crt /etc/kubernetes/pki/etcd/peer.key /etc/kubernetes/pki/etcd/server.crt /etc/kubernetes/pki/etcd/server.key /etc/kubernetes/pki/client-ca.crt /etc/kubernetes/pki/front-proxy-ca.key /etc/kubernetes/pki/apiserver.key /etc/kubernetes/pki/apiserver.crt /etc/kubernetes/pki/apiserver-kubelet-client.key /etc/kubernetes/pki/front-proxy-client.crt /etc/kubernetes/pki/serviceaccount.key /etc/kubernetes/pki/front-proxy-client.key /etc/kubernetes/pki/kubelet.crt /etc/kubernetes/pki/ca.crt /etc/kubernetes/pki/ca.key /etc/kubernetes/pki/apiserver-kubelet-client.crt /etc/kubernetes/pki/front-proxy-ca.crt /etc/kubernetes/pki/kubelet.key
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 All files exist and have the correct ownership.
@@ -3105,6 +3297,8 @@ start with `PASS`.
 
 
 
+<!-- SPREAD SKIP -->
+
 ### [V-242445]
 
 **Guideline:** The Kubernetes component etcd must be owned by etcd
@@ -3144,6 +3338,8 @@ Ensure contents of the etcd directory have correct ownership by running:
 chown -R 0:0 /var/snap/k8s/common/var/lib/etcd
 ```
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The contents of the etcd directory have the correct ownership.
@@ -3156,6 +3352,8 @@ In the default configuration of the `k8s-snap`, resulting output lines will
 start with `PASS`.
 
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242446]
 
@@ -3190,6 +3388,8 @@ Ensure all of the following paths have correct ownership by running:
 
     chown -R 0:0 /etc/kubernetes/admin.conf /etc/kubernetes/scheduler.conf /etc/kubernetes/controller.conf
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 All files exist and have the correct ownership.
@@ -3203,6 +3403,8 @@ stat -c %u:%g '/etc/kubernetes/controller.conf' | grep -q 0:0 && echo PASS /etc/
 In the default configuration of the `k8s-snap`, resulting output lines will
 start with `PASS`.
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242447]
 
@@ -3245,6 +3447,8 @@ Ensure all of the following paths have correct permissions by running:
     chmod -R 644 /etc/kubernetes/proxy.conf
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root) for Step 1**
 
 All required files have permissions '644' (or stricter):
@@ -3256,6 +3460,8 @@ stat -c %a '/etc/kubernetes/proxy.conf' | grep -q 600 && echo PASS /etc/kubernet
 In the default configuration of the `k8s-snap`, resulting output lines will
 start with `PASS`.
 
+
+<!-- SPREAD SKIP -->
 
 **Step 2/2**
 
@@ -3283,6 +3489,8 @@ Restart the `kube-proxy` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root) for Step 2**
 
 The argument `--kubeconfig` for service `kube-proxy` is set as
@@ -3297,6 +3505,8 @@ test $? -eq 0 && echo PASS || echo FAIL
 In the default configuration of the `k8s-snap`, resulting output lines will
 start with `PASS`.
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242448]
 
@@ -3337,6 +3547,8 @@ Ensure all of the following paths have correct ownership by running:
     chown -R 0:0 /etc/kubernetes/proxy.conf
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root) for Step 1**
 
 All files exist and have the correct ownership.
@@ -3349,6 +3561,8 @@ In the default configuration of the `k8s-snap`, resulting output lines will
 start with `PASS`.
 
 
+
+<!-- SPREAD SKIP -->
 
 **Step 2/2**
 
@@ -3371,6 +3585,8 @@ Restart the `kube-proxy` service:
     sudo systemctl restart snap.k8s.kube-proxy
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root) for Step 2**
 
 The argument `--kubeconfig` for service `kube-proxy` is set as
@@ -3385,6 +3601,8 @@ test $? -eq 0 && echo PASS || echo FAIL
 In the default configuration of the `k8s-snap`, resulting output lines will
 start with `PASS`.
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242449]
 
@@ -3428,6 +3646,8 @@ Ensure all of the following paths have correct permissions by running:
     chmod 644 /etc/kubernetes/pki/client-ca.crt
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root) for Step 1**
 
 All required files have permissions '644' (or stricter):
@@ -3440,6 +3660,8 @@ In the default configuration of the `k8s-snap`, resulting output lines will
 start with `PASS`.
 
 
+
+<!-- SPREAD SKIP -->
 
 **Step 2/2**
 
@@ -3466,6 +3688,8 @@ Restart the `kubelet` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root) for Step 2**
 
 The argument `--client-ca-file` for service `kubelet` is set as
@@ -3479,6 +3703,8 @@ test $? -eq 0 && echo PASS || echo FAIL
 In the default configuration of the `k8s-snap`, resulting output lines will
 start with `PASS`.
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242450]
 
@@ -3519,6 +3745,8 @@ Ensure all of the following paths have correct ownership by running:
     chown -R 0:0 /etc/kubernetes/pki/client-ca.crt
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root) for Step 1**
 
 All files exist and have the correct ownership.
@@ -3531,6 +3759,8 @@ In the default configuration of the `k8s-snap`, resulting output lines will
 start with `PASS`.
 
 
+
+<!-- SPREAD SKIP -->
 
 **Step 2/2**
 
@@ -3555,6 +3785,8 @@ Restart the `kubelet` service:
     sudo systemctl restart snap.k8s.kubelet
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root) for Step 2**
 
 The argument `--client-ca-file` for service `kubelet` is set as
@@ -3568,6 +3800,8 @@ test $? -eq 0 && echo PASS || echo FAIL
 In the default configuration of the `k8s-snap`, resulting output lines will
 start with `PASS`.
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242451]
 
@@ -3604,6 +3838,8 @@ Ensure all of the following paths have correct ownership by running:
 
     chown -R 0:0 /etc/kubernetes/pki /etc/kubernetes/pki/etcd /etc/kubernetes/pki/client-ca.crt /etc/kubernetes/pki/front-proxy-ca.key /etc/kubernetes/pki/apiserver.key /etc/kubernetes/pki/apiserver.crt /etc/kubernetes/pki/apiserver-kubelet-client.key /etc/kubernetes/pki/front-proxy-client.crt /etc/kubernetes/pki/serviceaccount.key /etc/kubernetes/pki/front-proxy-client.key /etc/kubernetes/pki/kubelet.crt /etc/kubernetes/pki/ca.crt /etc/kubernetes/pki/ca.key /etc/kubernetes/pki/apiserver-kubelet-client.crt /etc/kubernetes/pki/front-proxy-ca.crt /etc/kubernetes/pki/kubelet.key
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 All files exist and have the correct ownership.
@@ -3631,6 +3867,8 @@ In the default configuration of the `k8s-snap`, resulting output lines will
 start with `PASS`.
 
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242452]
 
@@ -3667,6 +3905,8 @@ Ensure all of the following paths have correct permissions by running:
     chmod -R 644 /etc/kubernetes/kubelet.conf
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root) for Step 1**
 
 All required files have permissions '644' (or stricter):
@@ -3679,6 +3919,8 @@ In the default configuration of the `k8s-snap`, resulting output lines will
 start with `PASS`.
 
 
+
+<!-- SPREAD SKIP -->
 
 **Step 2/2**
 
@@ -3702,6 +3944,8 @@ Restart the `kubelet` service:
     sudo systemctl restart snap.k8s.kubelet
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root) for Step 2**
 
 The argument `--kubeconfig` for service `kubelet` is set as
@@ -3715,6 +3959,8 @@ test $? -eq 0 && echo PASS || echo FAIL
 In the default configuration of the `k8s-snap`, resulting output lines will
 start with `PASS`.
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242453]
 
@@ -3749,6 +3995,8 @@ Ensure all of the following paths have correct ownership by running:
     chown -R 0:0 /etc/kubernetes/kubelet.conf
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root) for Step 1**
 
 All files exist and have the correct ownership.
@@ -3761,6 +4009,8 @@ In the default configuration of the `k8s-snap`, resulting output lines will
 start with `PASS`.
 
 
+
+<!-- SPREAD SKIP -->
 
 **Step 2/2**
 
@@ -3784,6 +4034,8 @@ Restart the `kubelet` service:
     sudo systemctl restart snap.k8s.kubelet
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root) for Step 2**
 
 The argument `--kubeconfig` for service `kubelet` is set as
@@ -3797,6 +4049,8 @@ test $? -eq 0 && echo PASS || echo FAIL
 In the default configuration of the `k8s-snap`, resulting output lines will
 start with `PASS`.
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242456]
 
@@ -3844,6 +4098,8 @@ Ensure all of the following paths have correct permissions by running:
     chmod -R 644 /var/snap/k8s/common/args/kubelet
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root) for Step 1**
 
 All required files have permissions '644' (or stricter):
@@ -3858,6 +4114,8 @@ start with `PASS`.
 
 
 
+
+<!-- SPREAD SKIP -->
 
 **Step 2/2**
 
@@ -3885,6 +4143,8 @@ Restart the `kubelet` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root) for Step 2**
 
 The argument `--config` for service `kubelet` is set as appropriate
@@ -3903,6 +4163,8 @@ start with `UNSET`.
 The final line of the output will be `PASS`.
 
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242457]
 
@@ -3948,6 +4210,8 @@ Ensure all of the following paths have correct permissions by running:
     chmod -R 644 /var/snap/k8s/common/args/kubelet
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root) for Step 1**
 
 All required files have permissions '644' (or stricter):
@@ -3959,6 +4223,8 @@ stat -c %a '/var/snap/k8s/common/args/kubelet' | grep -q 600 && echo PASS /var/s
 In the default configuration of the `k8s-snap`, resulting output lines will
 start with `PASS`.
 
+
+<!-- SPREAD SKIP -->
 
 **Step 2/2**
 
@@ -3984,6 +4250,8 @@ Restart the `kubelet` service:
     sudo systemctl restart snap.k8s.kubelet
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root) for Step 2**
 
 The argument `--config` for service `kubelet` is set as appropriate
@@ -4001,6 +4269,8 @@ start with `UNSET`.
 
 The final line of the output will be `PASS`.
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242459]
 
@@ -4041,6 +4311,8 @@ Ensure all of the etcd directories have correct permissions by running:
 find /var/snap/k8s/common/var/lib/etcd/ -type d -exec chmod 700 {} \;
 ```
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root) for Step 1**
 
 All directories have permissions '700' (or stricter):
@@ -4052,6 +4324,8 @@ find /var/snap/k8s/common/var/lib/etcd/ -type d -exec sh -c '[ "$(stat -c %a $1)
 In the default configuration of the `k8s-snap`, resulting output lines will
 start with `PASS`.
 
+<!-- SPREAD SKIP -->
+
 **Step 2/2**
 
 **Remediation for Step 2**
@@ -4061,6 +4335,8 @@ Ensure all of the etcd directories have correct permissions by running:
 ```
 find /var/snap/k8s/common/var/lib/etcd/ -type f -exec chmod 644 {} \;
 ```
+
+<!-- SPREAD SKIP END -->
 
 **Auditing (as root) for Step 2**
 
@@ -4075,6 +4351,8 @@ start with `PASS`.
 
 
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242460]
 
@@ -4108,6 +4386,8 @@ Ensure all of the following paths have correct permissions by running:
 
     chmod -R 644 /etc/kubernetes/admin.conf /etc/kubernetes/scheduler.conf /etc/kubernetes/controller.conf
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 All required files have permissions '644' (or stricter):
@@ -4121,6 +4401,8 @@ stat -c %a '/etc/kubernetes/controller.conf' | grep -q 600 && echo PASS /etc/kub
 In the default configuration of the `k8s-snap`, resulting output lines will
 start with `PASS`.
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242466]
 
@@ -4153,6 +4435,8 @@ Ensure all of the following paths have correct permissions by running:
 
     chmod -R 644 /etc/kubernetes/pki/apiserver-kubelet-client.crt /etc/kubernetes/pki/ca.crt /etc/kubernetes/pki/front-proxy-ca.crt /etc/kubernetes/pki/kubelet.crt /etc/kubernetes/pki/apiserver.crt /etc/kubernetes/pki/client-ca.crt /etc/kubernetes/pki/front-proxy-client.crt
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 All required files have permissions '644' (or stricter):
@@ -4170,6 +4454,8 @@ stat -c %a '/etc/kubernetes/pki/front-proxy-client.crt' | grep -q 600 && echo PA
 In the default configuration of the `k8s-snap`, resulting output lines will
 start with `PASS`.
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-242467]
 
@@ -4203,6 +4489,8 @@ Ensure all of the following paths have correct permissions by running:
 
     chmod -R 600 /etc/kubernetes/pki/apiserver-kubelet-client.key /etc/kubernetes/pki/ca.key /etc/kubernetes/pki/front-proxy-client.key /etc/kubernetes/pki/serviceaccount.key /etc/kubernetes/pki/apiserver.key /etc/kubernetes/pki/front-proxy-ca.key /etc/kubernetes/pki/kubelet.key
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 All required files have permissions '600' (or stricter):
@@ -4221,6 +4509,8 @@ In the default configuration of the `k8s-snap`, resulting output lines will
 start with `PASS`.
 
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-245542]
 
@@ -4266,6 +4556,8 @@ Restart the `kube-apiserver` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--basic-auth-file` for service `kube-apiserver` is
@@ -4285,6 +4577,8 @@ start with `UNSET`.
 The final line of the output will be `PASS`.
 
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-245543]
 
@@ -4335,6 +4629,8 @@ Restart the `kube-apiserver` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--token-auth-file` for service `kube-apiserver` is
@@ -4354,6 +4650,8 @@ start with `UNSET`.
 The final line of the output will be `PASS`.
 
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-245544]
 
@@ -4415,6 +4713,8 @@ Restart the `kube-apiserver` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root) for Step 1**
 
 The argument `--kubelet-client-certificate` for service
@@ -4429,6 +4729,8 @@ test $? -eq 0 && echo PASS || echo FAIL
 In the default configuration of the `k8s-snap`, resulting output lines will
 start with `PASS`.
 
+
+<!-- SPREAD SKIP -->
 
 **Step 2/2**
 
@@ -4458,6 +4760,8 @@ Restart the `kube-apiserver` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root) for Step 2**
 
 The argument `--kubelet-client-key` for service `kube-apiserver` is
@@ -4473,6 +4777,8 @@ In the default configuration of the `k8s-snap`, resulting output lines will
 start with `PASS`.
 
 
+
+<!-- SPREAD SKIP -->
 
 ### [V-254801]
 
@@ -4532,6 +4838,8 @@ Restart the `kubelet` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--feature-gates` for service `kubelet` is set as
@@ -4553,6 +4861,8 @@ The final line of the output will be `PASS`.
 ## Bootstrap class
 
 (242384)=
+
+<!-- SPREAD SKIP -->
 
 ### [V-242384]
 
@@ -4611,6 +4921,8 @@ Restart the `kube-scheduler` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--bind-address` for service `kube-scheduler` is set
@@ -4625,6 +4937,8 @@ test $? -eq 0 && echo PASS || echo FAIL
 The final line of the output will be `PASS`.
 
 (242385)=
+
+<!-- SPREAD SKIP -->
 
 ### [V-242385]
 
@@ -4682,6 +4996,8 @@ Restart the `kube-controller-manager` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--bind-address` for service `kube-controller-manager`
@@ -4696,6 +5012,8 @@ test $? -eq 0 && echo PASS || echo FAIL
 The final line of the output will be `PASS`.
 
 (242400)=
+
+<!-- SPREAD SKIP -->
 
 ### [V-242400]
 
@@ -4751,6 +5069,8 @@ Restart the `kube-apiserver` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--feature-gate` for service `kube-apiserver` is set
@@ -4770,6 +5090,8 @@ start with `UNSET`.
 The final line of the output will be `PASS`.
 
 (242402)=
+
+<!-- SPREAD SKIP -->
 
 ### [V-242402]
 
@@ -4830,6 +5152,8 @@ Restart the `kube-apiserver` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--audit-log-path` for service `kube-apiserver` is set
@@ -4844,6 +5168,8 @@ test $? -eq 0 && echo PASS || echo FAIL
 The final line of the output will be `PASS`.
 
 (242403)=
+
+<!-- SPREAD SKIP -->
 
 ### [V-242403]
 
@@ -4924,6 +5250,8 @@ Restart the `kube-apiserver` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--audit-policy-file` for service `kube-apiserver` is
@@ -4938,6 +5266,8 @@ test $? -eq 0 && echo PASS || echo FAIL
 The final line of the output will be `PASS`.
 
 (242434)=
+
+<!-- SPREAD SKIP -->
 
 ### [V-242434]
 
@@ -4987,6 +5317,8 @@ Restart the `kubelet` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 Set the argument `--protect-kernel-defaults` for service `kubelet` as
@@ -5005,6 +5337,8 @@ start with `UNSET`.
 The final line of the output will be `PASS`.
 
 (242461)=
+
+<!-- SPREAD SKIP -->
 
 ### [V-242461]
 
@@ -5060,6 +5394,8 @@ Restart the `kube-apiserver` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--audit-policy-file` for service `kube-apiserver` is
@@ -5074,6 +5410,8 @@ test $? -eq 0 && echo PASS || echo FAIL
 The final line of the output will be `PASS`.
 
 (242462)=
+
+<!-- SPREAD SKIP -->
 
 ### [V-242462]
 
@@ -5127,6 +5465,8 @@ Restart the `kube-apiserver` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--audit-log-maxsize` for service `kube-apiserver` is
@@ -5141,6 +5481,8 @@ The output should indicate that `audit-log-maxsize` is set to a value less or
 equal to `100`.
 
 (242463)=
+
+<!-- SPREAD SKIP -->
 
 ### [V-242463]
 
@@ -5192,6 +5534,8 @@ Restart the `kube-apiserver` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--audit-log-maxbackup` for service `kube-apiserver`
@@ -5206,6 +5550,8 @@ The output should indicate that `audit-log-maxbackup` is set to a value less or
 equal to `10`.
 
 (242464)=
+
+<!-- SPREAD SKIP -->
 
 ### [V-242464]
 
@@ -5256,6 +5602,8 @@ Restart the `kube-apiserver` service:
 
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--audit-log-maxage` for service `kube-apiserver` is
@@ -5269,6 +5617,8 @@ grep -E '\-\-audit-log-maxage=' '/var/snap/k8s/common/args/kube-apiserver'
 The output should indicate a `audit-log-maxage` value of 30.
 
 (242465)=
+
+<!-- SPREAD SKIP -->
 
 ### [V-242465]
 
@@ -5321,6 +5671,8 @@ Restart the `kube-apiserver` service:
     sudo systemctl restart snap.k8s.kube-apiserver
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--audit-log-path` for service `kube-apiserver` is set
@@ -5335,6 +5687,8 @@ test $? -eq 0 && echo PASS || echo FAIL
 The final line of the output will be `PASS`.
 
 (245541)=
+
+<!-- SPREAD SKIP -->
 
 ### [V-245541]
 
@@ -5391,6 +5745,8 @@ Restart the `kubelet` service:
     sudo systemctl restart snap.k8s.kubelet
 
 
+<!-- SPREAD SKIP END -->
+
 **Auditing (as root)**
 
 The argument `--streaming-connection-idle-timeout` for service
@@ -5405,6 +5761,8 @@ test $? -eq 0 && echo PASS || echo FAIL
 The final line of the output will be `PASS`.
 
 (254800)=
+
+<!-- SPREAD SKIP -->
 
 ### [V-254800]
 
@@ -5762,6 +6120,7 @@ Canonical Kubernetes follows this rule by default, but it’s up to users to
 follow in pods they create.
 
 
+
 **Auditing (as root)**
 
 The environment of each user-created pod should be inspected using the
@@ -5784,6 +6143,7 @@ sudo k8s kubectl get statefulset --all-namespaces -o yaml| grep -A5 "env:"
 ```
 
 (242417)=
+
 
 ### [V-242417]
 
@@ -6122,3 +6482,5 @@ the security settings within the document are implemented through this file.
 [V-242467]:https://stigviewer.com/stigs/kubernetes/2024-06-10/finding/V-242467
 [V-245541]:https://stigviewer.com/stigs/kubernetes/2024-06-10/finding/V-245541
 [deploy a DISA STIG hardened cluster]: /snap/howto/install/disa-stig.md
+
+<!-- SPREAD SKIP END -->
