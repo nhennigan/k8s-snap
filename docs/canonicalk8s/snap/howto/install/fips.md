@@ -3,11 +3,12 @@
 ```{versionadded} release-1.34
 ```
 
+<!-- SPREAD SUITE: snap_clean -->
+
 The [Federal Information Processing Standard (FIPS) 140-3] is a US government
 security standard regulating the use of cryptography. Compliance is crucial for
 US government and regulated industries. This how-to guide provides the steps to
 set up a FIPS compliant Kubernetes cluster using the {{ product }} snap.
-
 
 ## Prerequisites
 
@@ -17,6 +18,7 @@ This guide assumes the following:
 - You have root or sudo access to the machine
 - Internet access on the machine
 
+<!-- SPREAD SKIP -->
 ```{note}
 Canonical K8s uses the core22 base snap which includes certified crypto
 libraries from Ubuntu 22.04. Strictly speaking FIPS compliance requires
@@ -41,7 +43,7 @@ pro version
 
 If you have not installed the [Ubuntu Pro Client] yet or have an older version,
 run:
-
+<!-- SPREAD SKIP END -->
 ```
 sudo apt update
 sudo apt install ubuntu-pro-client
@@ -50,15 +52,31 @@ sudo apt install ubuntu-pro-client
 Attach the Ubuntu Pro token with the `--no-auto-enable` option to prevent
 Canonical Livepatch services, which are not supported with FIPS:
 
+<!-- SPREAD SKIP -->
 ```
 sudo pro attach <your_pro_token> --no-auto-enable
 ```
+<!-- SPREAD SKIP END -->
+
+<!-- SPREAD - NOT YET - this will be github env
+sudo pro attach $your_pro_token> --no-auto-enable
+-->
+
+<!-- SPREAD 
+sudo pro attach <your_pro_token> --no-auto-enable
+-->
 
 Now, enable the FIPS crypto modules on your host machine:
-
+<!-- SPREAD SKIP -->
 ```
 sudo pro enable fips-updates
 ```
+<!-- SPREAD SKIP END -->
+<!-- SPREAD 
+echo "y" | sudo pro enable fips-updates
+-->
+
+<!-- SPREAD SKIP -->
 
 ```{note}
 If you are deploying a [DISA STIG hardened cluster](disa-stig.md), you can skip
@@ -72,6 +90,16 @@ Reboot to apply the changes:
 ```
 sudo reboot
 ```
+<!-- SPREAD SKIP END -->
+
+<!-- SPREAD
+if [ ! -f /root/fips ]; then
+    echo "FIPS reboot check"
+    sudo touch /root/fips
+    sync
+    REBOOT
+fi
+-->
 
 Verify your host machine is running in FIPS mode:
 
@@ -93,7 +121,7 @@ sudo snap install core22 --channel=fips-updates/stable
 If core22 is already installed, a message will be displayed:
 `snap "core22" is already installed, see 'snap help refresh'`. In this case,
 use the refresh command instead of install.
-
+<!-- SPREAD SKIP -->
 ```
 sudo snap refresh core22 --channel=fips-updates/stable
 ```
@@ -106,9 +134,16 @@ Install the {{ product }} snap on your FIPS host:
 :start-after: <!-- snap start -->
 :end-before: <!-- snap end -->
 ```
+<!-- SPREAD SKIP END -->
+
+<!-- SPREAD
+sudo snap install k8s --classic --channel=1.35-classic/stable
+-->
 
 The components will automatically detect if the system is running in FIPS mode
 and activate internal FIPS-related settings accordingly.
+
+<!-- SPREAD SKIP -->
 
 ```{note}
 Each node in the cluster must be installed following these instructions in
@@ -139,6 +174,7 @@ sudo k8s status --wait-ready
 
 Otherwise, you can [add it] to an existing cluster.
 
+
 <!-- LINKS -->
 [Federal Information Processing Standard (FIPS) 140-3]:
 https://csrc.nist.gov/pubs/fips/140-3/final
@@ -149,3 +185,5 @@ https://csrc.nist.gov/pubs/fips/140-3/final
 [`fips-updates` track]:
 https://documentation.ubuntu.com/pro-client/en/latest/howtoguides/enable_fips
 [add it]: /snap/tutorial/add-remove-nodes
+
+<!-- SPREAD SKIP END -->
