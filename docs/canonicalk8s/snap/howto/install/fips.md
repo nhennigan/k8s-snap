@@ -72,6 +72,7 @@ Now, enable the FIPS crypto modules on your host machine:
 sudo pro enable fips-updates
 ```
 <!-- SPREAD SKIP END -->
+
 <!-- SPREAD 
 echo "y" | sudo pro enable fips-updates
 -->
@@ -92,20 +93,17 @@ sudo reboot
 ```
 <!-- SPREAD SKIP END -->
 
-<!-- SPREAD
-if [ ! -f /root/fips ]; then
-    echo "FIPS reboot check"
-    sudo touch /root/fips
-    sync
-    REBOOT
-fi
--->
-
 Verify your host machine is running in FIPS mode:
 
 ```
 cat /proc/sys/crypto/fips_enabled
 ```
+
+<!-- SPREAD
+source ${SPREAD_PATH}/docs/tools/repeat_checks.sh
+repeat_checks "cat /proc/sys/crypto/fips_enabled" "1"
+-->
+
 
 If the output is `1`, your host machine is running in FIPS mode.
 

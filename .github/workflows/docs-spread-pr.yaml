@@ -5,6 +5,7 @@ on:
     paths:
       - docs/canonicalk8s/snap/tutorial/**
       - docs/canonicalk8s/snap/howto/**
+      - docs/canonicalk8s/snap/reference/disa-stig-audit.md
       # - docs/canonicalk8s/charm/tutorial/**
       # - docs/canonicalk8s/charm/howto/**
 
@@ -46,12 +47,10 @@ jobs:
 
           rm -rf tests/spread-generated
           mkdir -p tests/spread-generated
-          # Create all suite directories so spread doesn't fail reading spread.yaml
-          mkdir -p tests/spread-generated/{snap_clean,snap_bootstrapped,charm_clean,charm_bootstrapped}
-
+          
           mapfile -t changed_files < <(
             git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.sha }}" \
-            | grep -E '^docs/canonicalk8s/(snap|charm)/(tutorial|howto)/.*\.(md|markdown|rst|rest)$' \
+            | grep -E '^docs/canonicalk8s/(snap|charm)/(tutorial|howto|reference)/.*\.(md|markdown|rst|rest)$' \
             || true
           )
 
@@ -61,10 +60,41 @@ jobs:
             exit 0
           fi
 
+          
+          # Create all suite directories so spread doesn't fail reading spread.yaml
+          mkdir -p tests/spread-generated/{disa_stig_chain,snap_clean,snap_bootstrapped,charm_clean,charm_bootstrapped}
+
           declare -A suites_seen=()
           generated_any=false
 
+          scenario_trigger=false
           for file in "${changed_files[@]}"; do
+            case "$file" in
+              docs/canonicalk8s/snap/howto/install/fips.md|\
+              docs/canonicalk8s/snap/howto/networking/ufw.md|\
+              docs/canonicalk8s/snap/howto/install/disa-stig.md|\
+              docs/canonicalk8s/snap/reference/disa-stig-audit.md)
+                scenario_trigger=true
+                break
+                ;;
+            esac
+          done
+
+          for file in "${changed_files[@]}"; do
+            # When scenario mode is active, these docs are tested only through
+            # the combined disa_stig_chain task to avoid duplicate runs.
+            if [[ "$scenario_trigger" == true ]]; then
+              case "$file" in
+                docs/canonicalk8s/snap/howto/install/fips.md|\
+                docs/canonicalk8s/snap/howto/networking/ufw.md|\
+                docs/canonicalk8s/snap/howto/install/disa-stig.md|\
+                docs/canonicalk8s/snap/reference/disa-stig-audit.md)
+                  echo "Skipping $file in per-doc generation (covered by disa_stig_chain scenario)"
+                  continue
+                  ;;
+              esac
+            fi
+
             marker_suite="$(grep -Eo 'SPREAD SUITE:\s*[a-z_]+' "$file" | head -n1 | sed -E 's/.*:\s*//' || true)"
 
             if [[ -z "$marker_suite" ]]; then
@@ -89,7 +119,7 @@ jobs:
             out_dir="tests/spread-generated/${suite}/${task_name}"
 
             mkdir -p "$out_dir"
-            python3 workflow-scripts/spread/create_spread_task_file.py \
+            python3 docs/tools/create_spread_task_file.py \
               "$file" \
               "$out_dir/task.yaml"
 
@@ -99,19 +129,6 @@ jobs:
 
           # DISA scenario: if any scenario source doc changes, build one ordered
           # scenario task from all required docs (including unchanged dependencies).
-          scenario_trigger=false
-          for file in "${changed_files[@]}"; do
-            case "$file" in
-              docs/canonicalk8s/snap/howto/install/fips.md|\
-              docs/canonicalk8s/snap/howto/networking/ufw.md|\
-              docs/canonicalk8s/snap/howto/install/disa-stig.md|\
-              docs/canonicalk8s/snap/reference/disa-stig-audit.md)
-                scenario_trigger=true
-                break
-                ;;
-            esac
-          done
-
           if [[ "$scenario_trigger" == true ]]; then
             scenario_tmp_dir="/tmp/disa-stig-scenario"
             rm -rf "$scenario_tmp_dir"
@@ -124,20 +141,38 @@ jobs:
               "docs/canonicalk8s/snap/reference/disa-stig-audit.md"
             )
 
-            scenario_tasks=()
-            for doc in "${scenario_docs[@]}"; do
-              task_file="$scenario_tmp_dir/$(basename "${doc%.*}").task.yaml"
-              python3 workflow-scripts/spread/create_spread_task_file.py "$doc" "$task_file"
-              scenario_tasks+=("$task_file")
+            fips_task="$scenario_tmp_dir/fips.task.yaml"
+            ufw_task="$scenario_tmp_dir/ufw.task.yaml"
+            disa_stig_task="$scenario_tmp_dir/disa-stig.task.yaml"
+            disa_stig_audit_task="$scenario_tmp_dir/disa-stig-audit.task.yaml"
+
+            python3 docs/tools/create_spread_task_file.py "${scenario_docs[0]}" "$fips_task"
+            python3 docs/tools/create_spread_task_file.py "${scenario_docs[1]}" "$ufw_task"
+            python3 docs/tools/create_spread_task_file.py "${scenario_docs[2]}" "$disa_stig_task"
+            python3 docs/tools/create_spread_task_file.py "${scenario_docs[3]}" "$disa_stig_audit_task"
+
+            scenario_tasks=(
+              "$fips_task"
+              "$ufw_task"
+              "$disa_stig_task"
+              "$disa_stig_audit_task"
+            )
+
+            for task_file in "${scenario_tasks[@]}"; do
+              if [[ ! -f "$task_file" ]]; then
+                echo "Expected scenario task file not found: $task_file"
+                ls -la "$scenario_tmp_dir" || true
+                exit 1
+              fi
             done
 
             python3 docs/tools/combine_spread_tasks.py \
-              --output tests/spread-generated/snap_clean/chain-disa-stig/task.yaml \
+              --output tests/spread-generated/disa_stig_chain/chain-disa-stig/task.yaml \
               --summary "DISA STIG chain scenario" \
               --kill-timeout "30m" \
               "${scenario_tasks[@]}"
 
-            suites_seen["snap_clean"]=1
+            suites_seen["disa_stig_chain"]=1
             generated_any=true
           fi
 

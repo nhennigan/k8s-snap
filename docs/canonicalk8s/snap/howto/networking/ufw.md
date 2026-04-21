@@ -1,5 +1,7 @@
 # How to configure Uncomplicated Firewall (UFW)
 
+<!-- SPREAD SUITE: snap_clean -->
+
 This how-to presents a set of firewall rules/guidelines that should be
 considered when setting up {{product}}. These rules may be incompatible
 with some network setups, so we recommend you review and tune them to
@@ -15,11 +17,17 @@ This guide assumes the following:
 ## Install UFW
 
 Install Uncomplicated Firewall:
-
+<!-- SPREAD SKIP -->
 ```sh
 sudo apt update
 sudo apt install ufw
 ```
+<!-- SPREAD SKIP END -->
+
+<!-- SPREAD
+sudo apt update
+sudo apt install -y ufw
+-->
 
 Verify that UFW is installed:
 
@@ -54,7 +62,7 @@ sudo sysctl -p
 ### Set forwarding rules
 
 Set UFW forwarding rules using one of the following methods.
-
+<!-- SPREAD SKIP -->
 `````{tab-set}
 ````{tab-item} Allow system wide
 Packet forwarding can be allowed system wide by editing `/etc/default/ufw`
@@ -63,6 +71,7 @@ and changing `DEFAULT_FORWARD_POLICY` to:
 ```sh
 DEFAULT_FORWARD_POLICY="ACCEPT"
 ```
+
 ````
 
 ````{tab-item} By subnet
@@ -77,6 +86,13 @@ sudo ufw route allow from 10.1.0.0/16 to 10.1.0.0/16
 ```
 ````
 `````
+<!-- SPREAD SKIP END -->
+
+<!-- SPREAD
+sudo grep -qE '^\s*#?\s*DEFAULT_FORWARD_POLICY=' /etc/default/ufw \
+  && sudo sed -i -E 's|^\s*#?\s*DEFAULT_FORWARD_POLICY=.*|DEFAULT_FORWARD_POLICY="ACCEPT"|' /etc/default/ufw \
+  || echo 'DEFAULT_FORWARD_POLICY="ACCEPT"' | sudo tee -a /etc/default/ufw
+-->
 
 ### Allow access to kubelet
 
@@ -138,16 +154,21 @@ sudo ufw allow 2379/tcp
 
 Now enable UFW:
 
+<!-- SPREAD SKIP -->
 ```sh
 sudo ufw enable
 ```
+<!-- SPREAD SKIP END -->
+<!-- SPREAD
+echo "y" | sudo ufw enable
+-->
 
 ## UFW troubleshooting
 
 The [ports-and-services] page has a list of all ports {{product}} uses.
 
 To inspect a failing service you can enable logging:
-
+<!-- SPREAD SKIP -->
 ```sh
 sudo ufw logging on
 ```
@@ -169,7 +190,7 @@ disabling logging:
 ```sh
 sudo ufw logging off
 ```
-
+<!-- SPREAD SKIP END -->
 <!-- LINKS -->
 
 [ports-and-services]: ../../reference/ports-and-services

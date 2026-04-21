@@ -2,7 +2,7 @@
 
 ```{versionadded} release-1.34
 ```
-<!-- SPREAD SUITE: disa_stig_chain -->
+<!-- SPREAD SUITE: snap_clean -->
 
 DISA Security Technical Implementation Guides (STIGs) provide hardening
 guidelines for meeting regulations from the U.S. Government and Department of
@@ -173,11 +173,12 @@ configuration files.
 Bootstrap the first control plane node using the
 example bootstrap configuration file which will apply the relevant Kubernetes 
 STIG recommendations:
-
+<!-- SPREAD SKIP END -->
 ```
 sudo k8s bootstrap --file /var/snap/k8s/common/etc/configurations/disa-stig/bootstrap.yaml
 sudo k8s status --wait-ready
 ```
+<!-- SPREAD SKIP -->
 
 ### Join control plane nodes
 

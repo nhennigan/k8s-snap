@@ -1,6 +1,8 @@
-<!-- SPREAD SKIP -->
+<!-- SPREAD SUITE: snap_clean -->
+
 
 # DISA STIG for {{product}}
+<!-- SPREAD SKIP -->
 
 Security Technical Implementation Guides (STIGs) are developed by the Defense
 Information System Agency (DISA) for the U.S. Department of Defense (DoD).
