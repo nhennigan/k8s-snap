@@ -2,8 +2,6 @@
 
 <!-- SPREAD SUITE: snap_clean -->
 
-<!-- Hi -->
-
 {{product}} is a distribution of Kubernetes which includes all
 the necessary tools and services needed to easily deploy and manage a cluster.
 As the upstream Kubernetes does not come with all that is required
@@ -33,9 +31,10 @@ Install the {{product}} `k8s` snap with:
 ```
 
 <!-- SPREAD SKIP END -->
-```
-sudo snap install k8s --classic --channel=1.33-classic/stable
-```
+
+<!-- SPREAD
+sudo snap install k8s --classic --channel=1.35-classic/stable
+-->
 
 This may take a few moments as the snap installs all the necessary Kubernetes
 components for a fully functioning cluster such as the networking, storage, etc.

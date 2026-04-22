@@ -6,25 +6,7 @@ backends:
   multipass:
     type: adhoc
     allocate: |
-      # instance_name="example-multipass-vm"
-      
-      # # Launch only if it doesn't exist to avoid the "already exists" error
-      # if ! multipass info "$instance_name" >/dev/null 2>&1; then
-      #     multipass launch --cpus 4 --disk 10G --memory 8G --name "$instance_name" 24.04
-      # fi
 
-      # PUB_KEY=$(cat ~/.ssh/id_rsa.pub) 
-      # # INJECT YOUR KEY: This ensures the 'ubuntu' user accepts your host's key
-      # multipass exec "$instance_name" -- bash -c "mkdir -p ~/.ssh && chmod 700 ~/.ssh && echo '$PUB_KEY' > ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
-      # # multipass transfer ~/.ssh/id_rsa.pub "$instance_name":.ssh/authorized_keys
-      # # multipass exec "$instance_name" -- bash -c "chmod 600 ~/.ssh/authorized_keys"
-
-      # # Get the IP
-      # ip=$(multipass info --format csv "$instance_name" | tail -1 | cut -d\, -f3)
-      
-      # # Use the 'ubuntu' user which the log shows is already working with keys
-      # # This ensures Spread and Multipass are 'in sync'
-      # ADDRESS "$ip"
       multipass_image=24.04
       instance_name="example-multipass-vm"
 
@@ -45,10 +27,6 @@ backends:
         fi"
       multipass exec "$instance_name" -- \
         sudo systemctl restart ssh
-
-      # multipass exec "$instance_name" -- bash -c "mkdir -p ~/.ssh && chmod 700 ~/.ssh"
-      # multipass transfer ~/.ssh/id_rsa.pub "$instance_name":.ssh/authorized_keys
-      # multipass exec "$instance_name" -- bash -c "chmod 600 ~/.ssh/authorized_keys"
 
       # Get the IP from the instance
       ip=$(multipass info --format csv "$instance_name" | tail -1 | cut -d\, -f3)

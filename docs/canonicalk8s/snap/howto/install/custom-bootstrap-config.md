@@ -14,7 +14,7 @@ available configuration options and their defaults.
 
 <!-- SPREAD SKIP -->
 
-```yaml 
+```{note}
 Most of these configuration options are set during the initial bootstrapping
 and cannot be modified afterward. Runtime changes may be unsupported and
 could require deploying a new cluster. Refer to the reference page to
@@ -33,13 +33,13 @@ sudo snap install k8s --classic --channel=1.33-classic/stable
 -->
 
 <!-- SPREAD SKIP -->
-```sh
+```
 sudo k8s bootstrap --timeout 10m --interactive
 ```
 
 Here is an example custom configuration:
 
-```md
+```
 Which features would you like to enable? (network, dns, gateway, ingress, local-storage, load-balancer) [network, dns, gateway, local-storage]: network,ingress,dns
 Please set the Pod CIDR: [10.1.0.0/16]: 10.1.0.0/16,fd01::/108
 Please set the Service CIDR: [10.152.183.0/24]: 10.152.183.0/24,fd98::/108
@@ -47,7 +47,7 @@ Please set the Service CIDR: [10.152.183.0/24]: 10.152.183.0/24,fd98::/108
 
 The expected output shows your node's ip that will differ from this example:
 
-```csv
+```
 Bootstrapping the cluster. This may take a few seconds, please wait.
 Bootstrapped a new Kubernetes cluster with node address "192.122.3.111:6400".
 The node will be 'Ready' to host workloads after the CNI is deployed successfully.
@@ -58,7 +58,7 @@ The node will be 'Ready' to host workloads after the CNI is deployed successfull
 If your deployment requires a more fine-tuned configuration, use the bootstrap
 configuration file.
 
-```rb { note= }
+``` {note}
 When using the custom configuration file on bootstrap, all features including
 network, dns, gateway, ingress, load-balancer and local-storage are disabled
 by default.
@@ -80,7 +80,7 @@ EOF
 Then, apply the bootstrap configuration file:
 
 <!-- SPREAD SKIP -->
-```sh
+```
 sudo k8s bootstrap --file /path/to/bootstrap.yaml
 ```
 <!-- SPREAD SKIP END -->
@@ -92,7 +92,7 @@ sudo k8s bootstrap --file bootstrap.yaml
 
 To verify any changes to the built-in features run:
 
-```sh
+```
 sudo k8s status
 ```
 
