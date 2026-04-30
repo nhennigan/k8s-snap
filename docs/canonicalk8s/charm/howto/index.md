@@ -85,15 +85,6 @@ Report a security issue <report-security-issue>
 Harden the cluster <hardening>
 ```
 
-## Contribute
-
-Contribute to the {{product}} project! Add to the code, documentation or both!
-
-```{toctree}
-:titlesonly:
-Contribute <contribute>
-```
-
 ---
 
 ## Other documentation types

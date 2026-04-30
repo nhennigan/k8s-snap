@@ -54,6 +54,13 @@ Deploy from Snap package </snap/index.md>
 Deploy with Juju </charm/index.md>
 Deploy with Cluster API </capi/index.md>
 Community </community.md>
+```
+
+```{toctree}
+:hidden:
+:titlesonly:
+:maxdepth: 6
+Contribute </contribute/index.md>
 Release notes </releases/index.md>
 ```
 

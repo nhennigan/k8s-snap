@@ -1,5 +1,13 @@
 # Welcome to the {{product}} community
 
+```{toctree}
+:hidden:
+:titlesonly:
+:maxdepth: 6
+Development <development.md>
+Documentation <documentation.md>
+```
+
 This rapidly growing community is a diverse bunch of people - developers,
 Kubernetes admins, inventors, researchers, students… and we all share the joy
 of a reliable, flexible and secure version of upstream Kubernetes. The
@@ -47,7 +55,7 @@ Our documentation is extremely important to us and is actively maintained by
 the entire team. That doesn't mean that it can't be improved though. Every page
 in the documentation has a "Give Feedback" button on the top right which
 takes you to GitHub to file an issue. For larger contributions, please see
-the [contributing guide].
+the [docs contributing guide].
 
 **Our commitment to you**: Comments are usually read daily and we are really
 grateful for docs improvements.
@@ -67,7 +75,7 @@ the guidelines for participation.
 [canonical-k8s]: https://kubernetes.slack.com/archives/CG1V2CAMB
 [Discourse]: https://discourse.ubuntu.com/c/kubernetes/180
 [bugs]: https://github.com/canonical/k8s-snap/issues
-[contributing guide]: /snap/howto/contribute.md
+[docs contributing guide]: /snap/howto/contribute.md
 [developer guide]: /snap/howto/contribute.md
 [support]: https://ubuntu.com/support
 [GitHub repository]: https://github.com/canonical/k8s-snap
