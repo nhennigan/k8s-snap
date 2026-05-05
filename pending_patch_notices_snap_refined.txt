@@ -1,0 +1,80 @@
+# Pending Patch Notices (Snap)
+# Refined : May 05, 2026
+# Snap    : k8s  (canonical/k8s-snap)
+
+### Version 1.32 ###
+May 5, 2026
+
+- Version bumps
+   - containerd v1.7.30
+   - runc v1.3.3
+   - runc v1.3.4
+- Use etcd learner mode during node join to reduce quorum loss risk while adding or recovering control-plane nodes ([#2515](https://github.com/canonical/k8s-snap/pull/2515)).
+- Address vulnerable Go and Python dependencies in the 1.32 snap to reduce exposure to known security issues ([#2483](https://github.com/canonical/k8s-snap/pull/2483)).
+- Add a documented revert path for failed upgrades so operators can recover more predictably when an upgrade does not complete cleanly ([#2449](https://github.com/canonical/k8s-snap/pull/2449)).
+- Replace grafana-agent guidance with opentelemetry-collector in the observability documentation to reflect the supported integration path ([#2426](https://github.com/canonical/k8s-snap/pull/2426)).
+- Ensure snap services are restarted after a revert so nodes do not remain in a partially recovered state ([#2423](https://github.com/canonical/k8s-snap/pull/2423)).
+- Switch Cilium agent and operator references to static image tags for more predictable upgrades and rollbacks ([#2325](https://github.com/canonical/k8s-snap/pull/2325)).
+- Add a k8s-dqlite deprecation warning during bootstrap so operators are alerted earlier to the datastore transition ([#2340](https://github.com/canonical/k8s-snap/pull/2340)).
+- Add node-join revert handling to improve rollback safety when a join operation fails ([#2337](https://github.com/canonical/k8s-snap/pull/2337)).
+- Disable unsupported volume resize for local storage to avoid failed or misleading resize behavior ([#2248](https://github.com/canonical/k8s-snap/pull/2248)).
+- Fix invalid `iproute2` JSON handling on arm64 nodes to improve reliability of networking-related operations ([#1821](https://github.com/canonical/k8s-snap/pull/1821)).
+- Prevent the feature controller from running on worker nodes to avoid unnecessary reconciliation and instability outside the control plane ([#1938](https://github.com/canonical/k8s-snap/pull/1938)).
+- Sanitize feature gates that are not applicable during configuration so unsupported settings do not trigger unnecessary failures ([#2023](https://github.com/canonical/k8s-snap/pull/2023)).
+
+### Version 1.33 ###
+May 5, 2026
+
+- Version bumps
+   - containerd v1.7.30
+   - Cilium static images v1.17.12
+   - runc v1.3.4
+   - sqlite v3.50.2
+- Use etcd learner mode during node join to reduce quorum loss risk while adding or recovering control-plane nodes ([#2514](https://github.com/canonical/k8s-snap/pull/2514)).
+- Address vulnerable Go and Python dependencies in the 1.33 snap to reduce exposure to known security issues ([#2481](https://github.com/canonical/k8s-snap/pull/2481)).
+- Add a documented revert path for failed upgrades so operators can recover more predictably when an upgrade does not complete cleanly ([#2450](https://github.com/canonical/k8s-snap/pull/2450)).
+- Replace grafana-agent guidance with opentelemetry-collector in the observability documentation to reflect the supported integration path ([#2427](https://github.com/canonical/k8s-snap/pull/2427)).
+- Ensure snap services are restarted after a revert so nodes do not remain in a partially recovered state ([#2424](https://github.com/canonical/k8s-snap/pull/2424)).
+- Add a k8s-dqlite deprecation warning during bootstrap so operators are alerted earlier to the datastore transition ([#2341](https://github.com/canonical/k8s-snap/pull/2341)).
+- Add node-join revert handling to improve rollback safety when a join operation fails ([#2338](https://github.com/canonical/k8s-snap/pull/2338)).
+- Disable unsupported volume resize for local storage to avoid failed or misleading resize behavior ([#2249](https://github.com/canonical/k8s-snap/pull/2249)).
+- Fix invalid `iproute2` JSON handling on arm64 nodes to improve reliability of networking-related operations ([#1822](https://github.com/canonical/k8s-snap/pull/1822)).
+- Harden kube-apiserver TLS cipher suites in line with the Mozilla intermediate profile to improve default transport security ([#1804](https://github.com/canonical/k8s-snap/pull/1804)).
+- Make cluster recovery more robust by tolerating skipped path flags during recovery workflows.
+
+### Version 1.34 ###
+May 5, 2026
+
+- Version bumps
+   - containerd v1.7.30
+   - runc v1.3.4
+   - sqlite v3.50.2
+- Use etcd learner mode during node join to reduce quorum loss risk while adding or recovering control-plane nodes ([#2513](https://github.com/canonical/k8s-snap/pull/2513)).
+- Address vulnerable Go dependencies in the 1.34 snap to reduce exposure to known security issues ([#2482](https://github.com/canonical/k8s-snap/pull/2482)).
+- Add a documented revert path for failed upgrades so operators can recover more predictably when an upgrade does not complete cleanly ([#2451](https://github.com/canonical/k8s-snap/pull/2451)).
+- Replace grafana-agent guidance with opentelemetry-collector in the observability documentation to reflect the supported integration path ([#2428](https://github.com/canonical/k8s-snap/pull/2428)).
+- Ensure snap services are restarted after a revert so nodes do not remain in a partially recovered state ([#2425](https://github.com/canonical/k8s-snap/pull/2425)).
+- Add a k8s-dqlite deprecation warning during bootstrap so operators are alerted earlier to the datastore transition ([#2342](https://github.com/canonical/k8s-snap/pull/2342)).
+- Add node-join revert handling to improve rollback safety when a join operation fails ([#2339](https://github.com/canonical/k8s-snap/pull/2339)).
+- Avoid failing reverts when the snap attempts to return to the same version, reducing unnecessary rollback errors ([#2274](https://github.com/canonical/k8s-snap/pull/2274)).
+- Add the Kubernetes version to node annotations to improve version visibility during cluster inspection and troubleshooting ([#2157](https://github.com/canonical/k8s-snap/pull/2157)).
+- Disable unsupported volume resize for local storage to avoid failed or misleading resize behavior ([#2250](https://github.com/canonical/k8s-snap/pull/2250)).
+- Use current endpoints in k8s-apiserver-proxy so newly discovered API endpoints are handled more reliably ([#1949](https://github.com/canonical/k8s-snap/pull/1949)).
+- Make cluster recovery more robust by tolerating skipped path flags during recovery workflows.
+
+### Version 1.35 ###
+May 5, 2026
+
+- Version bumps
+   - etcd v1.3.6
+   - containerd v2.1.4
+   - containerd v2.1.5
+   - runc v1.3.4
+- Add a documented revert path for failed upgrades so operators can recover more predictably when an upgrade does not complete cleanly ([#2452](https://github.com/canonical/k8s-snap/pull/2452)).
+- Replace grafana-agent guidance with opentelemetry-collector in the observability documentation to reflect the supported integration path ([#2429](https://github.com/canonical/k8s-snap/pull/2429)).
+- Add a k8s-dqlite deprecation notice in the documentation and surface a bootstrap warning so operators are alerted earlier to the datastore transition ([#2326](https://github.com/canonical/k8s-snap/pull/2326)).
+- Add node-join revert handling to improve rollback safety when a join operation fails ([#2327](https://github.com/canonical/k8s-snap/pull/2327)).
+- Fix a containerd plugin initialization race to improve startup reliability on newly started or restarted nodes ([#2311](https://github.com/canonical/k8s-snap/pull/2311)).
+- Avoid failing reverts when the snap attempts to return to the same version, reducing unnecessary rollback errors ([#2275](https://github.com/canonical/k8s-snap/pull/2275)).
+- Update k8sd dependencies to pull in CVE fixes and reduce exposure to known vulnerabilities ([#2253](https://github.com/canonical/k8s-snap/pull/2253)).
+- Disable unsupported volume resize for local storage to avoid failed or misleading resize behavior ([#2251](https://github.com/canonical/k8s-snap/pull/2251)).
