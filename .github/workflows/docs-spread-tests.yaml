@@ -22,8 +22,10 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+          persist-credentials: false
 
       - name: Checkout upstream spread script
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           repository: canonical/operator-workflows
@@ -32,6 +34,7 @@ jobs:
             spread/create_spread_task_file.py
           sparse-checkout-cone-mode: false
           path: workflow-scripts
+          persist-credentials: false
           persist-credentials: false
 
       - name: Set up Python
@@ -44,6 +47,8 @@ jobs:
         shell: bash
         env:
           CHANGED_FILES_INPUT: ${{ inputs.changed_files }}
+        env:
+          CHANGED_FILES_INPUT: ${{ inputs.changed_files }}
         run: |
           set -euo pipefail
 
@@ -54,7 +59,19 @@ jobs:
           mkdir -p tests/spread_generated/{snap_clean,snap_bootstrapped}
 
           changed_files_input="${CHANGED_FILES_INPUT:-}"
+          changed_files_input="${CHANGED_FILES_INPUT:-}"
 
+          # Append the docs/canonicalk8s/ prefix to each changed file and store in an array
+          if [[ -n "$changed_files_input" ]]; then
+            mapfile -t changed_files < <(
+              printf '%s\n' "$changed_files_input" \
+              | tr ' ' '\n' \
+              | sed 's|^|docs/canonicalk8s/|' \
+              || true
+            )
+          else
+            echo "No changed_files input provided; skipping docs spread generation."
+            echo "NO_SUITES=true" >> "$GITHUB_ENV"
           if [[ -z "$changed_files_input" ]]; then
             echo "no_suites=true" >> "$GITHUB_OUTPUT"
             exit 0
