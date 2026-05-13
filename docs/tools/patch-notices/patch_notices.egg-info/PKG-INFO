@@ -1,0 +1,9 @@
+Metadata-Version: 2.4
+Name: patch-notices
+Version: 0.1.0
+Summary: Automated patch-notices updater for Canonical Kubernetes
+Requires-Python: >=3.11
+Requires-Dist: click>=8.1
+Requires-Dist: requests>=2.31
+Requires-Dist: openai>=1.30
+Requires-Dist: rich>=13.7

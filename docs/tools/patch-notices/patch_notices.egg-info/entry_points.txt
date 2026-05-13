@@ -1,0 +1,2 @@
+[console_scripts]
+patch-notices = patch_notices.cli:main

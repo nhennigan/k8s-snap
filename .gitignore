@@ -2,6 +2,11 @@
 /stage/
 /prime/
 
+# patch-notices: local working files, not for commit
+docs/tools/patch-notices/metadata/delta-*.json
+docs/tools/patch-notices/monthly_review.md
+docs/tools/patch-notices/patch-notice-export.md
+
 
 **.snap
 k8s_*.txt

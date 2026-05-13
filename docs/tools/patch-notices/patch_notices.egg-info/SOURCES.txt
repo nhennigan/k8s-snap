@@ -1,0 +1,14 @@
+README.md
+pyproject.toml
+patch_notices/__init__.py
+patch_notices/ai.py
+patch_notices/cli.py
+patch_notices/fetcher.py
+patch_notices/state.py
+patch_notices/workbook.py
+patch_notices.egg-info/PKG-INFO
+patch_notices.egg-info/SOURCES.txt
+patch_notices.egg-info/dependency_links.txt
+patch_notices.egg-info/entry_points.txt
+patch_notices.egg-info/requires.txt
+patch_notices.egg-info/top_level.txt

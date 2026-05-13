@@ -1,0 +1,33 @@
+feat: bump metallb rock to v0.14.9-ck8 (#2557)
+HomayoonAlimohammadi
+
+test(dns): add regression test for CoreDNS propagation to late-joined nodes (#2536)
+HomayoonAlimohammadiktsakalozos
+
+fix: CoreDNS soft topology constraints (#2131)
+louiseschmidtgenktsakalozos
+
+docs: default dns reference page (#2132)
+louiseschmidtgenktsakalozos
+
+feat: coredns rebalancing controller (#2102)
+louiseschmidtgenktsakalozos
+
+feat: scale and schedule coredns (#2098)
+louiseschmidtgenktsakalozos
+
+fix: update log context in NodeLabelController to reflect correct controller name
+HomayoonAlimohammadiktsakalozos
+
+feat: enhance getClusterStatus to check CoreDNS service cluster IP for readiness
+HomayoonAlimohammadiktsakalozos
+
+feat: add ServiceArgsController to manage service argument drift and restart services
+HomayoonAlimohammadiktsakalozos
+
+fix: enhance WatchConfigMap to seed existing ConfigMap and handle errors
+HomayoonAlimohammadiktsakalozos
+
+test: increase feature controller test retry window [release-1.32] (#2528)
+bschimke95
+
