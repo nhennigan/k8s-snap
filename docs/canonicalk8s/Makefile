@@ -45,7 +45,7 @@ help:
 .PHONY: full-help spellcheck-install pa11y-install install run html \
         epub serve clean clean-doc spelling spellcheck linkcheck woke \
         allmetrics pa11y pdf-prep-force pdf-prep pdf vale-install vale \
-		update
+		update _fetch-upstream-script test-docs
 
 full-help: $(VENVDIR)
 	@. $(VENV); $(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
@@ -189,6 +189,35 @@ allmetrics: html
 
 update: install
 	@. $(VENV); .sphinx/update_sp.py
+
+# --------------------------------------------------------------------------
+# Spread docs testing
+# --------------------------------------------------------------------------
+
+REPO_ROOT        := $(shell git -C $(CURDIR) rev-parse --show-toplevel)
+SPREAD_TOOLS_DIR := $(REPO_ROOT)/docs/.spread-tools
+UPSTREAM_SCRIPT  := $(SPREAD_TOOLS_DIR)/create_spread_task_file.py
+UPSTREAM_SCRIPT_URL := https://raw.githubusercontent.com/canonical/operator-workflows/df449f1e3d1b8babbe9df48bbebcff1e58c9fda9/spread/create_spread_task_file.py
+SCENARIOS_FILE   := $(REPO_ROOT)/docs/scenarios.yaml
+BUILD_SCRIPT     := $(REPO_ROOT)/docs/tools/build_spread_task.py
+
+_fetch-upstream-script:
+	@mkdir -p $(SPREAD_TOOLS_DIR)
+	@if [ ! -f $(UPSTREAM_SCRIPT) ]; then \
+		echo "Fetching upstream spread script (pinned commit)..."; \
+		curl -fsSL '$(UPSTREAM_SCRIPT_URL)' -o '$(UPSTREAM_SCRIPT)'; \
+		echo "Downloaded to $(UPSTREAM_SCRIPT)"; \
+	else \
+		echo "Upstream script already cached at $(UPSTREAM_SCRIPT)"; \
+	fi
+
+test-docs: _fetch-upstream-script
+	$(if $(SPREAD_TARGET),,$(error SPREAD_TARGET is required. Usage: make test-docs SPREAD_TARGET=<scenario-name-or-file.md>))
+	@python3 $(BUILD_SCRIPT) \
+		--target "$(SPREAD_TARGET)" \
+		--upstream-script "$(UPSTREAM_SCRIPT)" \
+		--scenarios-file "$(SCENARIOS_FILE)" \
+		--repo-root "$(REPO_ROOT)"
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).

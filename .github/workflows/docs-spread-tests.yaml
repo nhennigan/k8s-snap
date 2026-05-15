@@ -37,6 +37,9 @@ jobs:
         with:
           python-version: "3.x"
 
+      - name: Install Python dependencies
+        run: pip install pyyaml
+
       - name: Set up Go
         uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
@@ -71,14 +74,7 @@ jobs:
             exit 0
           fi
 
-          if [[ ${#changed_files[@]} -eq 0 ]]; then
-            echo "No docs files needing spread tests changed in this PR."
-            echo "NO_SUITES=true" >> "$GITHUB_ENV"
-            exit 0
-          fi
-
           declare -A suites_seen=()
-          generated_any=false
 
           for file in "${changed_files[@]}"; do
             # Look for suite marker in the file like "SPREAD SUITE: snap_clean" to determine which suite to place it in
@@ -113,11 +109,26 @@ jobs:
               "$out_dir/task.yaml"
 
             suites_seen["$suite"]=1
-            generated_any=true
           done
 
-          if [[ "$generated_any" != true ]]; then
-            echo "No docs files with SPREAD SUITE markers changed in this PR."
+          # --- Scenario detection pass ---
+          # Runs unconditionally after the standalone loop, so that scenario-only
+          # pages (which have no SPREAD SUITE marker and are skipped above) still
+          # trigger their scenario chain when changed.
+          python3 docs/tools/build_spread_task.py \
+            --detect \
+            --changed-files "$CHANGED_FILES_INPUT" \
+            --upstream-script workflow-scripts/spread/create_spread_task_file.py \
+            --repo-root .
+
+          # Rescan everything — merges standalone + scenario task dirs into suites_seen
+          while IFS= read -r task_dir; do
+            suite="$(basename "$(dirname "$task_dir")")"
+            suites_seen["$suite"]=1
+          done < <(find tests/spread-generated -name task.yaml -printf '%h\n' 2>/dev/null || true)
+
+          if [[ ${#suites_seen[@]} -eq 0 ]]; then
+            echo "No spread tasks generated (no SPREAD SUITE markers and no triggered scenarios)."
             echo "NO_SUITES=true" >> "$GITHUB_ENV"
             exit 0
           fi

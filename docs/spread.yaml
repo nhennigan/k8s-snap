@@ -23,6 +23,42 @@ backends:
           password: ubuntu
           workers: 1
 
+  multipass:
+    type: adhoc
+    allocate: |
+      multipass_image=24.04
+      instance_name="spread-$(date +%s)-$$"
+
+      # Launch Multipass VM
+      multipass launch --cpus 4 --disk 10G --memory 8G --name "${instance_name}" "${multipass_image}"
+
+      # Enable PasswordAuthentication for root over SSH.
+      multipass exec "$instance_name" -- \
+        sudo sh -c "echo root:root | sudo chpasswd"
+      multipass exec "$instance_name" -- \
+        sudo sh -c \
+        "if [ -d /etc/ssh/sshd_config.d/ ]
+        then
+          echo 'PasswordAuthentication yes' > /etc/ssh/sshd_config.d/10-spread.conf
+          echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config.d/10-spread.conf
+        else
+          sed -i /etc/ssh/sshd_config -E -e 's/^#?PasswordAuthentication.*/PasswordAuthentication yes/' -e 's/^#?PermitRootLogin.*/PermitRootLogin yes/'
+        fi"
+      multipass exec "$instance_name" -- \
+        sudo systemctl restart ssh
+
+      # Get the IP from the instance
+      ip=$(multipass info --format csv "$instance_name" | tail -1 | cut -d\, -f3)
+      ADDRESS "$ip"
+    discard: |
+      instance_name=$(multipass list --format csv | awk -F',' -v ip="$SPREAD_SYSTEM_ADDRESS" '$3==ip {print $1}' || true)
+      [ -n "$instance_name" ] && multipass delete --purge "${instance_name}" || true
+    systems:
+      - ubuntu-24.04-64:
+          username: root
+          password: "root"
+          workers: 1
+
 suites:
   tests/spread-generated/snap_clean/:
     summary: docs tests that run from a clean VM and perform install/bootstrap in-task
@@ -52,3 +88,5 @@ suites:
       sudo rm -rf /var/snap/k8s || true
     systems:
       - ubuntu-24.04-64
+
+

@@ -12,6 +12,7 @@ k8s_*.txt
 
 # ignore docs ephemerals
 
+/docs/.spread-tools/
 /docs/canonicalk8s/_build
 /docs/canonicalk8s/.sphinx/venv/
 /docs/canonicalk8s/.sphinx/warnings.txt
