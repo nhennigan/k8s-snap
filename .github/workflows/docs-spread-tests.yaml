@@ -127,6 +127,28 @@ jobs:
 
           if [[ "$generated_any" != true ]]; then
             echo "no_suites=true" >> "$GITHUB_OUTPUT"
+            suites_seen["$suite"]=1
+          done
+
+          # --- Scenario detection pass ---
+          # Runs unconditionally after the standalone loop, so that scenario-only
+          # pages (which have no SPREAD SUITE marker and are skipped above) still
+          # trigger their scenario chain when changed.
+          python3 docs/tools/build_spread_task.py \
+            --detect \
+            --changed-files "$CHANGED_FILES_INPUT" \
+            --upstream-script workflow-scripts/spread/create_spread_task_file.py \
+            --repo-root .
+
+          # Rescan everything — merges standalone + scenario task dirs into suites_seen
+          while IFS= read -r task_dir; do
+            suite="$(basename "$(dirname "$task_dir")")"
+            suites_seen["$suite"]=1
+          done < <(find tests/spread-generated -name task.yaml -printf '%h\n' 2>/dev/null || true)
+
+          if [[ ${#suites_seen[@]} -eq 0 ]]; then
+            echo "No spread tasks generated (no SPREAD SUITE markers and no triggered scenarios)."
+            echo "NO_SUITES=true" >> "$GITHUB_ENV"
             exit 0
           fi
 

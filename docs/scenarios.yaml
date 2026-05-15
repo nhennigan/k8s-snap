@@ -1,0 +1,7 @@
+scenarios:
+  - name: fips-disa-stig
+    suite: snap_clean
+    pages:
+      - snap/howto/install/fips.md
+      - snap/howto/networking/ufw.md
+      - snap/howto/install/disa-stig.md

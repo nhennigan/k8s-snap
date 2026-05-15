@@ -47,6 +47,8 @@ To generate a compliance audit report (without applying changes):
 sudo usg audit disa_stig
 ```
 
+<!-- SPREAD SKIP -->
+
 ```{attention}
 
 The USG tool in the following command will apply host STIG password rules such 
@@ -56,6 +58,7 @@ passwords to access this machine.
 You can check whether the current account has an empty password by running
 `passwd --status` and looking for "NP" in the second field of the output.
 ```
+<!-- SPREAD SKIP END --> 
 
 To automatically apply the recommended hardening changes:
 
@@ -63,11 +66,24 @@ To automatically apply the recommended hardening changes:
 sudo usg fix disa_stig
 ```
 
+<!-- SPREAD SKIP -->
+
 Reboot to apply the changes:
+
+
 
 ```
 sudo reboot
 ```
+<!-- SPREAD SKIP END --> 
+
+<!-- SPREAD
+if [ ! -f /root/disa ]; then
+    sudo touch /root/disa
+    sync
+    REBOOT
+fi
+-->
 
 After rebooting, you can re-run `sudo usg audit disa_stig` to verify host
 compliance. You may need to create a tailoring file to disable certain rules
@@ -105,7 +121,7 @@ kernel.panic_on_oops=1
 EOF
 sudo sysctl --system
 ```
-
+<!-- SPREAD SKIP -->
 ```{note}
 Ensure that the configuration in `/etc/sysctl.d/99-kubelet.conf` is not
 overridden by another configuration file with higher precedence.
@@ -172,11 +188,12 @@ configuration files.
 Bootstrap the first control plane node using the
 example bootstrap configuration file which will apply the relevant Kubernetes 
 STIG recommendations:
-
+<!-- SPREAD SKIP END -->
 ```
 sudo k8s bootstrap --file /var/snap/k8s/common/etc/configurations/disa-stig/bootstrap.yaml
 sudo k8s status --wait-ready
 ```
+<!-- SPREAD SKIP -->
 
 ### Join control plane nodes
 
@@ -279,3 +296,5 @@ recommendations and details how they apply to {{product}}.
 [DISA STIG configuration files]: /snap/reference/config-files/disa-stig-config.md
 [DISA STIG audit]: /snap/reference/disa-stig-audit.md
 [configuration yaml files]: https://github.com/canonical/k8s-snap/tree/main/k8s/resources/configurations/disa-stig
+
+<!-- SPREAD SKIP END -->

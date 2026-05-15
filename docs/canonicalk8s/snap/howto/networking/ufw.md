@@ -28,6 +28,12 @@ Install Uncomplicated Firewall:
 sudo apt update
 sudo apt install ufw
 ```
+<!-- SPREAD SKIP END -->
+
+<!-- SPREAD
+sudo apt update
+sudo apt install -y ufw
+-->
 
 Verify that UFW is installed:
 
@@ -81,6 +87,7 @@ and changing `DEFAULT_FORWARD_POLICY` to:
 ```
 DEFAULT_FORWARD_POLICY="ACCEPT"
 ```
+
 ````
 
 ````{tab-item} By subnet
@@ -219,7 +226,7 @@ disabling logging:
 ```
 sudo ufw logging off
 ```
-
+<!-- SPREAD SKIP END -->
 <!-- LINKS -->
 
 [ports-and-services]: ../../reference/ports-and-services
