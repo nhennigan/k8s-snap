@@ -49,6 +49,12 @@ Deploy with Cluster API </capi/index.md>
 Community </community.md>
 Release notes </releases/index.md>
 ```
+```{toctree}
+:hidden:
+:titlesonly:
+:maxdepth: 6
+Community Integrations </releases/index.md>
+```
 
 ````{grid} 3
 

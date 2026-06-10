@@ -1,5 +1,11 @@
 # How to use Prometheus with {{product}}
 
+```{note}
+This guide covers a third-party integration (Prometheus). It is not part of
+the core {{product}} distribution and is not covered by Canonical's
+commercial support or long-term support commitments.
+```
+
 Observability is an essential component in any system for understanding,
 managing, and improving its performance and reliability. The main pillars of
 observability are metrics, logs and traces.

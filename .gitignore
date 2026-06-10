@@ -2,6 +2,7 @@
 /stage/
 /prime/
 
+.github/skills
 
 **.snap
 k8s_*.txt

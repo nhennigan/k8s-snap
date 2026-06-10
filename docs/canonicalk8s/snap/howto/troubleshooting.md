@@ -4,6 +4,12 @@ myst:
     description: Troubleshoot and resolve common issues with a Canonical Kubernetes (k8s) snap based cluster in this how-to guide.
 ---
 
+<!-- SPREAD SUITE: snap_bootstrapped -->
+
+<!-- SPREAD
+trap 'rm -f inspection-report-*.tar.gz' EXIT
+-->
+
 # How to troubleshoot {{product}}
 
 Identifying issues in a Kubernetes cluster can be difficult, especially to new
@@ -23,7 +29,14 @@ Verify that the cluster status is ready by running the following command:
 sudo k8s status
 ```
 
+<!-- SPREAD
+# verify: cluster is in a ready state
+sudo k8s status --wait-ready
+-->
+
 You should see a command output similar to the following:
+
+<!-- SPREAD SKIP -->
 
 ```
 cluster status:           ready
@@ -38,6 +51,8 @@ local-storage:            enabled at /var/snap/k8s/common/rawfile-storage
 gateway                   enabled
 ```
 
+<!-- SPREAD SKIP END -->
+
 ### Test the API server health
 
 Verify that the API server is healthy and reachable by running the following
@@ -47,32 +62,63 @@ command on a control plane node:
 sudo k8s kubectl get all
 ```
 
+<!-- SPREAD
+# verify: API server is reachable and lists resources
+sudo k8s kubectl get all | grep -q "service/kubernetes"
+-->
+
 This command lists resources that exist under the default namespace. You should
 see a command output similar to the following if the API server is healthy:
+
+<!-- SPREAD SKIP -->
 
 ```
 NAME                 TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE
 service/kubernetes   ClusterIP   10.152.183.1   <none>        443/TCP   29m
 ```
 
+<!-- SPREAD SKIP END -->
+
 A typical error message may look like this if the API server cannot be reached:
+
+<!-- SPREAD SKIP -->
 
 ```
 The connection to the server 127.0.0.1:6443 was refused - did you specify the right host or port?
 ```
 
+<!-- SPREAD SKIP END -->
+
 A failure can mean that the API server on the particular node is unhealthy.
 Check the status of the API server service:
+
+<!-- SPREAD SKIP -->
 
 ```
 sudo systemctl status snap.k8s.kube-apiserver
 ```
 
+<!-- SPREAD SKIP END -->
+
+<!-- SPREAD
+# verify: kube-apiserver service is active
+sudo systemctl is-active snap.k8s.kube-apiserver
+-->
+
 Access the logs of the API server service by running the following command:
+
+<!-- SPREAD SKIP -->
 
 ```
 sudo journalctl -xe -u snap.k8s.kube-apiserver
 ```
+
+<!-- SPREAD SKIP END -->
+
+<!-- SPREAD
+# verify: kube-apiserver journal has entries (non-hanging check)
+sudo journalctl -u snap.k8s.kube-apiserver --no-pager -n 1 | grep -qv '^$'
+-->
 
 If you are trying to reach the API server from a host that is not a
 control plane node, a failure could mean that:
@@ -97,7 +143,15 @@ status:
 sudo k8s kubectl get nodes
 ```
 
+<!-- SPREAD
+# verify: at least one node is Ready
+source ${SPREAD_PATH}/docs/tools/repeat_checks.sh
+repeat_checks "sudo k8s kubectl get nodes" "Ready"
+-->
+
 You should see a command output similar to the following:
+
+<!-- SPREAD SKIP -->
 
 ```
 NAME     STATUS   ROLES                  AGE     VERSION
@@ -105,6 +159,8 @@ node-1   Ready    control-plane,worker   10m     v1.32.0
 node-2   Ready    control-plane,worker   6m51s   v1.32.0
 node-3   Ready    control-plane,worker   6m21s   v1.32.0
 ```
+
+<!-- SPREAD SKIP END -->
 
 ### Troubleshoot an unhealthy node
 
@@ -132,15 +188,35 @@ Services running only on worker nodes:
 Check the status of these services on the failing node by running the following
 command:
 
+<!-- SPREAD SKIP -->
+
 ```
 sudo systemctl status snap.k8s.<service>
 ```
 
+<!-- SPREAD SKIP END -->
+
 The logs of a failing service can be checked by running the following command:
+
+<!-- SPREAD SKIP -->
 
 ```
 sudo journalctl -xe -u snap.k8s.<service>
 ```
+
+<!-- SPREAD SKIP END -->
+
+<!-- SPREAD
+# verify: core services are active on a bootstrapped single-node cluster
+sudo systemctl is-active snap.k8s.k8sd
+sudo systemctl is-active snap.k8s.kubelet
+sudo systemctl is-active snap.k8s.containerd
+sudo systemctl is-active snap.k8s.kube-proxy
+sudo systemctl is-active snap.k8s.kube-apiserver
+sudo systemctl is-active snap.k8s.kube-controller-manager
+sudo systemctl is-active snap.k8s.kube-scheduler
+sudo systemctl is-active snap.k8s.etcd
+-->
 
 If the issue indicates a problem with the configuration of the services on the
 node, examine the arguments used to run these services.
@@ -156,6 +232,12 @@ Check whether all of the cluster's pods are `Running` and `Ready`:
 sudo k8s kubectl get pods -n kube-system
 ```
 
+<!-- SPREAD
+# verify: pods in kube-system are running
+source ${SPREAD_PATH}/docs/tools/repeat_checks.sh
+repeat_checks "sudo k8s kubectl get pods -n kube-system" "Running"
+-->
+
 The pods in the `kube-system` namespace belong to {{product}} features such as
 `network`. Unhealthy pods could be related to configuration issues or nodes not
 meeting certain requirements.
@@ -164,15 +246,23 @@ meeting certain requirements.
 
 Look at the events on a failing pod by running:
 
+<!-- SPREAD SKIP -->
+
 ```
 sudo k8s kubectl describe pod <pod-name> -n <namespace>
 ```
 
+<!-- SPREAD SKIP END -->
+
 Check the logs on a failing pod by running the following command:
+
+<!-- SPREAD SKIP -->
 
 ```
 sudo k8s kubectl logs <pod-name> -n <namespace>
 ```
+
+<!-- SPREAD SKIP END -->
 
 You can check out the upstream [debug pods documentation][] for more
 information.
@@ -189,11 +279,15 @@ The [kubeconfig file] generated by the `k8s kubectl` CLI cannot be used to
 access the cluster from an external machine. The following error is seen when
 running `kubectl` with the invalid kubeconfig:
 
+<!-- SPREAD SKIP -->
+
 ```
 ...
 E0412 08:36:06.404499  517166 memcache.go:265] couldn't get current server API group list: Get "https://127.0.0.1:6443/api?timeout=32s": dial tcp 127.0.0.1:6443: connect: connection refused
 The connection to the server 127.0.0.1:6443 was refused - did you specify the right host or port?
 ```
+
+<!-- SPREAD SKIP END -->
 
 ````{dropdown} Explanation
 
@@ -220,9 +314,13 @@ This is related to the `kubepods` cgroup not getting the cpuset controller up on
 the kubelet. kubelet needs a feature from cgroup and the kernel may not be set
 up appropriately to provide the cpuset feature.
 
+<!-- SPREAD SKIP -->
+
 ```
 E0125 00:20:56.003890    2172 kubelet.go:1466] "Failed to start ContainerManager" err="failed to initialise top level QOS containers: root container [kubepods] doesn't exist"
 ```
+
+<!-- SPREAD SKIP END -->
 
 ````{dropdown} Explanation
 
@@ -251,6 +349,8 @@ This is in the process of being fixed upstream via
 In the meantime, the best solution is to create a `Delegate=yes` configuration
 in systemd.
 
+<!-- SPREAD SKIP -->
+
 ```bash
 mkdir -p /etc/systemd/system/snap.k8s.kubelet.service.d
 cat /etc/systemd/system/snap.k8s.kubelet.service.d/delegate.conf <<EOF
@@ -259,6 +359,8 @@ Delegate=yes
 EOF
 reboot
 ```
+
+<!-- SPREAD SKIP END -->
 
 ````
 
@@ -286,11 +388,15 @@ you can create a LXD VM for your installation. See
 
 As an alternative, you may specify a custom containerd path like so:
 
+<!-- SPREAD SKIP -->
+
 ```bash
 cat <<EOF | sudo k8s bootstrap --file -
 containerd-base-dir: $containerdBaseDir
 EOF
 ```
+
+<!-- SPREAD SKIP END -->
 
 ````
 
@@ -312,6 +418,8 @@ by looking at the following parameters in `/etc/systemd/journald.conf`:
 We recommend setting the following parameters either by editing the file directly
 or by creating an override file:
 
+<!-- SPREAD SKIP -->
+
 ```bash
 # Limit disk usage
 SystemMaxUse=500M
@@ -323,11 +431,17 @@ MaxRetentionSec=1week
 ForwardToSyslog=no
 ```
 
+<!-- SPREAD SKIP END -->
+
 After making changes, restart the journald service:
+
+<!-- SPREAD SKIP -->
 
 ```
 sudo systemctl restart systemd-journald
 ```
+
+<!-- SPREAD SKIP END -->
 
 ````
 
@@ -381,9 +495,17 @@ cause the same error.
 Configure Cilium to use another tunnel port. Set the annotation `tunnel-port`
 to an appropriate value (the default is 8472).
 
+<!-- SPREAD SKIP -->
+
 ```
-sudo k8s set annotation="k8sd/v1alpha1/cilium/tunnel-port=<PORT-NUMBER>"
+sudo k8s set annotations="k8sd/v1alpha1/cilium/tunnel-port=<PORT-NUMBER>"
 ```
+
+<!-- SPREAD SKIP END -->
+
+<!-- SPREAD 
+sudo k8s set annotations="k8sd/v1alpha1/cilium/tunnel-port=8473"
+-->
 
 Since the Cilium pods are in a failing state, the recreation of the VXLAN
 interface is automatically triggered. Verify the VXLAN interface has come
@@ -392,6 +514,11 @@ up:
 ```
 ip link list type vxlan
 ```
+
+<!-- SPREAD
+# verify: cilium vxlan interface exists (low confidence — only valid if Cilium is in vxlan mode)
+ip link list type vxlan | grep -q "cilium_vxlan"
+-->
 
 It should be named `cilium_vxlan` or something similar.
 
@@ -412,9 +539,13 @@ sudo k8s kubectl get pods -n kube-system
 When deploying {{product}}, the Cilium pods fail to start and reports
 the error:
 
+<!-- SPREAD SKIP -->
+
 ```
 level=error msg="Start failed" error="daemon creation failed: unable to determine direct routing device. Use --direct-routing-device to specify it"
 ```
+
+<!-- SPREAD SKIP END -->
 
 ````{dropdown} Explanation
 This issue was introduced in Cilium 1.15 and has been [reported here]. Both
@@ -438,11 +569,17 @@ restarts—there is no need to set `direct-routing-device` manually.
 Identify the default route used for the cluster. The `route` command is part
 of the net-tools Debian package.
 
+<!-- SPREAD 
+sudo apt install net-tools
+-->
+
 ```
 route
 ```
 
 In this example of deploying {{product}}, the output is as follows:
+
+<!-- SPREAD SKIP -->
 
 ```
 Kernel IP routing table
@@ -450,6 +587,8 @@ Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
 default         _gateway        0.0.0.0         UG    0      0        0 br-ex
 172.27.20.0     0.0.0.0         255.255.254.0   U     0      0        0 br-ex
 ```
+
+<!-- SPREAD SKIP END -->
 
 The `br-ex` interface is the default interface used for this cluster. Apply
 the annotation to the node adding bridge interfaces `br+` to the `devices` list:
@@ -469,11 +608,24 @@ is unique to each pod:
 sudo k8s kubectl get pods -n kube-system
 ```
 
+<!-- SPREAD
+# verify: cilium pods are visible in kube-system
+sudo k8s kubectl get pods -n kube-system | grep -q "cilium"
+-->
+
 Delete the pod:
+
+<!-- SPREAD SKIP -->
 
 ```
 sudo k8s kubectl delete pod cilium-XXXX -n kube-system
 ```
+
+<!-- SPREAD SKIP END -->
+
+<!-- SPREAD
+sudo k8s kubectl delete pod -n kube-system -l app.kubernetes.io/name=cilium-agent
+-->
 
 Verify the Cilium pod has restarted and is now in the running state:
 
@@ -487,6 +639,8 @@ sudo k8s kubectl get pods -n kube-system
 
 A node that is permanently lost cannot be removed with `k8s remove-node`:
 
+<!-- SPREAD SKIP -->
+
 ```sh
 Error: Failed to remove node "t1" from the cluster.
 
@@ -494,6 +648,8 @@ The error was: failed after potential retry: wait check failed: failed to POST /
 failed to delete cluster member t1: Post "https://10.23.245.80:6400/core/internal/hooks/pre-remove?target=t1":
 Unable to connect to "10.23.245.80:6400": dial tcp 10.23.245.80:6400: connect: no route to host
 ```
+
+<!-- SPREAD SKIP END -->
 
 ````{dropdown} Explanation
 By default, `k8s remove-node` attempts to contact the node being removed
@@ -508,9 +664,14 @@ inconsistent with the Kubernetes datastore.
 
 Use the `--force` flag to forcibly remove the node:
 
+<!-- SPREAD SKIP -->
+
 ```
 sudo k8s remove-node --force <node-name>
 ```
+
+<!-- SPREAD SKIP END -->
+
 ````
 
 ## Use the built-in inspection command
@@ -525,6 +686,11 @@ required to collect all the data):
 ```
 sudo k8s inspect
 ```
+
+<!-- SPREAD
+# verify: inspection report tarball was created in the working directory
+ls inspection-report-*.tar.gz
+-->
 
 See the [inspection report reference page] for more details.
 

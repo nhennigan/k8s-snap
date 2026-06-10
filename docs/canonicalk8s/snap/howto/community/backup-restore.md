@@ -1,5 +1,11 @@
 # How to backup and restore a {{product}} cluster
 
+```{note}
+This guide covers a third-party integration (Velero and MinIO). It is not
+part of the core {{product}} distribution and is not covered by Canonical's
+commercial support or long-term support commitments.
+```
+
 [Velero][] is a popular open source backup solution for Kubernetes. Its core
 implementation is a controller running in the cluster that oversees the backup
 and restore operations. The administrator is given a CLI tool to schedule

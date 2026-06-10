@@ -67,22 +67,12 @@ Manage cluster images directly through containerd.
 Manage images <image-management.md>
 ```
 
-## Cluster back up and restore
+## Troubleshooting
+
+Sometimes things go wrong and you need to troubleshoot.
 
 ```{toctree}
 :titlesonly:
-Back up and restore <backup-restore>
-```
-
-## Monitoring and troubleshooting
-
-Sometimes things go wrong and you need to troubleshoot. Having observability
-set up on your cluster can greatly increase the rate at which a problem is
-identified and solved.
-
-```{toctree}
-:titlesonly:
-Set up cluster observability  <observability>
 Recover a cluster after quorum loss <restore-quorum>
 Troubleshoot <troubleshooting>
 Get support <support>
@@ -96,6 +86,18 @@ exposes technologies such as HugePages, CPU pinning, SR-IOV and more.
 ```{toctree}
 :titlesonly:
 Set up Enhanced Platform Awareness <epa>
+```
+
+## Community integrations
+
+The following guides cover third-party tools that can be used alongside
+{{product}}. They are not part of the core {{product}} distribution and
+are not covered by Canonical's commercial support or long-term support
+commitments. These guides are maintained on a best-effort basis.
+
+```{toctree}
+:titlesonly:
+community/index
 ```
 
 ## Contribute
