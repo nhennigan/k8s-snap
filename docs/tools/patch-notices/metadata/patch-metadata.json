@@ -1,16 +1,36 @@
 {
   "tracks": {
-    "1.35-classic/stable": {
-      "last_documented_sha": "b17d6f53f7dca44aa8164704e05aeee6591851ab",
-      "last_documented_date": "06-05-2026"
+    "snap:1.35-classic/stable": {
+      "last_documented_sha": "0f699a465d6f807a84f3f5b931d16a1b083e1242",
+      "last_documented_date": "2026-06-15"
     },
-    "1.34-classic/stable": {
-      "last_documented_sha": "62bc59018fe47b36520a30dea8ba437cac8e1f12",
-      "last_documented_date": "06-05-2026"
+    "snap:1.34-classic/stable": {
+      "last_documented_sha": "5396ca5955235223415da3949d0cd32de323761d",
+      "last_documented_date": "2026-06-15"
     },
-    "1.32-classic/stable": {
-      "last_documented_sha": "f7e7777d522f3fbde9aebd7b29e61d5d56c3dfc7",
-      "last_documented_date": "06-05-2026"
+    "snap:1.33-classic/stable": {
+      "last_documented_sha": "ed5c3e02f958743e9e26bd60b992d701ff09e202",
+      "last_documented_date": "2026-06-15"
+    },
+    "snap:1.32-classic/stable": {
+      "last_documented_sha": "e084bc81a5aeefe0c5ef9a7ffe7b3f05c740d6f4",
+      "last_documented_date": "2026-06-15"
+    },
+    "charm:1.35/stable": {
+      "last_documented_sha": "0f699a465d6f807a84f3f5b931d16a1b083e1242",
+      "last_documented_date": "2026-06-15"
+    },
+    "charm:1.34/stable": {
+      "last_documented_sha": "2c27f24558e978000c4044a9c300e16a9ae29cb6",
+      "last_documented_date": "2026-06-15"
+    },
+    "charm:1.33/stable": {
+      "last_documented_sha": "6b70b9f87123e37ba44b2a50913e3161a85dafdc",
+      "last_documented_date": "2026-06-15"
+    },
+    "charm:1.32/stable": {
+      "last_documented_sha": "9732111d8daf9012312daacb3d1dd816689a4ba3",
+      "last_documented_date": "2026-06-15"
     }
   }
 }

@@ -130,9 +130,14 @@ def export_clean(workbook_path: str, export_path: str) -> None:
     """Write a clean copy of the Included section, stripped of all tags."""
     text = Path(workbook_path).read_text()
     included_section = text.split("## Verification")[0]
-    # Remove sha tags and blockquote hints
+    # Remove sha tags
     clean = SHA_TAG_RE.sub("", included_section)
+    # Remove blockquote editor hints
     clean = re.sub(r"^> .*\n", "", clean, flags=re.MULTILINE)
+    # Remove group hint lines (indented _(Group: ...)_ lines)
+    clean = re.sub(r"^ {2}_\(Group:.*\)_\n", "", clean, flags=re.MULTILINE)
+    # Strip **Category** labels from bullet lines
+    clean = re.sub(r"^(- )\*\*[^*]+\*\* ", r"\1", clean, flags=re.MULTILINE)
     # Collapse multiple blank lines
     clean = re.sub(r"\n{3,}", "\n\n", clean).strip() + "\n"
     Path(export_path).write_text(clean)

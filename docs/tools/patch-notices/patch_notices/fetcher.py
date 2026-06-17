@@ -25,6 +25,8 @@ SNAP_STORE_API = "https://api.snapcraft.io/v2/snaps/info/k8s"
 LAUNCHPAD_API = "https://api.launchpad.net/devel"
 GITHUB_API = "https://api.github.com"
 GITHUB_REPO = "canonical/k8s-snap"
+CHARMHUB_API = "https://api.charmhub.io/v2/charms/info"
+CHARM_GITHUB_REPO = "canonical/k8s-operator"
 
 # Launchpad snap owner/project path — builds live at ~containers/k8s/+snap/<name>
 LP_SNAP_OWNER = "~containers"
@@ -111,7 +113,7 @@ def _launchpad_sha(track: str, revision: int) -> str:
     )
 
 
-def _github_commits(base_sha: str, head_sha: str) -> list[dict[str, Any]]:
+def _github_commits(base_sha: str, head_sha: str, repo: str = GITHUB_REPO) -> list[dict[str, Any]]:
     """Return one entry per commit between *base_sha* and *head_sha*.
 
     Uses a single GitHub compare request. The compare response contains both
@@ -126,7 +128,7 @@ def _github_commits(base_sha: str, head_sha: str) -> list[dict[str, Any]]:
     headers["X-GitHub-Api-Version"] = "2022-11-28"
 
     resp = requests.get(
-        f"{GITHUB_API}/repos/{GITHUB_REPO}/compare/{base_sha}...{head_sha}?per_page=250",
+        f"{GITHUB_API}/repos/{repo}/compare/{base_sha}...{head_sha}?per_page=250",
         headers=headers,
         timeout=30,
     )
@@ -148,7 +150,7 @@ def _github_commits(base_sha: str, head_sha: str) -> list[dict[str, Any]]:
         m = _PR_IN_SUBJECT_RE.search(title)
         pr_number = int(m.group(1)) if m else None
         pr_url = (
-            f"https://github.com/{GITHUB_REPO}/pull/{pr_number}"
+            f"https://github.com/{repo}/pull/{pr_number}"
             if pr_number else None
         )
 
@@ -168,33 +170,117 @@ def _github_commits(base_sha: str, head_sha: str) -> list[dict[str, Any]]:
     return entries
 
 
-def fetch_delta(track: str) -> list[dict[str, Any]]:
-    """Full pipeline: Snap Store -> Launchpad -> GitHub. Returns PR list."""
-    track_state = state.load().get("tracks", {}).get(track, {})
+def _charmhub_revision(track: str) -> int:
+    """Return the current amd64 revision number published on *track* for the k8s charm.
+
+    The track argument should be the full channel name, e.g. '1.32/stable'.
+    """
+    resp = requests.get(
+        f"{CHARMHUB_API}/k8s?fields=channel-map",
+        timeout=15,
+    )
+    resp.raise_for_status()
+    data = resp.json()
+
+    for entry in data.get("channel-map", []):
+        ch = entry["channel"]
+        if (
+            ch.get("name") == track
+            and entry["revision"]["bases"][0].get("architecture") == "amd64"
+        ):
+            return int(entry["revision"]["revision"])
+
+    available = sorted(
+        {e["channel"]["name"] for e in data.get("channel-map", []) if e["channel"].get("risk") == "stable"}
+    )
+    raise ValueError(
+        f"Track '{track}' not found in Charmhub channel-map for 'k8s'. "
+        f"Available stable tracks: {available}"
+    )
+
+
+def _charm_github_sha(revision: int) -> str:
+    """Return the git SHA for *revision* of the k8s charm via its GitHub tag.
+
+    Tags follow the pattern 'k8s-rev{revision}' in canonical/k8s-operator.
+    Tags are lightweight (type 'commit'), so object.sha is the commit SHA directly.
+    """
+    token = os.environ.get("GITHUB_TOKEN")
+    headers = {"Authorization": f"Bearer {token}"} if token else {}
+    headers["Accept"] = "application/vnd.github+json"
+    headers["X-GitHub-Api-Version"] = "2022-11-28"
+
+    tag_name = f"k8s-rev{revision}"
+    resp = requests.get(
+        f"{GITHUB_API}/repos/{CHARM_GITHUB_REPO}/git/refs/tags/{tag_name}",
+        headers=headers,
+        timeout=15,
+    )
+    resp.raise_for_status()
+    data = resp.json()
+    sha = data["object"]["sha"]
+    return sha
+
+
+def fetch_charm_delta(state_key: str) -> list[dict[str, Any]]:
+    """Full charm pipeline: Charmhub -> GitHub tag -> GitHub commits. Returns commit list.
+
+    *state_key* must be in the form 'charm:<channel>', e.g. 'charm:1.32/stable'.
+    Only '/stable' channels are accepted.
+    """
+    if not state_key.startswith("charm:"):
+        raise ValueError(
+            f"state_key must start with 'charm:', got: {state_key!r}"
+        )
+    channel = state_key[len("charm:"):]
+    if not channel.endswith("/stable"):
+        raise ValueError(
+            f"Charm patch notices only support '/stable' channels, got: {channel!r}"
+        )
+
+    track_state = state.load().get("tracks", {}).get(state_key, {})
     base_sha = track_state.get("last_documented_sha")
     if not base_sha:
         raise ValueError(
-            f"No last_documented_sha for track '{track}' in patch-metadata.json. "
+            f"No last_documented_sha for '{state_key}' in patch-metadata.json. "
+            "Add an initial entry before running fetch."
+        )
+
+    revision = _charmhub_revision(channel)
+    head_sha = _charm_github_sha(revision)
+    commits = _github_commits(base_sha, head_sha, repo=CHARM_GITHUB_REPO)
+    _save_delta(state_key, commits)
+    return commits
+
+
+def fetch_delta(track: str) -> list[dict[str, Any]]:
+    """Full pipeline: Snap Store -> Launchpad -> GitHub. Returns PR list."""
+    state_key = f"snap:{track}"
+    track_state = state.load().get("tracks", {}).get(state_key, {})
+    base_sha = track_state.get("last_documented_sha")
+    if not base_sha:
+        raise ValueError(
+            f"No last_documented_sha for '{state_key}' in patch-metadata.json. "
             "Add an initial entry before running fetch."
         )
     revision = _snap_store_revision(track)
     head_sha = _launchpad_sha(track, revision)
     prs = _github_commits(base_sha, head_sha)
-    _save_delta(track, prs)
+    _save_delta(state_key, prs)
     return prs
 
 
 def _save_delta(track: str, prs: list[dict[str, Any]]) -> None:
     """Persist delta to metadata/delta-<safe-track>.json."""
     METADATA_DIR.mkdir(exist_ok=True)
-    safe = track.replace("/", "-")
+    safe = track.replace(":", "-").replace("/", "-")
     path = METADATA_DIR / f"delta-{safe}.json"
     path.write_text(json.dumps(prs, indent=2))
 
 
 def load_delta(track: str) -> list[dict[str, Any]]:
     """Load a previously saved delta from disk."""
-    safe = track.replace("/", "-")
+    safe = track.replace(":", "-").replace("/", "-")
     path = METADATA_DIR / f"delta-{safe}.json"
     if not path.exists():
         raise FileNotFoundError(
