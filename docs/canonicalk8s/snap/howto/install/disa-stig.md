@@ -3,6 +3,8 @@
 ```{versionadded} release-1.34
 ```
 
+<!-- SPREAD SUITE: scenario_only -->
+
 DISA Security Technical Implementation Guides (STIGs) provide hardening
 guidelines for meeting regulations from the U.S. Government and Department of
 Defense (DoD).

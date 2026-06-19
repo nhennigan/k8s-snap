@@ -24,10 +24,13 @@ This guide assumes the following:
 
 Install Uncomplicated Firewall:
 
+<!-- SPREAD SKIP -->
+
 ```
 sudo apt update
 sudo apt install ufw
 ```
+
 <!-- SPREAD SKIP END -->
 
 <!-- SPREAD
@@ -223,6 +226,7 @@ enable within UFW.
 After troubleshooting, keep the resources used by UFW to a minimum by
 disabling logging:
 
+<!-- SPREAD SKIP -->
 ```
 sudo ufw logging off
 ```

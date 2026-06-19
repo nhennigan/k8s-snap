@@ -64,11 +64,9 @@ sudo pro attach <your_pro_token> --no-auto-enable
 
 <!-- SPREAD SKIP END -->
 
-<!-- SPREAD - NOT YET - this will be github env
+<!-- NOT YET - this will be github env
 sudo pro attach $your_pro_token> --no-auto-enable
-
-<!-- SPREAD 
-sudo pro attach <your_pro_token> --no-auto-enable
+--> 
 
 Now, enable the FIPS crypto modules on your host machine:
 
@@ -82,6 +80,7 @@ sudo pro enable fips-updates
 
 <!-- SPREAD 
 echo "y" | sudo pro enable fips-updates
+-->
 
 <!-- SPREAD SKIP -->
 
@@ -107,6 +106,7 @@ if [ ! -f /root/fips ]; then
     sync
     REBOOT
 fi
+-->
 
 Verify your host machine is running in FIPS mode:
 
@@ -148,6 +148,7 @@ Install the {{ product }} snap on your FIPS host:
 
 <!-- SPREAD
 sudo snap install k8s --classic --channel=1.35-classic/stable
+-->
 
 The components will automatically detect if the system is running in FIPS mode
 and activate internal FIPS-related settings accordingly.

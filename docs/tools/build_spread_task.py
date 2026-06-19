@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import argparse
 import re
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -41,6 +42,11 @@ UPSTREAM_SCRIPT_URL = (
     "/df449f1e3d1b8babbe9df48bbebcff1e58c9fda9/spread/create_spread_task_file.py"
 )
 
+# Compiled pattern for the SPREAD SUITE marker used in documentation pages.
+_SUITE_MARKER_RE = re.compile(r"SPREAD SUITE:\s*([a-z_]+)")
+SCENARIO_ONLY_SUITE = "scenario_only"
+SUPPORTED_SUITES = {"snap_bootstrapped", "snap_clean", SCENARIO_ONLY_SUITE}
+
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -57,14 +63,23 @@ def find_repo_root() -> Path:
     return Path(result.stdout.strip())
 
 
-def detect_suite(file_path: Path) -> str:
-    """Return the SPREAD SUITE value declared in a docs file."""
+def detect_suite(file_path: Path) -> str | None:
+    """Return the SPREAD SUITE value declared in a docs file, or None if absent."""
     content = file_path.read_text(encoding="utf-8")
     for line in content.splitlines():
-        match = re.search(r"SPREAD SUITE:\s*([a-z_]+)", line)
+        match = _SUITE_MARKER_RE.search(line)
         if match:
             return match.group(1)
-    raise ValueError(f"No 'SPREAD SUITE:' marker found in {file_path}")
+    return None
+
+
+def validate_suite(suite: str) -> None:
+    """Raise ValueError if *suite* is not supported by the spread workflow."""
+    if suite not in SUPPORTED_SUITES:
+        raise ValueError(
+            f"Unsupported SPREAD SUITE marker '{suite}'. "
+            f"Supported values: {', '.join(sorted(SUPPORTED_SUITES))}"
+        )
 
 
 def run_upstream_script(upstream_script: Path, doc_file: Path, output_task: Path) -> None:
@@ -119,9 +134,11 @@ def write_task(
     output_file.parent.mkdir(parents=True, exist_ok=True)
 
     with output_file.open("w", encoding="utf-8") as f:
-        f.write(f"summary: \"{summary}\"\n\n")
-        f.write(f"kill-timeout: {kill_timeout}\n\n")
-        f.write("execute: |\n")
+        # Use yaml.dump for scalar fields to handle quotes and special characters safely.
+        f.write(yaml.dump({"summary": summary}, default_flow_style=False))
+        f.write("\n")
+        f.write(yaml.dump({"kill-timeout": kill_timeout}, default_flow_style=False))
+        f.write("\nexecute: |\n")
 
         # Preamble
         f.write("  set -e\n")
@@ -131,7 +148,10 @@ def write_task(
 
         # Sections
         for title, commands in sections:
-            f.write(f'  echo "=== Starting Section: {title} ==="\n')
+            # Single-quote the echo argument; escape any literal single quotes in title
+            # to prevent shell expansion of $(...) or backtick sequences.
+            safe_title = title.replace("'", "'\\''")
+            f.write(f"  echo '=== Starting Section: {safe_title} ==='\n")
             f.write('  cd "${SPREAD_PATH:-.}"\n')
             for line in commands:
                 f.write(f"  {line}\n")
@@ -169,6 +189,12 @@ def build_scenario(
         )
 
     suite = scenario["suite"]
+    validate_suite(suite)
+    if suite == SCENARIO_ONLY_SUITE:
+        raise ValueError(
+            f"Scenario '{scenario_name}' cannot use suite '{SCENARIO_ONLY_SUITE}'. "
+            "Use snap_clean or snap_bootstrapped."
+        )
     pages = scenario["pages"]
     docs_root = repo_root / "docs" / "canonicalk8s"
     sections: list[tuple[str, list[str]]] = []
@@ -181,7 +207,9 @@ def build_scenario(
             tmp_task = Path(tmpdir) / page.replace("/", "-")
             run_upstream_script(upstream_script, doc_file, tmp_task)
             commands = extract_execute_block(tmp_task)
-            sections.append((Path(page).name, commands))
+            # Use the full relative page path as the section title to avoid
+            # ambiguity when multiple pages share the same filename.
+            sections.append((page, commands))
 
     output_file = output_dir / suite / f"scenario-{scenario_name}" / "task.yaml"
     write_task(
@@ -206,10 +234,10 @@ def build_standalone(
     output_dir: Path,
     summary: str,
     kill_timeout: str,
-) -> tuple[Path, str]:
+) -> tuple[Path | None, str]:
     """Generate a task.yaml for a single documentation page.
 
-    Returns (output_file, suite_name).
+    Returns (output_file, suite_name), or (None, "") if the page should be skipped.
     """
     if not doc_path.is_absolute():
         # Accept paths relative to repo root or relative to docs/canonicalk8s/
@@ -218,13 +246,33 @@ def build_standalone(
             candidate = repo_root / "docs" / "canonicalk8s" / doc_path
         doc_path = candidate
 
+    # Resolve symlinks and normalise ../ components before enforcing the repo boundary.
+    doc_path = doc_path.resolve()
+    if not doc_path.is_relative_to(repo_root.resolve()):
+        raise ValueError(
+            f"Refusing to process {doc_path}: path is outside the repository root"
+        )
+
     if not doc_path.is_file():
         raise FileNotFoundError(f"File not found: {doc_path}")
 
     suite = detect_suite(doc_path)
+    if suite is None:
+        print(f"Skipping {doc_path.name} (no SPREAD SUITE marker — not a testable page)")
+        return None, ""
+    validate_suite(suite)
+    if suite == SCENARIO_ONLY_SUITE:
+        print(f"Skipping {doc_path.name} (scenario_only — will only run as part of a scenario chain)")
+        return None, ""
 
     docs_root = repo_root / "docs" / "canonicalk8s"
-    rel = doc_path.relative_to(docs_root)
+    try:
+        rel = doc_path.relative_to(docs_root.resolve())
+    except ValueError:
+        raise ValueError(
+            f"{doc_path} is not under {docs_root}. "
+            "Pass a path relative to docs/canonicalk8s/ or to the repo root."
+        )
     task_name = str(rel.with_suffix("")).replace("/", "-")
 
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -236,7 +284,7 @@ def build_standalone(
     output_file = output_dir / suite / task_name / "task.yaml"
     write_task(
         output_file,
-        summary=summary or f"Standalone: {doc_path.name}",
+        summary=summary or str(rel),
         kill_timeout=kill_timeout,
         sections=sections,
         scenario_mode=False,
@@ -266,10 +314,11 @@ def run_detect(
         print(f"No scenarios file found at {scenarios_file}, skipping scenario detection.")
         return
 
-    # Build the set of changed files with full relative path from repo root
+    # Build the set of changed files with full relative path from repo root.
+    # shlex.split() handles quoted filenames that contain spaces, unlike str.split().
     changed_set = {
         f"docs/canonicalk8s/{p}"
-        for p in changed_files_input.split()
+        for p in shlex.split(changed_files_input)
         if p
     }
     if not changed_set:
@@ -315,13 +364,16 @@ def parse_args() -> argparse.Namespace:
         epilog="""
 examples:
   # scenario mode
-  build_spread_task.py --target fips-disa-stig --upstream-script /path/to/create_spread_task_file.py
+  build_spread_task.py --target fips-disa-stig
 
   # standalone mode
-  build_spread_task.py --target snap/howto/install/fips.md --upstream-script /path/to/create_spread_task_file.py
+  build_spread_task.py --target snap/howto/install/fips.md
 
   # CI detect mode (generates all scenarios triggered by changed files)
-  build_spread_task.py --detect --changed-files "snap/howto/install/fips.md" --upstream-script /path/to/create_spread_task_file.py
+  build_spread_task.py --detect-scenarios "snap/howto/install/fips.md snap/howto/install/disa-stig.md"
+
+  # override upstream script location (e.g. for local use)
+  build_spread_task.py --target fips-disa-stig --upstream-script /path/to/create_spread_task_file.py
 """,
     )
     parser.add_argument(
@@ -333,32 +385,29 @@ examples:
         ),
     )
     parser.add_argument(
-        "--detect",
-        action="store_true",
+        "--detect-scenarios",
+        default=None,
+        metavar="CHANGED_FILES",
         help=(
-            "CI detect mode: read --changed-files and generate chained task.yaml "
-            "for every scenario whose pages intersect the changed set."
-        ),
-    )
-    parser.add_argument(
-        "--changed-files",
-        default="",
-        help=(
-            "Space-delimited docs/canonicalk8s/-relative file list. "
-            "Used with --detect."
+            "(CI use only) Space-delimited docs/canonicalk8s/-relative list of changed files. "
+            "Generates a chained task.yaml for every scenario whose pages intersect the changed set."
         ),
     )
     parser.add_argument(
         "--upstream-script",
-        required=True,
+        required=False,
+        default=None,
         type=Path,
-        help="Path to the upstream create_spread_task_file.py.",
+        help=(
+            "Path to the upstream create_spread_task_file.py "
+            "(default: workflow-scripts/spread/create_spread_task_file.py relative to repo root)."
+        ),
     )
     parser.add_argument(
         "--scenarios-file",
         type=Path,
         default=None,
-        help="Path to scenarios.yaml (default: docs/scenarios.yaml inside repo root).",
+        help="Path to scenarios.yaml (default: docs/tools/scenarios.yaml inside repo root).",
     )
     parser.add_argument(
         "--repo-root",
@@ -388,15 +437,18 @@ examples:
 def main() -> None:
     args = parse_args()
 
-    if not args.detect and not args.target:
-        print("Error: one of --target or --detect is required.", file=sys.stderr)
+    if not args.detect_scenarios and not args.target:
+        print("Error: one of --target or --detect-scenarios is required.", file=sys.stderr)
         sys.exit(1)
 
     # Resolve defaults
     repo_root: Path = args.repo_root or find_repo_root()
-    scenarios_file: Path = args.scenarios_file or repo_root / "docs" / "scenarios.yaml"
-    output_dir: Path = args.output_dir or repo_root / "tests" / "spread-generated"
-    upstream_script: Path = args.upstream_script
+    scenarios_file: Path = args.scenarios_file or repo_root / "docs" / "tools" / "scenarios.yaml"
+    output_dir: Path = args.output_dir or repo_root / "tests" / "spread_generated"
+    upstream_script: Path = (
+        args.upstream_script
+        or repo_root / "workflow-scripts" / "spread" / "create_spread_task_file.py"
+    )
 
     if not upstream_script.is_file():
         print(
@@ -408,9 +460,9 @@ def main() -> None:
         sys.exit(1)
 
     # --- Detect mode (CI) ---
-    if args.detect:
+    if args.detect_scenarios is not None:
         run_detect(
-            changed_files_input=args.changed_files,
+            changed_files_input=args.detect_scenarios,
             scenarios_file=scenarios_file,
             upstream_script=upstream_script,
             repo_root=repo_root,
@@ -448,16 +500,17 @@ def main() -> None:
             summary=args.summary,
             kill_timeout=args.kill_timeout,
         )
+        if output_file is None:
+            return
 
     # Print summary and the spread command
     rel_task_dir = output_file.parent.relative_to(repo_root)
+    # Suite dir is tests/spread_generated/<suite>/ — one level up from the task dir.
+    suite_dir = rel_task_dir.parents[0]
     print(f"\nGenerated: {output_file}")
-    print(f"\nTo run the spread test:")
-    print(f"  cd {repo_root}/docs")
-    print(f"  spread <system>:{rel_task_dir}/")
     print(f"\nFor local testing with multipass:")
     print(f"  cd {repo_root}/docs")
-    print(f"  spread multipass:ubuntu-24.04-64:{rel_task_dir}/")
+    print(f"  spread multipass:ubuntu-24.04-64:{suite_dir}/\n")
 
 
 if __name__ == "__main__":

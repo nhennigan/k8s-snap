@@ -8,8 +8,6 @@ myst:
 
 <!-- SPREAD SUITE: snap_clean -->
 
-<!-- SPREAD SUITE: snap_clean -->
-
 {{product}} is a distribution of Kubernetes which includes all
 the necessary tools and services needed to easily deploy and manage a cluster.
 Upstream Kubernetes does not provide you with a fully functional cluster by 
@@ -108,11 +106,6 @@ source ${SPREAD_PATH}/docs/tools/repeat_checks.sh
 repeat_checks "sudo k8s kubectl get nodes" "Ready"
 -->
 
-<!-- SPREAD
-source ${SPREAD_PATH}/docs/tools/repeat_checks.sh
-repeat_checks "sudo k8s kubectl get nodes" "Ready"
--->
-
 …or to see the running services:
 
 ```
@@ -168,10 +161,6 @@ sudo k8s kubectl get pods
 repeat_checks "sudo k8s kubectl get pods" "Running"
 -->
 
-<!-- SPREAD
-repeat_checks "sudo k8s kubectl get pods" "Running"
--->
-
 This command shows all pods in the default namespace.
 It may take a moment for the pod to be ready and running.
 
@@ -181,7 +170,6 @@ the `-owide` argument so we get more information about the pod:
 
 <!-- SPREAD SKIP -->
 
-```
 ```
 sudo k8s kubectl get pods -owide
 ```
@@ -260,20 +248,12 @@ sudo k8s kubectl get pvc myclaim
 repeat_checks "sudo k8s kubectl get pvc myclaim" "Bound"
 -->
 
-<!-- SPREAD
-repeat_checks "sudo k8s kubectl get pvc myclaim" "Bound"
--->
-
 The persistent volume claim status should be Bound. Now let's inspect the 
 storage-writer-pod:
 
 ```
 sudo k8s kubectl describe pod storage-writer-pod
 ```
-
-<!-- SPREAD
-repeat_checks "sudo k8s kubectl describe pod storage-writer-pod" "Running"
--->
 
 <!-- SPREAD
 repeat_checks "sudo k8s kubectl describe pod storage-writer-pod" "Running"
@@ -294,8 +274,6 @@ Volumes:
 
 <!-- SPREAD SKIP END -->
 
-<!-- SPREAD SKIP END -->
- 
 ## Disable local storage
 
 Begin by removing the pod along with the persistent volume claim:
@@ -321,10 +299,6 @@ sudo k8s disable local-storage
 repeat_checks "sudo k8s disable local-storage" "local-storage disabled."
 -->
 
-<!-- SPREAD
-repeat_checks "sudo k8s disable local-storage" "local-storage disabled."
--->
-
 ## Remove {{product}} (Optional)
 
 If you would like to maintain a snapshot of the `k8s` snap for future
@@ -332,13 +306,10 @@ restoration, simply run :
 
 <!-- SPREAD SKIP -->
 
-
 ```
 sudo snap remove k8s
 ```
 
-
-<!-- SPREAD SKIP END -->
 <!-- SPREAD SKIP END -->
 
 The snapshot is a copy of the user, system and configuration data stored by
