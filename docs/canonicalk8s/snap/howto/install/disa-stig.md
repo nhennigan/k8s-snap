@@ -49,8 +49,6 @@ To generate a compliance audit report (without applying changes):
 sudo usg audit disa_stig
 ```
 
-<!-- SPREAD SKIP -->
-
 ```{attention}
 
 The USG tool in the following command will apply host STIG password rules such 
@@ -60,7 +58,6 @@ passwords to access this machine.
 You can check whether the current account has an empty password by running
 `passwd --status` and looking for "NP" in the second field of the output.
 ```
-<!-- SPREAD SKIP END --> 
 
 To automatically apply the recommended hardening changes:
 
@@ -68,11 +65,9 @@ To automatically apply the recommended hardening changes:
 sudo usg fix disa_stig
 ```
 
-<!-- SPREAD SKIP -->
-
 Reboot to apply the changes:
 
-
+<!-- SPREAD SKIP -->
 
 ```
 sudo reboot
@@ -123,7 +118,7 @@ kernel.panic_on_oops=1
 EOF
 sudo sysctl --system
 ```
-<!-- SPREAD SKIP -->
+
 ```{note}
 Ensure that the configuration in `/etc/sysctl.d/99-kubelet.conf` is not
 overridden by another configuration file with higher precedence.
@@ -190,7 +185,7 @@ configuration files.
 Bootstrap the first control plane node using the
 example bootstrap configuration file which will apply the relevant Kubernetes 
 STIG recommendations:
-<!-- SPREAD SKIP END -->
+
 ```
 sudo k8s bootstrap --file /var/snap/k8s/common/etc/configurations/disa-stig/bootstrap.yaml
 sudo k8s status --wait-ready
@@ -211,10 +206,13 @@ example control plane node join configuration file:
 ```
 sudo k8s join-cluster --file=/var/snap/k8s/common/etc/configurations/disa-stig/control-plane.yaml <join-token>
 ```
+<!-- SPREAD SKIP END -->
 
 ### Join worker nodes
 
 First retrieve a join token from an existing control plane node:
+
+<!-- SPREAD SKIP -->
 
 ```
 sudo k8s get-join-token <joining-node-hostname> --worker
@@ -233,6 +231,8 @@ the SSH service:
 ```
 sudo systemctl disable ssh.service ssh.socket
 ```
+
+<!-- SPREAD SKIP END -->
 
 ```{note}
 According to rule {ref}`242393` and {ref}`242394` Kubernetes worker nodes must not
@@ -298,5 +298,3 @@ recommendations and details how they apply to {{product}}.
 [DISA STIG configuration files]: /snap/reference/config-files/disa-stig-config.md
 [DISA STIG audit]: /snap/reference/disa-stig-audit.md
 [configuration yaml files]: https://github.com/canonical/k8s-snap/tree/main/k8s/resources/configurations/disa-stig
-
-<!-- SPREAD SKIP END -->

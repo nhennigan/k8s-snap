@@ -1,8 +1,13 @@
 # How to install a FIPS compliant Kubernetes cluster
 
-```text { versionadded= }
-
+```{versionadded} release-1.34
 ```
+
+<!-- SPREAD 
+# Tear down FIPS settings on exit
+trap 'sudo pro disable fips-updates --assume-yes; sudo pro detach --assume-yes; sudo rm -f /root/pro /root/enabled /root/fips' EXIT
+# Start doc test
+-->
 
 <!-- SPREAD SUITE: snap_clean -->
 
@@ -19,9 +24,7 @@ This guide assumes the following:
 - You have root or sudo access to the machine
 - Internet access on the machine
 
-<!-- SPREAD SKIP -->
-
-```ini { note= }
+```{note}
 Canonical K8s uses the core22 base snap which includes certified crypto
 libraries from Ubuntu 22.04. Strictly speaking FIPS compliance requires
 deploying on a matching certified kernel (Ubuntu 22.04). In practice auditors
@@ -39,16 +42,18 @@ system.
 
 Ensure that your Ubuntu Pro Client is installed and running at least 27.0:
 
-```sh
+```
 pro version
 ```
+
+<!-- SPREAD 
+pro version | xargs -r -I{} dpkg --compare-versions "{}" ge 27.0
+-->
 
 If you have not installed the [Ubuntu Pro Client](https://documentation.ubuntu.com/pro-client/en/latest/tutorials/basic_commands/#tutorial-commands) yet or have an older version,
 run:
 
-<!-- SPREAD SKIP END -->
-
-```sh
+```
 sudo apt update
 sudo apt install ubuntu-pro-client
 ```
@@ -58,33 +63,41 @@ Canonical Livepatch services, which are not supported with FIPS:
 
 <!-- SPREAD SKIP -->
 
-```sh
+```
 sudo pro attach <your_pro_token> --no-auto-enable
 ```
 
 <!-- SPREAD SKIP END -->
 
-<!-- NOT YET - this will be github env
-sudo pro attach $your_pro_token> --no-auto-enable
+<!-- SPREAD
+if [ ! -f /root/pro ]; then
+    echo "Pro not yet attached"
+    sudo touch /root/pro
+    sync
+    sudo pro attach C12wo2on4vvbA2PysZRQ78PyTHq9Y2 --no-auto-enable
+fi
 --> 
 
 Now, enable the FIPS crypto modules on your host machine:
 
 <!-- SPREAD SKIP -->
 
-```sh
+```
 sudo pro enable fips-updates
 ```
 
 <!-- SPREAD SKIP END -->
 
 <!-- SPREAD 
-echo "y" | sudo pro enable fips-updates
+if [ ! -f /root/enabled ]; then
+    echo "FIPS not yet enabled"
+    sudo touch /root/enabled
+    sync
+    echo "y" | sudo pro enable fips-updates
+fi
 -->
 
-<!-- SPREAD SKIP -->
-
-```sh { note= }
+```{attention}
 If you are deploying a [DISA STIG hardened cluster](disa-stig.md), you can skip
 rebooting here since you will need reboot anyway after running `usg fix
 disa_stig`. `/proc/sys/crypto/fips_enabled` will not update though until after
@@ -93,7 +106,9 @@ rebooting.
 
 Reboot to apply the changes:
 
-```sh
+<!-- SPREAD SKIP -->
+
+```
 sudo reboot
 ```
 
@@ -110,9 +125,13 @@ fi
 
 Verify your host machine is running in FIPS mode:
 
-```sh
+```
 cat /proc/sys/crypto/fips_enabled
 ```
+
+<!-- SPREAD 
+cat /proc/sys/crypto/fips_enabled | grep 1
+-->
 
 If the output is `1`, your host machine is running in FIPS mode.
 
@@ -121,7 +140,7 @@ If the output is `1`, your host machine is running in FIPS mode.
 Install the [core22](https://snapcraft.io/core22) base snap containing the FIPS certified libraries from the
 [`fips-updates` track](https://documentation.ubuntu.com/pro-client/en/latest/howtoguides/enable_fips).
 
-```sh
+```
 sudo snap install core22 --channel=fips-updates/stable
 ```
 
@@ -131,20 +150,20 @@ use the refresh command instead of install.
 
 <!-- SPREAD SKIP -->
 
-```sh
+```
 sudo snap refresh core22 --channel=fips-updates/stable
 ```
+
+<!-- SPREAD SKIP END -->
 
 ## Install {{product}}
 
 Install the {{ product }} snap on your FIPS host:
 
-```html { literalinclude= }
+```{literalinclude} /_parts/install.md
 :start-after: <!-- snap start -->
 :end-before: <!-- snap end -->
 ```
-
-<!-- SPREAD SKIP END -->
 
 <!-- SPREAD
 sudo snap install k8s --classic --channel=1.35-classic/stable
@@ -153,16 +172,14 @@ sudo snap install k8s --classic --channel=1.35-classic/stable
 The components will automatically detect if the system is running in FIPS mode
 and activate internal FIPS-related settings accordingly.
 
-<!-- SPREAD SKIP -->
-
-```sh { note= }
+```{note}
 Each node in the cluster must be installed following these instructions in
 order for the whole cluster to be FIPS compliant.
 ```
 
 ## Next steps
 
-```md { attention= }
+```{attention}
 If you are deploying a DISA STIG hardened cluster, stop here and instead
 continue following the
 [Canonical Kubernetes DISA STIG deployment guide](disa-stig.md)
@@ -172,18 +189,16 @@ configuration file.
 
 If this is the first node in your cluster, you can bootstrap it as usual:
 
-```sh
+```
 sudo k8s bootstrap
 ```
 
 Then you may wait for the node to be ready, by running:
 
-```sh
+```
 sudo k8s status --wait-ready
 ```
 
 Otherwise, you can [add it](/snap/tutorial/add-remove-nodes) to an existing cluster.
 
 <!-- LINKS -->
-
-<!-- SPREAD SKIP END -->
