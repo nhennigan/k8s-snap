@@ -5,3 +5,8 @@ scenarios:
       - snap/howto/install/fips.md
       - snap/howto/networking/ufw.md
       - snap/howto/install/disa-stig.md
+  - name: cis
+    suite: snap_bootstrapped
+    pages:
+      - snap/howto/security/hardening.md
+      - snap/howto/security/cis-assessment.md
