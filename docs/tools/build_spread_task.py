@@ -44,6 +44,9 @@ UPSTREAM_SCRIPT_URL = (
 
 # Compiled pattern for the SPREAD SUITE marker used in documentation pages.
 _SUITE_MARKER_RE = re.compile(r"SPREAD SUITE:\s*([a-z_]+)")
+
+# Matches `trap <expression> EXIT` line (no leading whitespace)
+_TRAP_EXIT_RE = re.compile(r"^trap\s+(.+)\s+EXIT\s*$")
 SCENARIO_ONLY_SUITE = "scenario_only"
 SUPPORTED_SUITES = {"snap_bootstrapped", "snap_clean", SCENARIO_ONLY_SUITE}
 
@@ -119,6 +122,75 @@ def extract_execute_block(task_file: Path) -> list[str]:
 
 
 # ---------------------------------------------------------------------------
+# Trap helpers
+# ---------------------------------------------------------------------------
+
+
+def _extract_trap_body(expression: str) -> str:
+    """Strip the outer quotes from a trap expression and return the raw body.
+
+    The returned string is unquoted and ready to be joined with other bodies
+    before being re-wrapped in a single pair of single-quotes.
+
+    Handles three forms:
+    - Single-quoted:  'cmd1; cmd2'  → cmd1; cmd2
+    - Double-quoted:  "cmd1; cmd2"  → cmd1; cmd2  (interior " escaped)
+    - Unquoted:        cmd1; cmd2   → cmd1; cmd2  (returned as-is)
+    """
+    if expression.startswith("'") and expression.endswith("'"):
+        inner = expression[1:-1]
+        # Normalise any escaped single-quotes that were already present.
+        inner = inner.replace("'\\''", "'")
+        return inner
+    if expression.startswith('"') and expression.endswith('"'):
+        inner = expression[1:-1]
+        return inner
+    return expression
+
+
+def _partition_traps(
+    sections: list[tuple[str, list[str]]],
+) -> tuple[list[tuple[str, list[str]]], list[str]]:
+    """Separate ``trap '...' EXIT`` lines from the rest of each section's commands.
+
+    Returns a tuple of:
+    - cleaned_sections: same structure as *sections* but with trap lines removed.
+    - trap_bodies: the unquoted body from each trap, in the order they were
+      encountered (section 0 first).  Pass to :func:`_build_combined_trap`.
+    """
+    cleaned_sections: list[tuple[str, list[str]]] = []
+    trap_bodies: list[str] = []
+
+    for title, commands in sections:
+        cleaned_commands: list[str] = []
+        for line in commands:
+            match = _TRAP_EXIT_RE.match(line)
+            if match:
+                trap_bodies.append(_extract_trap_body(match.group(1).strip()))
+            else:
+                cleaned_commands.append(line)
+        cleaned_sections.append((title, cleaned_commands))
+
+    return cleaned_sections, trap_bodies
+
+
+def _build_combined_trap(bodies: list[str]) -> str:
+    """Return a single ``trap '...' EXIT`` line combining all *bodies* in LIFO order.
+
+    LIFO (last body first) ensures the most recently set-up state is torn down
+    first — the idiomatic teardown order for shell scripts.
+
+    The returned line has no leading whitespace; the caller is responsible for
+    adding the two-space YAML indent.
+    """
+    combined = "; ".join(reversed(bodies))
+    # Escape any literal single-quotes in the combined body using the standard
+    # shell idiom: end the quote, insert \', reopen: '\''
+    combined = combined.replace("'", "'\\''")
+    return f"trap '{combined}' EXIT"
+
+
+# ---------------------------------------------------------------------------
 # Task writer
 # ---------------------------------------------------------------------------
 
@@ -133,6 +205,10 @@ def write_task(
 ) -> None:
     output_file.parent.mkdir(parents=True, exist_ok=True)
 
+    # Hoist all trap EXIT lines out of sections and merge them into one combined
+    # trap in the preamble so that later traps cannot silently overwrite earlier ones.
+    sections, trap_bodies = _partition_traps(sections)
+
     with output_file.open("w", encoding="utf-8") as f:
         # Use yaml.dump for scalar fields to handle quotes and special characters safely.
         f.write(yaml.dump({"summary": summary}, default_flow_style=False))
@@ -144,6 +220,8 @@ def write_task(
         f.write("  set -e\n")
         if scenario_mode:
             f.write("  export SCENARIO_MODE=true\n")
+        if trap_bodies:
+            f.write(f"  {_build_combined_trap(trap_bodies)}\n")
         f.write("\n")
 
         # Sections

@@ -93,7 +93,7 @@ if [ ! -f /root/enabled ]; then
     echo "FIPS not yet enabled"
     sudo touch /root/enabled
     sync
-    echo "y" | sudo pro enable fips-updates
+    sudo pro enable fips-updates --assume-yes
 fi
 -->
 
@@ -119,7 +119,7 @@ if [ ! -f /root/fips ]; then
     echo "FIPS reboot check"
     sudo touch /root/fips
     sync
-    REBOOT
+    [ "${SCENARIO_MODE}" != "true" ] && REBOOT
 fi
 -->
 
@@ -189,15 +189,32 @@ configuration file.
 
 If this is the first node in your cluster, you can bootstrap it as usual:
 
+<!-- SPREAD SKIP -->
+
 ```
 sudo k8s bootstrap
 ```
 
+<!-- SPREAD SKIP END -->
+
+
+<!-- SPREAD
+[ "${SCENARIO_MODE}" != "true" ] && sudo k8s bootstrap
+-->
+
 Then you may wait for the node to be ready, by running:
+
+<!-- SPREAD SKIP -->
 
 ```
 sudo k8s status --wait-ready
 ```
+
+<!-- SPREAD SKIP END -->
+
+<!-- SPREAD
+[ "${SCENARIO_MODE}" != "true" ] && sudo k8s status --wait-ready --timeout=3m
+-->
 
 Otherwise, you can [add it](/snap/tutorial/add-remove-nodes) to an existing cluster.
 
