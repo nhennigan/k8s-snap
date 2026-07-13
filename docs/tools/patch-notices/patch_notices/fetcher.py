@@ -15,6 +15,7 @@ import json
 import os
 import pathlib
 import re
+import sys
 from typing import Any
 
 import requests
@@ -113,14 +114,34 @@ def _launchpad_sha(track: str, revision: int) -> str:
     )
 
 
+def _github_commit_diff(sha: str, repo: str, headers: dict) -> str:
+    """Return the unified diff for a single commit as a formatted string.
+
+    Makes one API call to GET /repos/{repo}/commits/{sha}. The *headers*
+    dict (auth token, Accept header, API version) is shared with the caller
+    so it does not need to be rebuilt.
+    """
+    resp = requests.get(
+        f"{GITHUB_API}/repos/{repo}/commits/{sha}",
+        headers=headers,
+        timeout=15,
+    )
+    resp.raise_for_status()
+    data = resp.json()
+    return "\n\n".join(
+        f"--- {f['filename']} ---\n{f.get('patch', '(binary or no diff)')}"
+        for f in data.get("files", [])
+    )
+
+
 def _github_commits(base_sha: str, head_sha: str, repo: str = GITHUB_REPO) -> list[dict[str, Any]]:
     """Return one entry per commit between *base_sha* and *head_sha*.
 
-    Uses a single GitHub compare request. The compare response contains both
-    the commit list and the aggregate file patches for the whole range.
+    Uses a GitHub compare request to obtain the commit list, then fetches
+    each commit's individual diff via a dedicated API call so the AI receives
+    focused, accurate context instead of the entire release's aggregate diff.
     PR numbers are extracted from commit message subjects where GitHub embeds
-    them (e.g. "fix: something (#2131)"). No per-commit API calls are made.
-    The aggregate diff is attached to every entry so the AI has full context.
+    them (e.g. "fix: something (#2131)").
     """
     token = os.environ.get("GITHUB_TOKEN")
     headers = {"Authorization": f"Bearer {token}"} if token else {}
@@ -135,14 +156,17 @@ def _github_commits(base_sha: str, head_sha: str, repo: str = GITHUB_REPO) -> li
     resp.raise_for_status()
     data = resp.json()
 
-    # Build aggregate diff string from all changed files in the range (one request, free)
-    aggregate_diff = "\n\n".join(
-        f"--- {f['filename']} ---\n{f.get('patch', '(binary or no diff)')}"
-        for f in data.get("files", [])
-    )
+    commits = data.get("commits", [])
+    if not token and len(commits) > 20:
+        print(
+            f"\u26a0 GITHUB_TOKEN not set \u2014 fetching per-commit diffs for {len(commits)} commits "
+            "against the 60 req/hr unauthenticated rate limit. "
+            "Set GITHUB_TOKEN to avoid throttling.",
+            file=sys.stderr,
+        )
 
     entries: list[dict[str, Any]] = []
-    for commit in data.get("commits", []):
+    for commit in commits:
         msg_lines = commit["commit"]["message"].splitlines()
         title = msg_lines[0]
         body = "\n".join(msg_lines[1:]).strip()
@@ -154,6 +178,8 @@ def _github_commits(base_sha: str, head_sha: str, repo: str = GITHUB_REPO) -> li
             if pr_number else None
         )
 
+        diff = _github_commit_diff(commit["sha"], repo, headers)
+
         entries.append({
             "sha": commit["sha"],
             "title": title,
@@ -164,7 +190,7 @@ def _github_commits(base_sha: str, head_sha: str, repo: str = GITHUB_REPO) -> li
             "date": commit["commit"]["author"]["date"][:10],
             "pr_number": pr_number,
             "pr_url": pr_url,
-            "diff": aggregate_diff,
+            "diff": diff,
         })
 
     return entries

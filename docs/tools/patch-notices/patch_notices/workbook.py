@@ -76,6 +76,8 @@ def write(triage_results: list[dict[str, Any]], output_path: str) -> None:
             summary = r["triage"].get("summary", "")
             lines.append(f"<!-- sha:{sha} -->")
             lines.append(f"- **{category}** {summary}")
+            if r["triage"].get("limited_context"):
+                lines.append("> \u26a0\ufe0f Large diff \u2014 triaged from PR title and description only. Verify before publishing.")
         else:
             # Multi-commit group: one sha tag per commit, one combined bullet
             best = _best_in_group(group)
@@ -90,6 +92,8 @@ def write(triage_results: list[dict[str, Any]], output_path: str) -> None:
                 for r in group
             )
             lines.append(f"  _(Group: {hint} — covers: {covers})_")
+            if any(r["triage"].get("limited_context") for r in group):
+                lines.append("> ⚠️ Large diff on one or more commits — partially triaged from PR title and description only. Verify before publishing.")
     lines.append("")
 
     # -- Verification ------------------------------------------------------
@@ -112,7 +116,8 @@ def write(triage_results: list[dict[str, Any]], output_path: str) -> None:
         reason = r["triage"].get("reason", "")
         sha = r.get('sha', 'unknown')[:8]
         pr = f" PR #{r['pr_number']}" if r.get('pr_number') else ""
-        lines.append(f"- `{sha}`{pr} — {r.get('title')} | _{reason}_")
+        lc_marker = " *(\u26a0\ufe0f large diff \u2014 verify)*" if r["triage"].get("limited_context") else ""
+        lines.append(f"- `{sha}`{pr} \u2014 {r.get('title')} | _{reason}_{lc_marker}")
     lines.append("")
 
     Path(output_path).write_text("\n".join(lines))

@@ -10,7 +10,7 @@ strips the internal tags and writes a clean snippet ready to paste into a PR.
 
 - Python 3.11+
 - An OpenAI API key (or compatible endpoint)
-- Network access to the Snap Store, Launchpad, and GitHub APIs
+- Network access to the Snap Store, Launchpad, Charmhub, and GitHub APIs
 
 ## Setup
 
@@ -23,12 +23,19 @@ pip install -e .
 Set the required environment variable:
 
 ```bash
-# OpenAI directly:
+# GitHub Models (uses your Copilot licence — no additional spend):
+# Create a PAT at https://github.com/settings/tokens (no scopes required)
+export OPENAI_API_KEY=ghp_...
+export OPENAI_BASE_URL=https://models.inference.ai.azure.com
+export OPENAI_MODEL=gpt-4o
+
+# Or OpenAI directly:
 export OPENAI_API_KEY=sk-...
 
-# Or OpenRouter (recommended — supports spend limits):
+# Or OpenRouter (supports spend limits):
 export OPENAI_API_KEY=sk-or-...
 export OPENAI_BASE_URL=https://openrouter.ai/api/v1
+export OPENAI_MODEL=openai/gpt-4o
 ```
 
 Optionally, set a GitHub token to raise the API rate limit from 60 to 5000
@@ -38,12 +45,22 @@ requests/hour (useful if you process a large delta):
 export GITHUB_TOKEN=ghp_...  # optional, read-only public_repo scope
 ```
 
+The grouping pass (Pass 2 of `review`) uses a separate, lighter model. To override the
+default:
+
+```bash
+export OPENAI_GROUP_MODEL=gpt-4o-mini   # default; change if your endpoint lacks this model
+```
+
 ## The three commands
+
+Snap tracks use the format `<version>-classic/stable`, e.g. `1.32-classic/stable`.
+State is stored under the key `snap:1.32-classic/stable` in `patch-metadata.json`.
 
 ### 1. fetch — pull the PR delta
 
 ```bash
-patch-notices fetch --track 1.30/stable
+patch-notices fetch --track 1.32-classic/stable
 ```
 
 Queries the Snap Store for the current stable revision, resolves the build SHA
@@ -54,7 +71,7 @@ Writes a raw delta to `metadata/delta-<track>.json`.
 ### 2. review — run AI triage and open the workbook
 
 ```bash
-patch-notices review --track 1.30/stable
+patch-notices review --track 1.32-classic/stable
 ```
 
 Reads the delta, processes each PR through the AI (diff > body > title),
@@ -72,7 +89,7 @@ sections. The `<!-- sha:... -->` tags are the only thing `finalize` reads.
 ### 3. finalize — close the loop
 
 ```bash
-patch-notices finalize --track 1.30/stable
+patch-notices finalize --track 1.32-classic/stable
 ```
 
 Parses the workbook for `<!-- sha:... -->` tags, updates
@@ -116,9 +133,6 @@ stable at your last patch notice date:
 https://github.com/canonical/k8s-operator/releases/tag/k8s-rev<N>
 ```
 
-Replace the `PLACEHOLDER` values in `patch-metadata.json` with the commit SHA
-from that tag.
-
 ### The three commands
 
 ```bash
@@ -138,4 +152,4 @@ when processing both snap and charm tracks in the same session.
 
 ## See also
 
-[PLAN.md](PLAN.md) — full system specification.
+[PLAN.md](PLAN.md) — original system specification (snap pipeline only; predates charm support).
