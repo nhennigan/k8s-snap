@@ -3,6 +3,10 @@
 
 """Entry point for the patch-notices CLI."""
 
+import json
+from datetime import date as _date
+from pathlib import Path
+
 import click
 from rich.console import Console
 
@@ -141,3 +145,157 @@ def finalize(track: str, source: str, workbook_path: str, export: str):
 
     state.update(state_key, latest_sha)
     console.print(f"[green]State updated.[/green] Latest SHA: {latest_sha}")
+
+
+@main.command()
+@click.option(
+    "--track",
+    required=True,
+    help="Track to process, e.g. '1.35-classic/stable' (snap) or '1.35/stable' (charm).",
+)
+@click.option(
+    "--source",
+    default="snap",
+    show_default=True,
+    type=click.Choice(["snap", "charm"]),
+    help="Source to process: 'snap' (default) or 'charm'.",
+)
+@click.option(
+    "--release-notes",
+    required=True,
+    help="Path to the release notes file to update, e.g. docs/canonicalk8s/releases/snap/1.35.md.",
+)
+@click.option(
+    "--summary-out",
+    required=True,
+    help="Path to write the per-track summary JSON (for use by pr-body).",
+)
+@click.option(
+    "--workbook",
+    "workbook_out",
+    default=None,
+    show_default=True,
+    help="Optional path to also write the full review workbook (Included/Discarded/Verification). "
+         "Useful for local inspection. Does not affect the release notes or state.",
+)
+def generate(track: str, source: str, release_notes: str, summary_out: str, workbook_out: str | None):
+    """Fetch, triage, and write directly to the release notes file.
+
+    The CI entry point for the automated workflow. Combines fetch + review +
+    insert into one command. On success, advances the state bookmark.
+
+    Writes a summary JSON to --summary-out regardless of outcome so that
+    pr-body can include all tracks in the PR body table.
+    """
+    today_dt = _date.today()
+    today = f"{today_dt.strftime('%b')} {today_dt.day}, {today_dt.year}"
+    state_key = f"charm:{track}" if source == "charm" else f"snap:{track}"
+
+    console.print(f"[bold]Generating patch notice:[/bold] {track} [dim](source: {source})[/dim]")
+
+    # --- Fetch ---
+    if source == "charm":
+        delta = fetcher.fetch_charm_delta(state_key)
+    else:
+        delta = fetcher.fetch_delta(track)
+
+    if not delta:
+        summary = {
+            "track": state_key,
+            "status": "up-to-date",
+            "date": today,
+            "included": [],
+            "discarded": [],
+            "limited_context": [],
+        }
+        Path(summary_out).parent.mkdir(parents=True, exist_ok=True)
+        Path(summary_out).write_text(json.dumps(summary, indent=2))
+        console.print(f"[dim]Up to date — no new commits.[/dim]")
+        return
+
+    # --- AI triage ---
+    triage_result = ai.triage(delta, source=source)
+
+    included = [r for r in triage_result if r["triage"]["action"] == "include"]
+    discarded = [r for r in triage_result if r["triage"]["action"] == "discard"]
+
+    if not included:
+        summary = workbook.build_track_summary(triage_result, state_key, today)
+        summary["status"] = "all-discarded"
+        Path(summary_out).parent.mkdir(parents=True, exist_ok=True)
+        Path(summary_out).write_text(json.dumps(summary, indent=2))
+        if workbook_out:
+            workbook.write(triage_result, output_path=workbook_out)
+            console.print(f"[green]Workbook written:[/green] {workbook_out}")
+        latest_sha = delta[-1]["sha"]
+        state.update(state_key, latest_sha)
+        console.print(
+            f"[yellow]All {len(discarded)} commits discarded — bookmark advanced, "
+            "release notes unchanged.[/yellow]"
+        )
+        return
+
+    # --- Insert into release notes (before updating state, so a failure is retryable) ---
+    workbook.insert_patch_notice(release_notes, triage_result, today, source)
+
+    # --- Update state ---
+    latest_sha = delta[-1]["sha"]
+    state.update(state_key, latest_sha)
+
+    # --- Write summary ---
+    summary = workbook.build_track_summary(triage_result, state_key, today)
+    Path(summary_out).parent.mkdir(parents=True, exist_ok=True)
+    Path(summary_out).write_text(json.dumps(summary, indent=2))
+
+    if workbook_out:
+        workbook.write(triage_result, output_path=workbook_out)
+        console.print(f"[green]Workbook written:[/green] {workbook_out}")
+
+    console.print(
+        f"[green]✓[/green] {track} — "
+        f"[green]{len(included)} included[/green], "
+        f"[dim]{len(discarded)} discarded[/dim]"
+        + (f", [yellow]{len(summary['limited_context'])} ⚠️[/yellow]"
+           if summary["limited_context"] else "")
+    )
+
+
+@main.command()
+@click.option(
+    "--summaries-dir",
+    required=True,
+    help="Directory containing per-track summary JSON files written by generate.",
+)
+@click.option(
+    "--output",
+    default="-",
+    show_default=True,
+    help="Output file path. Use '-' to print to stdout (default).",
+)
+def pr_body(summaries_dir: str, output: str):
+    """Generate the PR body markdown from per-track summary JSON files.
+
+    Reads all *.json files in --summaries-dir (produced by generate) and
+    prints a formatted PR body with a summary table and per-track collapsible
+    detail sections.
+    """
+    summary_dir = Path(summaries_dir)
+    if not summary_dir.is_dir():
+        console.print(f"[red]Directory not found:[/red] {summaries_dir}")
+        raise SystemExit(1)
+
+    summaries = [
+        json.loads(f.read_text())
+        for f in sorted(summary_dir.glob("*.json"))
+    ]
+    if not summaries:
+        console.print(f"[red]No summary JSON files found in[/red] {summaries_dir}")
+        raise SystemExit(1)
+
+    body = workbook.build_pr_body(summaries)
+
+    if output == "-":
+        click.echo(body)
+    else:
+        Path(output).write_text(body)
+        console.print(f"[green]PR body written:[/green] {output}")

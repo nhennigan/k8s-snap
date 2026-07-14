@@ -48,12 +48,11 @@ You will be given a git commit: its title, body, and the file diff for that comm
   - *Include*: packaged component updates — Kubernetes, CNI, containerd, runc, Helm,
     k8s-dqlite, Cilium, CoreDNS, MetalLB, metrics-server, and similar shipped deps.
   - *Exclude*: commits that only move track-specific amd64/arm64 snap revision numbers.
-- **Version bumps formatting.** When component updates are present, group them under
-  a `Version bumps` bullet at the top of the included items:
-  - If exact component names and versions are visible in the input, list each as a
-    nested bullet: `- containerd 1.7.x → 1.7.y`
-  - If versions changed but exact values are not visible, use a single
-    `- Version bumps` bullet without inventing details.
+- **Version bumps formatting.** When component updates are present, populate the
+  `components` array (see Output format). List each updated component as
+  `"name new-version"`, e.g. `"containerd v1.7.30"`.
+  Only include components where the new version is visible in the diff.
+  If versions are not visible, set `components` to null and use `summary` instead.
 
 ## Tone
 
@@ -70,6 +69,9 @@ Respond with valid JSON only — no markdown fences:
   "summary": "<starts with a verb, states the fix/feature AND its consequence for the operator, max 120 chars, or null>",
   // Prefer: 'Honor AnnotationDisableSeparateFeatureUpgrades during node joins to prevent unintended upgrades.'
   // Over:   'Honor AnnotationDisableSeparateFeatureUpgrades during node joins.'
+  "components": ["<name> <new-version>", ...] | null,
+  // Only for Component Bump when the new version is visible. e.g. ["containerd v1.7.30", "runc v1.3.4"]
+  // null for all other categories and for Component Bumps where versions are not in the diff.
   "reason": "<one sentence reason if discarded, else null>"
 }
 """
@@ -139,6 +141,8 @@ Respond with valid JSON only — no markdown fences:
   "summary": "<starts with a verb, states the fix/feature AND its consequence for the operator, max 120 chars, or null>",
   // Prefer: 'Honor AnnotationDisableSeparateFeatureUpgrades during node joins to prevent unintended upgrades.'
   // Over:   'Honor AnnotationDisableSeparateFeatureUpgrades during node joins.'
+  "components": null,
+  // Always null for charm triage (charm releases do not use the Version bumps nested format).
   "reason": "<one sentence reason if discarded, else null>"
 }
 """
@@ -287,4 +291,5 @@ def _triage_one(client: openai.OpenAI, pr: dict[str, Any], system_prompt: str) -
     result = json.loads(response.choices[0].message.content)
     result["group_hint"] = None  # populated by _group_pass if applicable
     result["limited_context"] = limited_context
+    result.setdefault("components", None)  # ensure field exists if AI omits it
     return result

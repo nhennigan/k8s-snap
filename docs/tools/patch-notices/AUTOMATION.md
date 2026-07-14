@@ -19,7 +19,7 @@ archaeology, AI triage, and backport orchestration steps.
 
 A new GitHub Actions workflow (`.github/workflows/update-patch-notices.yaml`) runs:
 
-- **Scheduled**: 1st and 15th of every month (`cron: "0 10 1,15 * *"`)
+- **Scheduled**: 1st of every month (`cron: "0 10 1 * *"`)
 - **On demand**: `workflow_dispatch`
 
 The workflow runs on **`main` only** (not on release branches). This mirrors the current
@@ -49,10 +49,13 @@ Human reviews PR body (included / discarded / ⚠️ summary per track)
        │
        ▼ (merge)
 backport.yaml auto-creates 4 backport PRs
-  ├── → release-1.32  (only 1.32 release notes changes)
-  ├── → release-1.33  (1.32 + 1.33 changes)
-  ├── → release-1.34  (1.32 + 1.33 + 1.34 changes)
-  └── → release-1.35  (all changes)
+  ├── → release-1.32  (1.32 release notes + any older versions present in the commit)
+  ├── → release-1.33  (same commit — carries 1.32 + 1.33 file changes)
+  ├── → release-1.34  (same commit — carries 1.32 + 1.33 + 1.34 file changes)
+  └── → release-1.35  (same commit — carries all changed release notes files)
+       │
+       ├─ Note: a release-X.YY branch receives the backport even if version X.YY
+       │  had no new notices, because it still needs the older version file updates.
        │
        ▼
 Each backport PR has a small patch-metadata.json conflict
@@ -75,17 +78,31 @@ exist, it is created at the correct location:
 - **Snap** release notes: after `## Upgrade notes`
 - **Charm** release notes: after `## Also in this release`
 
-Format of each inserted entry:
+Before inserting, the content passes through the same clean pipeline used by `finalize`:
+
+- `<!-- sha:... -->` tags removed
+- `**Category**` labels stripped from bullet lines (same as `export_clean` in `workbook.py`)
+- `⚠️` blockquote callouts removed (reviewer warnings, not for publication)
+- Group hint lines removed
+
+Format of each inserted entry (clean — no internal tags or category labels):
 
 ```markdown
 ## Patch notices
 
 Jul 15, 2026
 
-- **Bug Fix** Fixes ConfigMap watch recovery after resource version expiration,
+- Version bumps
+    - Kubernetes v1.35.3
+    - containerd v1.7.30
+    - runc v1.3.4
+- Fixes ConfigMap watch recovery after resource version expiration,
   preventing stalled controllers on compacted clusters.
-- **Component Bump** Updates containerd to v1.7.30 and runc to v1.3.4.
 ```
+
+Component bumps are always grouped into a single nested "Version bumps" entry.
+All other items are flat bullets beneath it. This matches the existing format in
+`docs/canonicalk8s/releases/snap/1.35.md`.
 
 ---
 
@@ -106,28 +123,40 @@ Jul 15, 2026
 
 ## PR body structure
 
+The table uses the human-readable release version so it's immediately clear which release
+each row corresponds to. The `source` column distinguishes snap from charm.
+
 ```markdown
 ## Patch notices — 2026-07-15
 
-| Track | Status | Included | Discarded | ⚠️ Large diff |
-|---|---|---|---|---|
-| snap:1.35-classic/stable | ✅ Updated | 3 | 4 | 1 |
-| snap:1.34-classic/stable | — Up to date | | | |
-| charm:1.35/stable | ✅ Updated | 2 | 5 | 0 |
-| ... | | | | |
+| Release | Source | Status | Included | Discarded | ⚠️ |
+|---|---|---|---|---|---|
+| 1.35 | snap | ✅ Updated | 3 | 4 | 1 |
+| 1.35 | charm | ✅ Updated | 2 | 5 | 0 |
+| 1.34 | snap | — Up to date | | | |
+| 1.34 | charm | ✅ Updated | 1 | 6 | 0 |
+| 1.33 | snap | ✅ Updated | 2 | 3 | 0 |
+| ... | | | | | |
 
-<details><summary>snap:1.35-classic/stable — 3 included, 4 discarded</summary>
+<details><summary>Snap 1.35 — 3 included, 4 discarded, 1 ⚠️</summary>
 
 ### Included
-- **Bug Fix** Fixes ConfigMap watch recovery after resource version expiration...
-- **Component Bump** Updates containerd to v1.7.30 and runc to v1.3.4.
+- Fixes ConfigMap watch recovery after resource version expiration,
+  preventing stalled controllers on compacted clusters.
+- Updates containerd to v1.7.30 and runc to v1.3.4.
 
-### ⚠️ Large diff — verify manually
+### ⚠️ Large diff — verify manually before approving
 - `abc1234` (PR #2616) — docs: Upgrade sphinx stack to v2
+  _(triaged from PR title and description only)_
 
 ### Discarded
-- `def5678` PR #2595 — fix(test): validate previous_track | internal test change
+- `def5678` PR #2595 — fix(test): validate previous_track
+  _internal test change, no operator impact_
 
+</details>
+
+<details><summary>Charm 1.35 — 2 included, 5 discarded</summary>
+...
 </details>
 ```
 
@@ -210,15 +239,43 @@ structured dict written to the per-track summary JSON by `generate`.
 
 ### 4. New workflow — `.github/workflows/update-patch-notices.yaml`
 
-Key settings:
+All 8 tracks are declared in **one place** — the `TRACKS` env block at the top of the
+workflow. When a new release is cut, add two lines here and nowhere else:
 
 ```yaml
 name: Update patch notices
 
 on:
   schedule:
-    - cron: "0 10 1,15 * *"
+    - cron: "0 10 1 * *"
   workflow_dispatch:
+
+env:
+  OPENAI_API_KEY: ${{ secrets.PATCH_NOTICES_OPENAI_KEY }}
+  OPENAI_BASE_URL: ${{ secrets.PATCH_NOTICES_OPENAI_BASE_URL }}
+  OPENAI_MODEL: gpt-4o
+  OPENAI_GROUP_MODEL: gpt-4o-mini
+  # Use BOT_TOKEN (not github.token) so the created PR triggers CI checks.
+  # github.token-created PRs are blocked from triggering other workflows
+  # by GitHub's anti-infinite-loop protection.
+  GH_TOKEN: ${{ secrets.BOT_TOKEN }}
+  # -----------------------------------------------------------------------
+  # TRACKS — one entry per active release, snap then charm.
+  # To add 1.36 when it ships: append the two lines marked ADD BELOW.
+  # To retire 1.32 at EOL: remove its two lines.
+  # -----------------------------------------------------------------------
+  TRACKS: |
+    snap:1.35-classic/stable docs/canonicalk8s/releases/snap/1.35.md
+    snap:1.34-classic/stable docs/canonicalk8s/releases/snap/1.34.md
+    snap:1.33-classic/stable docs/canonicalk8s/releases/snap/1.33.md
+    snap:1.32-classic/stable docs/canonicalk8s/releases/snap/1.32.md
+    charm:1.35/stable        docs/canonicalk8s/releases/charm/1.35.md
+    charm:1.34/stable        docs/canonicalk8s/releases/charm/1.34.md
+    charm:1.33/stable        docs/canonicalk8s/releases/charm/1.33.md
+    charm:1.32/stable        docs/canonicalk8s/releases/charm/1.32.md
+    # ADD BELOW when 1.36 ships:
+    # snap:1.36-classic/stable docs/canonicalk8s/releases/snap/1.36.md
+    # charm:1.36/stable        docs/canonicalk8s/releases/charm/1.36.md
 
 jobs:
   generate:
@@ -226,22 +283,41 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-
-    env:
-      OPENAI_API_KEY: ${{ secrets.PATCH_NOTICES_OPENAI_KEY }}
-      OPENAI_BASE_URL: ${{ secrets.PATCH_NOTICES_OPENAI_BASE_URL }}
-      OPENAI_MODEL: gpt-4o
-      OPENAI_GROUP_MODEL: gpt-4o-mini
-      GITHUB_TOKEN: ${{ github.token }}
 ```
+
+The job iterates `$TRACKS` in a shell loop, running `patch-notices generate` for each
+line and collecting the `--summary-out` JSON files. The backport labels are derived
+automatically from the track list (every `release-X.YY` present in the tracks list
+gets a corresponding `backport release-X.YY` label).
 
 Uses `peter-evans/create-pull-request@v6` (same action as `update-components.yaml`).
 
 PR settings:
 - Title: `docs: Update patch notices YYYY-MM-DD`
 - Branch: `auto/patch-notices-YYYY-MM-DD`
-- Labels: `backport release-1.32`, `backport release-1.33`, `backport release-1.34`,
-  `backport release-1.35`
+- Labels: auto-derived — `backport release-1.32`, `backport release-1.33`,
+  `backport release-1.34`, `backport release-1.35` (grows automatically as tracks are added)
+
+---
+
+## Rate limits and failure handling
+
+GitHub Models limits `gpt-4o` to ~50 requests/day. A full 8-track run with
+~8 commits per track uses ~72 requests (8 commits × 8 tracks + 8 grouping calls),
+which can exceed the daily limit on a busy fortnight.
+
+**Automatic notification:** GitHub emails the workflow author whenever a scheduled
+workflow fails, so rate limit failures are not silent. No extra setup required.
+
+**Partial failure handling:** If a track fails mid-run, the workflow should collect
+the error and include it in the PR body (or skip PR creation and open a GitHub issue
+if no tracks succeeded). This prevents a silent partial update.
+
+**Mitigation options:**
+- Use OpenRouter instead of GitHub Models — higher rate limits, configurable spend cap
+- Add a retry step with exponential backoff for rate-limit errors (HTTP 429)
+- Switch `OPENAI_GROUP_MODEL` to `gpt-4o-mini` which has a higher daily limit
+  (already the default — ensure the endpoint supports it)
 
 ---
 
@@ -253,6 +329,7 @@ Add as repo secrets:
 |---|---|---|
 | `PATCH_NOTICES_OPENAI_KEY` | AI triage API key | GitHub Models PAT (no scopes needed) or OpenRouter key |
 | `PATCH_NOTICES_OPENAI_BASE_URL` | API endpoint | `https://models.inference.ai.azure.com` or `https://openrouter.ai/api/v1` |
+| `BOT_TOKEN` | PR creation (so CI triggers) | Same bot token used by `update-components.yaml` — no new secret needed |
 
 If using GitHub Models with the repo's built-in `github.token`, no extra secrets are
 needed — set `OPENAI_API_KEY: ${{ github.token }}` and
@@ -291,5 +368,7 @@ needed — set `OPENAI_API_KEY: ${{ github.token }}` and
 - Automated merge of the main PR
 - Removing active tracks from the list when a release reaches end-of-life
   (manual update to the workflow YAML matrix)
-- Mattermost notifications (can be added later via the existing `mattermost.py` pattern)
+- Mattermost failure notifications (GitHub's built-in email covers the baseline;
+  can add Mattermost via the existing `mattermost.py` pattern if richer alerting
+  is needed)
 - Web UI or dashboard for reviewing triage decisions

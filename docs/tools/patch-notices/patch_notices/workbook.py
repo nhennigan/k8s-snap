@@ -18,7 +18,10 @@ Workbook structure
 
 from __future__ import annotations
 
+import json
+import os
 import re
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -74,19 +77,34 @@ def write(triage_results: list[dict[str, Any]], output_path: str) -> None:
             sha = r.get("sha", "unknown")
             category = r["triage"].get("category", "")
             summary = r["triage"].get("summary", "")
+            components = r["triage"].get("components") or []
             lines.append(f"<!-- sha:{sha} -->")
-            lines.append(f"- **{category}** {summary}")
+            if category == "Component Bump" and components:
+                lines.append(f"- **{category}** Version bumps")
+                for component in components:
+                    lines.append(f"    - {component}")
+            else:
+                lines.append(f"- **{category}** {summary}")
             if r["triage"].get("limited_context"):
                 lines.append("> \u26a0\ufe0f Large diff \u2014 triaged from PR title and description only. Verify before publishing.")
         else:
             # Multi-commit group: one sha tag per commit, one combined bullet
             best = _best_in_group(group)
             category = best["triage"].get("category", "")
-            summary = best["triage"].get("summary", "")
             hint = best["triage"].get("group_hint", "")
             for r in group:
                 lines.append(f"<!-- sha:{r.get('sha', 'unknown')} -->")
-            lines.append(f"- **{category}** {summary}")
+            # Merge components from all items in the group for Component Bump groups
+            all_components = []
+            for r in group:
+                all_components.extend(r["triage"].get("components") or [])
+            if category == "Component Bump" and all_components:
+                lines.append(f"- **{category}** Version bumps")
+                for component in all_components:
+                    lines.append(f"    - {component}")
+            else:
+                summary = best["triage"].get("summary", "")
+                lines.append(f"- **{category}** {summary}")
             covers = ", ".join(
                 f"`{r.get('sha','')[:8]}` {r.get('title', '')}"
                 for r in group
@@ -169,3 +187,270 @@ def _sort_by_category(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
             return len(CATEGORY_ORDER)
 
     return sorted(items, key=_key)
+
+
+def _clean_entry_lines(triage_results: list[dict[str, Any]]) -> list[str]:
+    """Return clean bullet lines from triage results (no sha tags, no category labels).
+
+    Produces the same output as export_clean but directly from triage results,
+    without needing a workbook file on disk.
+    """
+    included = [r for r in triage_results if r["triage"]["action"] == "include"]
+    groups = _group_included(_sort_by_category(included))
+    lines: list[str] = []
+    for group in groups:
+        if len(group) == 1:
+            r = group[0]
+            category = r["triage"].get("category", "")
+            summary = r["triage"].get("summary", "")
+            components = r["triage"].get("components") or []
+            if category == "Component Bump" and components:
+                lines.append("- Version bumps")
+                for component in components:
+                    lines.append(f"    - {component}")
+            else:
+                lines.append(f"- {summary}")
+        else:
+            best = _best_in_group(group)
+            category = best["triage"].get("category", "")
+            summary = best["triage"].get("summary", "")
+            all_components: list[str] = []
+            for r in group:
+                all_components.extend(r["triage"].get("components") or [])
+            if category == "Component Bump" and all_components:
+                lines.append("- Version bumps")
+                for component in all_components:
+                    lines.append(f"    - {component}")
+            else:
+                lines.append(f"- {summary}")
+    return lines
+
+
+def insert_patch_notice(
+    release_notes_path: str,
+    triage_results: list[dict[str, Any]],
+    date: str,
+    source: str,
+) -> None:
+    """Insert a new dated patch notice entry into the release notes file.
+
+    If ``## Patch notices`` already exists, the new entry is prepended at the
+    top of that section (newest-first order).  If the section is absent it is
+    created at the canonical location:
+
+    - snap: after ``## Upgrade notes``
+    - charm: after ``## Also in this release``
+
+    Writes the file atomically via a sibling temp file.
+    """
+    entry_lines = _clean_entry_lines(triage_results)
+    if not entry_lines:
+        return
+
+    # Build dated entry block (no trailing blank line — caller adds separation)
+    entry_block = date + "\n\n" + "\n".join(entry_lines)
+
+    path = Path(release_notes_path)
+    text = path.read_text()
+
+    if "## Patch notices" in text:
+        # Insert new entry immediately after the section heading + blank line.
+        # Pattern: the heading followed by one or more blank lines.
+        new_text, n = re.subn(
+            r"(## Patch notices\n\n)",
+            f"\\1{entry_block}\n\n",
+            text,
+            count=1,
+        )
+        if n == 0:
+            raise ValueError(
+                f"Found '## Patch notices' in {release_notes_path} but could not "
+                "match expected heading format '## Patch notices\\n\\n'. "
+                "Check for unexpected whitespace."
+            )
+    else:
+        # Section absent — create it after the anchor heading's content block.
+        anchor = "## Upgrade notes" if source == "snap" else "## Also in this release"
+        if anchor not in text:
+            raise ValueError(
+                f"Cannot find anchor heading '{anchor}' in {release_notes_path}. "
+                "Unable to create '## Patch notices' section."
+            )
+        anchor_pos = text.index(anchor)
+        # Walk past the anchor to find the next ## heading
+        after_anchor = text[anchor_pos + len(anchor):]
+        next_heading = re.search(r"\n##\s", after_anchor)
+        new_section = f"\n## Patch notices\n\n{entry_block}\n"
+        if next_heading:
+            insert_pos = anchor_pos + len(anchor) + next_heading.start()
+            new_text = text[:insert_pos] + new_section + text[insert_pos:]
+        else:
+            new_text = text.rstrip() + new_section + "\n"
+
+    # Atomic write: write to temp then rename
+    fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=".tmp-patch-notice-")
+    try:
+        os.write(fd, new_text.encode())
+        os.close(fd)
+        os.replace(tmp, path)
+    except Exception:
+        os.close(fd)
+        os.unlink(tmp)
+        raise
+
+
+def build_track_summary(
+    triage_results: list[dict[str, Any]],
+    track: str,
+    date: str,
+) -> dict[str, Any]:
+    """Return a per-track summary dict for the pr-body command.
+
+    *track* is the state key, e.g. ``snap:1.35-classic/stable``.
+    """
+    included = [r for r in triage_results if r["triage"]["action"] == "include"]
+    discarded = [r for r in triage_results if r["triage"]["action"] == "discard"]
+    limited = [r for r in included if r["triage"].get("limited_context")]
+
+    return {
+        "track": track,
+        "status": "updated" if included else "all-discarded",
+        "date": date,
+        "included": [
+            {
+                "category": r["triage"].get("category", ""),
+                "summary": r["triage"].get("summary", ""),
+                "components": r["triage"].get("components"),
+            }
+            for r in included
+        ],
+        "discarded": [
+            {
+                "sha": r.get("sha", "")[:8],
+                "pr_number": r.get("pr_number"),
+                "title": r.get("title", ""),
+                "reason": r["triage"].get("reason", ""),
+            }
+            for r in discarded
+        ],
+        "limited_context": [
+            {
+                "sha": r.get("sha", "")[:8],
+                "pr_number": r.get("pr_number"),
+                "title": r.get("title", ""),
+            }
+            for r in limited
+        ],
+    }
+
+
+def build_pr_body(summaries: list[dict[str, Any]]) -> str:
+    """Generate GitHub PR body markdown from a list of per-track summary dicts."""
+    from datetime import date as _date
+
+    today = _date.today().strftime("%Y-%m-%d")
+
+    def _parse_track(track: str) -> tuple[str, str]:
+        """Return (source, human-readable version) from a state key."""
+        source, rest = track.split(":", 1)
+        version = rest.split("/")[0].replace("-classic", "")
+        return source, version
+
+    # Sort: snap before charm, newest version first within each source
+    def _sort_key(s: dict[str, Any]) -> tuple[int, str]:
+        src, ver = _parse_track(s["track"])
+        return (0 if src == "snap" else 1, ver)
+
+    summaries = sorted(summaries, key=_sort_key, reverse=False)
+    # reverse version within source so newest is first
+    snap = sorted([s for s in summaries if s["track"].startswith("snap:")],
+                  key=lambda s: _parse_track(s["track"])[1], reverse=True)
+    charm = sorted([s for s in summaries if s["track"].startswith("charm:")],
+                   key=lambda s: _parse_track(s["track"])[1], reverse=True)
+    summaries = snap + charm
+
+    lines: list[str] = [f"## Patch notices — {today}\n"]
+
+    # Summary table
+    lines.append("| Release | Source | Status | Included | Discarded | ⚠️ |")
+    lines.append("|---|---|---|---|---|---|")
+    for s in summaries:
+        source, version = _parse_track(s["track"])
+        if s["status"] == "updated":
+            status_str = "✅ Updated"
+        elif s["status"] == "up-to-date":
+            status_str = "— Up to date"
+        else:
+            status_str = "— All discarded"
+        n_inc = len(s.get("included", []))
+        n_dis = len(s.get("discarded", []))
+        n_lc = len(s.get("limited_context", []))
+        lines.append(
+            f"| {version} | {source} | {status_str} "
+            f"| {n_inc or ''} | {n_dis or ''} | {n_lc or ''} |"
+        )
+    lines.append("")
+
+    # Collapsible detail blocks — only for tracks with activity
+    for s in summaries:
+        if s["status"] == "up-to-date":
+            continue
+        source, version = _parse_track(s["track"])
+        n_inc = len(s.get("included", []))
+        n_dis = len(s.get("discarded", []))
+        n_lc = len(s.get("limited_context", []))
+        label = f"{source.capitalize()} {version}"
+        parts = []
+        if n_inc:
+            parts.append(f"{n_inc} included")
+        if n_dis:
+            parts.append(f"{n_dis} discarded")
+        if n_lc:
+            parts.append(f"{n_lc} ⚠️")
+        if parts:
+            label += " — " + ", ".join(parts)
+
+        lines.append(f"<details><summary>{label}</summary>")
+        lines.append("")
+
+        if s.get("included"):
+            lines.append("### Included")
+            lines.append("")
+            for item in s["included"]:
+                category = item.get("category", "")
+                summary_text = item.get("summary", "")
+                components = item.get("components") or []
+                if category == "Component Bump" and components:
+                    lines.append("- Version bumps")
+                    for comp in components:
+                        lines.append(f"    - {comp}")
+                else:
+                    lines.append(f"- {summary_text}")
+            lines.append("")
+
+        if s.get("limited_context"):
+            lines.append("### ⚠️ Large diff — verify manually before approving")
+            lines.append("")
+            for item in s["limited_context"]:
+                sha = item.get("sha", "")
+                pr = f" (PR #{item['pr_number']})" if item.get("pr_number") else ""
+                lines.append(f"- `{sha}`{pr} — {item.get('title', '')}")
+                lines.append("  _(triaged from PR title and description only)_")
+            lines.append("")
+
+        if s.get("discarded"):
+            lines.append("### Discarded")
+            lines.append("")
+            for item in s["discarded"]:
+                sha = item.get("sha", "")
+                pr = f" PR #{item['pr_number']}" if item.get("pr_number") else ""
+                reason = item.get("reason", "")
+                lines.append(f"- `{sha}`{pr} — {item.get('title', '')}")
+                if reason:
+                    lines.append(f"  _{reason}_")
+            lines.append("")
+
+        lines.append("</details>")
+        lines.append("")
+
+    return "\n".join(lines)
