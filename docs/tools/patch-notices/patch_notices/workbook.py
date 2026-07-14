@@ -20,7 +20,10 @@ from __future__ import annotations
 
 import json
 import os
+import json
+import os
 import re
+import tempfile
 import tempfile
 from pathlib import Path
 from typing import Any
@@ -78,7 +81,14 @@ def write(triage_results: list[dict[str, Any]], output_path: str) -> None:
             category = r["triage"].get("category", "")
             summary = r["triage"].get("summary", "")
             components = r["triage"].get("components") or []
+            components = r["triage"].get("components") or []
             lines.append(f"<!-- sha:{sha} -->")
+            if category == "Component Bump" and components:
+                lines.append(f"- **{category}** Version bumps")
+                for component in components:
+                    lines.append(f"    - {component}")
+            else:
+                lines.append(f"- **{category}** {summary}")
             if category == "Component Bump" and components:
                 lines.append(f"- **{category}** Version bumps")
                 for component in components:
@@ -94,6 +104,17 @@ def write(triage_results: list[dict[str, Any]], output_path: str) -> None:
             hint = best["triage"].get("group_hint", "")
             for r in group:
                 lines.append(f"<!-- sha:{r.get('sha', 'unknown')} -->")
+            # Merge components from all items in the group for Component Bump groups
+            all_components = []
+            for r in group:
+                all_components.extend(r["triage"].get("components") or [])
+            if category == "Component Bump" and all_components:
+                lines.append(f"- **{category}** Version bumps")
+                for component in all_components:
+                    lines.append(f"    - {component}")
+            else:
+                summary = best["triage"].get("summary", "")
+                lines.append(f"- **{category}** {summary}")
             # Merge components from all items in the group for Component Bump groups
             all_components = []
             for r in group:
@@ -318,9 +339,6 @@ def build_track_summary(
         "date": date,
         "included": [
             {
-                "sha": r.get("sha", "")[:8],
-                "pr_number": r.get("pr_number"),
-                "pr_url": r.get("pr_url") or r.get("html_url", ""),
                 "category": r["triage"].get("category", ""),
                 "summary": r["triage"].get("summary", ""),
                 "components": r["triage"].get("components"),
@@ -423,17 +441,12 @@ def build_pr_body(summaries: list[dict[str, Any]]) -> str:
                 category = item.get("category", "")
                 summary_text = item.get("summary", "")
                 components = item.get("components") or []
-                sha = item.get("sha", "")
-                pr_number = item.get("pr_number")
-                pr_url = item.get("pr_url", "")
-                ref = f"[`{sha}`]({pr_url})" if pr_url else f"`{sha}`"
-                ref += f" PR #{pr_number}" if pr_number else ""
                 if category == "Component Bump" and components:
-                    lines.append(f"- {ref} — Version bumps")
+                    lines.append("- Version bumps")
                     for comp in components:
                         lines.append(f"    - {comp}")
                 else:
-                    lines.append(f"- {ref} — {summary_text}")
+                    lines.append(f"- {summary_text}")
             lines.append("")
 
         if s.get("limited_context"):
@@ -447,8 +460,7 @@ def build_pr_body(summaries: list[dict[str, Any]]) -> str:
             lines.append("")
 
         if s.get("discarded"):
-            n_dis = len(s["discarded"])
-            lines.append(f"<details><summary>{n_dis} discarded — click to review</summary>")
+            lines.append("### Discarded")
             lines.append("")
             for item in s["discarded"]:
                 sha = item.get("sha", "")
@@ -457,8 +469,6 @@ def build_pr_body(summaries: list[dict[str, Any]]) -> str:
                 lines.append(f"- `{sha}`{pr} — {item.get('title', '')}")
                 if reason:
                     lines.append(f"  _{reason}_")
-            lines.append("")
-            lines.append("</details>")
             lines.append("")
 
         lines.append("</details>")
