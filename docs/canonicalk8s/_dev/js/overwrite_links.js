@@ -1,6 +1,6 @@
 // Replaces rtd-address with new-address in links
 
-const rtd_address = 'documentation.ubuntu.com/canonical-kubernetes';
+const rtd_address = 'canonical-k8s-snap-proxy.readthedocs-hosted.com';
 const new_address = 'ubuntu.com/kubernetes/docs';
 
 function escapeRegExp(value) {
