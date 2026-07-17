@@ -318,6 +318,9 @@ def build_track_summary(
         "date": date,
         "included": [
             {
+                "sha": r.get("sha", "")[:8],
+                "pr_number": r.get("pr_number"),
+                "pr_url": r.get("pr_url") or r.get("html_url", ""),
                 "category": r["triage"].get("category", ""),
                 "summary": r["triage"].get("summary", ""),
                 "components": r["triage"].get("components"),
@@ -420,12 +423,17 @@ def build_pr_body(summaries: list[dict[str, Any]]) -> str:
                 category = item.get("category", "")
                 summary_text = item.get("summary", "")
                 components = item.get("components") or []
+                sha = item.get("sha", "")
+                pr_number = item.get("pr_number")
+                pr_url = item.get("pr_url", "")
+                ref = f"[`{sha}`]({pr_url})" if pr_url else f"`{sha}`"
+                ref += f" PR #{pr_number}" if pr_number else ""
                 if category == "Component Bump" and components:
-                    lines.append("- Version bumps")
+                    lines.append(f"- {ref} — Version bumps")
                     for comp in components:
                         lines.append(f"    - {comp}")
                 else:
-                    lines.append(f"- {summary_text}")
+                    lines.append(f"- {ref} — {summary_text}")
             lines.append("")
 
         if s.get("limited_context"):
@@ -439,7 +447,8 @@ def build_pr_body(summaries: list[dict[str, Any]]) -> str:
             lines.append("")
 
         if s.get("discarded"):
-            lines.append("### Discarded")
+            n_dis = len(s["discarded"])
+            lines.append(f"<details><summary>{n_dis} discarded — click to review</summary>")
             lines.append("")
             for item in s["discarded"]:
                 sha = item.get("sha", "")
@@ -448,6 +457,8 @@ def build_pr_body(summaries: list[dict[str, Any]]) -> str:
                 lines.append(f"- `{sha}`{pr} — {item.get('title', '')}")
                 if reason:
                     lines.append(f"  _{reason}_")
+            lines.append("")
+            lines.append("</details>")
             lines.append("")
 
         lines.append("</details>")
