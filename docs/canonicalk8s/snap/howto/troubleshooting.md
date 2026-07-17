@@ -4,6 +4,8 @@ myst:
     description: Troubleshoot and resolve common issues with a Canonical Kubernetes (k8s) snap based cluster in this how-to guide.
 ---
 
+<!-- SPREAD SUITE: snap_bootstrapped -->
+
 # How to troubleshoot {{product}}
 
 Identifying issues in a Kubernetes cluster can be difficult, especially to new
@@ -23,7 +25,13 @@ Verify that the cluster status is ready by running the following command:
 sudo k8s status
 ```
 
+<!-- SPREAD 
+sudo k8s status | grep "ready"
+-->
+
 You should see a command output similar to the following:
+
+<!-- SPREAD SKIP -->
 
 ```
 cluster status:           ready
@@ -38,6 +46,8 @@ local-storage:            enabled at /var/snap/k8s/common/rawfile-storage
 gateway                   enabled
 ```
 
+<!-- SPREAD SKIP END -->
+
 ### Test the API server health
 
 Verify that the API server is healthy and reachable by running the following
@@ -47,19 +57,29 @@ command on a control plane node:
 sudo k8s kubectl get all
 ```
 
+<!-- SPREAD
+sudo k8s kubectl get all | grep "service/kubernetes"
+-->
+
 This command lists resources that exist under the default namespace. You should
 see a command output similar to the following if the API server is healthy:
+
+<!-- SPREAD SKIP -->
 
 ```
 NAME                 TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE
 service/kubernetes   ClusterIP   10.152.183.1   <none>        443/TCP   29m
 ```
 
+<!-- SPREAD SKIP END -->
+
 A typical error message may look like this if the API server cannot be reached:
 
+<!-- SPREAD SKIP -->
 ```
 The connection to the server 127.0.0.1:6443 was refused - did you specify the right host or port?
 ```
+<!-- SPREAD SKIP END -->
 
 A failure can mean that the API server on the particular node is unhealthy.
 Check the status of the API server service:
@@ -99,12 +119,14 @@ sudo k8s kubectl get nodes
 
 You should see a command output similar to the following:
 
+<!-- SPREAD SKIP -->
 ```
 NAME     STATUS   ROLES                  AGE     VERSION
 node-1   Ready    control-plane,worker   10m     v1.32.0
 node-2   Ready    control-plane,worker   6m51s   v1.32.0
 node-3   Ready    control-plane,worker   6m21s   v1.32.0
 ```
+<!-- SPREAD SKIP END -->
 
 ### Troubleshoot an unhealthy node
 
@@ -404,9 +426,7 @@ sudo k8s kubectl get pods -n kube-system
 ````
 
 <!-- markdownlint-disable -->
-
 ### Cilium pod `unable to determine direct routing device`
-
 <!-- markdownlint-restore -->
 
 When deploying {{product}}, the Cilium pods fail to start and reports

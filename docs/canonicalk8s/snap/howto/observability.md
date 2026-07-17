@@ -2,6 +2,12 @@
 
 <!-- SPREAD SUITE: snap_bootstrapped -->
 
+<!-- SPREAD 
+# Tear down kubeconfig settings on exit
+trap 'rm -f ~/.kube/config' EXIT
+# Start doc test
+-->
+
 Observability is an essential component in any system for understanding,
 managing, and improving its performance and reliability. The main pillars of
 observability are metrics, logs and traces.
