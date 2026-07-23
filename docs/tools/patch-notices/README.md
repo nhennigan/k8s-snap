@@ -2,9 +2,10 @@
 
 Automates the monthly patch-notices update for Canonical Kubernetes.
 
-It pulls the delta of PRs since the last documented commit, runs AI triage,
-and produces a human-editable Markdown workbook. Once approved, `finalize`
-strips the internal tags and writes a clean snippet ready to paste into a PR.
+For manual use, it pulls the PR delta, runs AI triage, and produces a
+human-editable Markdown workbook. Once approved, `finalize` strips the internal
+tags and writes a clean snippet. For CI use, `generate` combines all three steps
+and writes directly into the release notes file.
 
 ## Prerequisites
 
@@ -52,7 +53,7 @@ default:
 export OPENAI_GROUP_MODEL=gpt-4o-mini   # default; change if your endpoint lacks this model
 ```
 
-## The three commands
+## Manual workflow
 
 Snap tracks use the format `<version>-classic/stable`, e.g. `1.32-classic/stable`.
 State is stored under the key `snap:1.32-classic/stable` in `patch-metadata.json`.
@@ -76,7 +77,7 @@ patch-notices review --track 1.32-classic/stable
 
 Reads the delta, processes each PR through the AI (diff > body > title),
 and writes `monthly_review.md` in the current directory.
-Prints a clickable link to the file.
+Prints the path to the written file.
 
 The workbook has three sections:
 - **Included** — benefit-centric summaries tagged `<!-- sha:... -->`
@@ -96,6 +97,13 @@ Parses the workbook for `<!-- sha:... -->` tags, updates
 `metadata/patch-metadata.json` with the latest included SHA and today's date,
 then writes `patch-notice-export.md` — a clean snippet with all internal tags
 and verification noise removed.
+
+If all commits were discarded (no included items), the export file is not
+written but the bookmark is still advanced to the latest delta SHA so the
+next run does not re-process the same commits.
+
+If `fetch` found no new commits at all (empty delta), only the
+`last_documented_date` is updated — the SHA is left unchanged.
 
 ## State file
 
@@ -133,7 +141,7 @@ stable at your last patch notice date:
 https://github.com/canonical/k8s-operator/releases/tag/k8s-rev<N>
 ```
 
-### The three commands
+### Manual workflow commands
 
 ```bash
 # 1. Pull the commit delta from canonical/k8s-operator
@@ -150,6 +158,42 @@ patch-notices finalize --source charm --track 1.32/stable \
 Use `--output` and `--export` to avoid overwriting your snap workbook files
 when processing both snap and charm tracks in the same session.
 
+## Automated workflow (CI)
+
+The `generate` and `pr-body` commands are used by the GitHub Actions workflow
+to process all tracks automatically. See [AUTOMATION.md](AUTOMATION.md) for the
+full architecture.
+
+### generate — fetch, triage, and insert in one step
+
+```bash
+patch-notices generate \
+  --track 1.32-classic/stable \
+  --release-notes docs/canonicalk8s/releases/snap/1.32.md \
+  --summary-out summaries/snap-1.32.json
+```
+
+Combines `fetch` + AI triage + direct insertion into the release notes file.
+Advances the state bookmark on success. Writes a summary JSON to `--summary-out`
+(used by `pr-body`) regardless of outcome.
+
+Use `--workbook <path>` to also write the full Included/Discarded/Verification
+workbook for local inspection — this does not affect the release notes or state.
+
+Works for both snap and charm tracks via `--source charm`.
+
+### pr-body — generate the PR body
+
+```bash
+patch-notices pr-body --summaries-dir summaries/ --output pr-body.md
+```
+
+Reads all `*.json` files in `--summaries-dir` (written by `generate`) and
+produces a formatted PR body with a summary table and per-track collapsible
+detail sections. Use `--output -` (default) to print to stdout.
+
 ## See also
 
 [PLAN.md](PLAN.md) — original system specification (snap pipeline only; predates charm support).
+
+[AUTOMATION.md](AUTOMATION.md) — architecture and PR flow for the automated monthly workflow.

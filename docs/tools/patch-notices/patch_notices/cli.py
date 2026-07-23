@@ -134,14 +134,24 @@ def finalize(track: str, source: str, workbook_path: str, export: str):
         workbook.export_clean(workbook_path, export)
         console.print(f"[green]Clean export written:[/green] {export}")
     else:
-        # All commits were discarded — advance the bookmark to the head of the delta
-        # so the next run doesn't re-process the same commits.
-        delta = fetcher.load_delta(state_key)
-        if not delta:
+        # No included items — either all commits were discarded, or fetch found nothing.
+        try:
+            delta = fetcher.load_delta(state_key)
+        except FileNotFoundError:
             console.print("[red]No delta found. Run `fetch` first.[/red]")
             raise SystemExit(1)
-        latest_sha = delta[-1]["sha"]
-        console.print("[yellow]No included items — advancing bookmark to delta head (nothing exported).[/yellow]")
+        if delta:
+            # Commits were fetched but all discarded — advance to the delta head.
+            latest_sha = delta[-1]["sha"]
+            console.print("[yellow]No included items — advancing bookmark to delta head (nothing exported).[/yellow]")
+        else:
+            # fetch ran but found no new commits — update the date with the existing SHA.
+            existing = state.load().get("tracks", {}).get(state_key, {})
+            latest_sha = existing.get("last_documented_sha")
+            if not latest_sha:
+                console.print("[red]No existing state for this track.[/red]")
+                raise SystemExit(1)
+            console.print("[dim]No new commits — updating date only.[/dim]")
 
     state.update(state_key, latest_sha)
     console.print(f"[green]State updated.[/green] Latest SHA: {latest_sha}")
