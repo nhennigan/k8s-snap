@@ -1,0 +1,150 @@
+# How to assess CIS compliance
+
+<!-- SPREAD SUITE: snap_bootstrapped -->
+
+<!-- SPREAD 
+# Tear down kube bench settings on exit
+trap 'sudo rm -f /usr/local/bin/kube-bench; sudo snap remove kubectl --purge; rm -f ~/.kube/config; rm -rf ~/kube-bench ~/kube-bench-ck8s-cfg' EXIT
+# Start doc test
+-->
+
+CIS Hardening refers to the process of implementing security configurations that
+align with the benchmarks set by the [Center for Internet Security (CIS)].
+Out of the box {{product}} complies with the majority of the recommended
+CIS security configurations. Since implementing all security recommendations
+would come at the expense of compatibility and/or performance we expect
+cluster administrators to follow post-deployment hardening steps based on
+their needs. This guide covers using [kube-bench] to automatically check whether
+your Kubernetes clusters are configured according to the
+[CIS Kubernetes Benchmark].
+
+## Prerequisites
+
+This guide assumes the following:
+
+- You have a bootstrapped {{product}} cluster (see the [getting started] guide)
+- You have root or sudo access to the machine
+- You have reviewed the [post-deployment hardening] guide and have applied the
+  hardening steps that relevant to your use-case
+
+## Assess CIS hardening with kube-bench
+
+Download the latest [kube-bench release] on your Kubernetes nodes. Make sure
+to select the appropriate binary version.
+
+For example, to download the Linux binary, use the following command. Replace
+`KB` by the version listed in the releases page:
+
+```
+KB=8.0
+mkdir kube-bench
+cd kube-bench
+curl -L https://github.com/aquasecurity/kube-bench/releases/download/v0.$KB/kube-bench_0.$KB\_linux_amd64.tar.gz -o kube-bench_0.$KB\_linux_amd64.tar.gz
+```
+
+Extract the downloaded tarball and move the binary to a directory in your PATH:
+
+```
+tar -xvf kube-bench_0.$KB\_linux_amd64.tar.gz
+sudo mv kube-bench /usr/local/bin/
+```
+
+Verify kube-bench installation:
+
+```
+kube-bench version
+```
+
+<!-- SPREAD 
+kube-bench version | grep 0.8.0
+-->
+
+The output should list the version installed.
+
+Install `kubectl` and configure it to interact with the cluster:
+
+```{warning}
+This will override your ~/.kube/config if you already have kubectl installed in your cluster.
+```
+
+```
+sudo snap install kubectl --classic
+mkdir -p ~/.kube/
+sudo k8s kubectl config view --raw > ~/.kube/config
+export KUBECONFIG=~/.kube/config
+```
+
+Get CIS hardening checks applicable for {{product}}:
+
+```
+git clone -b ck8s-etcd https://github.com/canonical/kube-bench.git kube-bench-ck8s-cfg
+```
+
+Test-run kube-bench against {{product}}:
+
+```
+sudo -E kube-bench --version ck8s-cis-1.24 --config-dir ./kube-bench-ck8s-cfg/cfg/ --config ./kube-bench-ck8s-cfg/cfg/config.yaml
+```
+
+Review the warnings detected and address any failing checks you see fit.
+
+<!-- SPREAD SKIP -->
+
+```
+[INFO] 1 Control Plane Security Configuration
+...
+[PASS] 1.1.7 Ensure that the etcd pod specification file permissions are set to 644 or more restrictive (Automated)
+[PASS] 1.1.8 Ensure that the etcd pod specification file ownership is set to root:root (Automated)
+...
+[PASS] 1.1.11 Ensure that the etcd data directory permissions are set to 700 or more restrictive (Automated)
+[PASS] 1.1.12 Ensure that the etcd data directory ownership is set to root:root (Automated)
+...
+== Summary master ==
+55 checks PASS
+0 checks FAIL
+4 checks WARN
+0 checks INFO
+
+[INFO] 3 Control Plane Configuration
+...
+== Summary controlplane ==
+1 checks PASS
+0 checks FAIL
+2 checks WARN
+0 checks INFO
+
+[INFO] 4 Worker Node Security Configuration
+...
+== Summary node ==
+23 checks PASS
+0 checks FAIL
+0 checks WARN
+0 checks INFO
+
+[INFO] 5 Kubernetes Policies
+...
+== Summary policies ==
+0 checks PASS
+0 checks FAIL
+30 checks WARN
+0 checks INFO
+
+== Summary total ==
+79 checks PASS
+0 checks FAIL
+36 checks WARN
+0 checks INFO
+
+```
+
+<!-- TODO: This test will fail without hardening applied. When pages are testing with each other, test 0 checks FAIL -->
+
+<!-- SPREAD SKIP END -->
+
+<!-- LINKS -->
+[Center for Internet Security (CIS)]:https://www.cisecurity.org/
+[kube-bench]:https://aquasecurity.github.io/kube-bench/v0.6.15/
+[CIS Kubernetes Benchmark]:https://www.cisecurity.org/benchmark/kubernetes
+[getting started]: /snap/tutorial/getting-started
+[post-deployment hardening]: hardening.md
+[kube-bench release]: https://github.com/aquasecurity/kube-bench/releases
