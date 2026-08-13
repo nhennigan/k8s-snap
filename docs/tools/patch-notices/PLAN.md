@@ -68,7 +68,7 @@ When the user runs `patch-notices finalize`:
 
 1. Parse the workbook for `<!-- sha:... -->` tags in the Included section.
 2. Update `patch-metadata.json` with the latest included SHA.
-3. Write `patch-notice-export.md` — clean snippet, no tags, no verification
+3. Write `patch_notices_output.md` — clean snippet, no tags, no verification
    noise — ready to paste into a PR.
 
 ## 7. Risks and Notes

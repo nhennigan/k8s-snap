@@ -22,6 +22,8 @@ You will be given a git commit: its title, body, and the file diff for that comm
 
 - **Focus on impact.** Do not repeat the commit subject. Describe the user-facing
   benefit, operational impact, or reason the change matters.
+- **Truth hierarchy.** File diffs > PR body > PR title. Ignore misleading titles when
+  the diff tells a different story.
 - **Filter for user action.** Include: bug fixes, features, security-relevant
   dependency updates, deprecation warnings, operational improvements, and significant
   upgrade or rollback behaviour changes.

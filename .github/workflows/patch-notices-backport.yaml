@@ -1,0 +1,64 @@
+name: Backport patch notices
+
+on:
+  pull_request_target:
+    types: [closed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  backport:
+    name: Backport to ${{ matrix.target }}
+    runs-on: ubuntu-latest
+    if: >
+      github.event.pull_request.merged == true &&
+      startsWith(github.event.pull_request.head.ref, 'auto/patch-notices-')
+    permissions:
+      contents: write
+      pull-requests: write
+    strategy:
+      fail-fast: false
+      matrix:
+        # Add release-X.YY here when a new release branch is cut.
+        # Remove it when the branch reaches EOL.
+        target: [release-1.32, release-1.33, release-1.34, release-1.35]
+
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.BOT_TOKEN }}
+
+      - name: Cherry-pick, drop missing files, open PR
+        env:
+          GH_TOKEN: ${{ secrets.BOT_TOKEN }}
+          TARGET: ${{ matrix.target }}
+          SHA: ${{ github.event.pull_request.merge_commit_sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          git config user.name  "canonical-k8s-bot"
+          git config user.email "k8s-bot@canonical.com"
+
+          BRANCH="backport-patch-notices-${SHA::8}-to-${TARGET}"
+          git checkout -b "$BRANCH" "origin/${TARGET}"
+
+          # Attempt cherry-pick; on conflict, drop files absent from the target branch.
+          # This handles the common case of newer release notes (e.g. 1.35.md) not yet
+          # existing on older release branches (e.g. release-1.32).
+          if ! git cherry-pick "$SHA"; then
+            git diff --name-only --diff-filter=U | while read -r file; do
+              if ! git cat-file -e "origin/${TARGET}:${file}" 2>/dev/null; then
+                git rm --force "$file"
+              fi
+            done
+            git cherry-pick --continue --no-edit
+          fi
+
+          git push origin "$BRANCH"
+          gh pr create \
+            --base "$TARGET" \
+            --head "$BRANCH" \
+            --title "docs: Update patch notices [Backport ${TARGET}]" \
+            --body "Backport of #${PR_NUMBER} to \`${TARGET}\`."

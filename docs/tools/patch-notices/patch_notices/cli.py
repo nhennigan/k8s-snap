@@ -15,6 +15,15 @@ from patch_notices import fetcher, ai, workbook, state
 console = Console()
 
 
+def _expand_track(version: str, source: str) -> str:
+    """Expand a short version like '1.32' to the full channel string."""
+    if "/" in version:
+        return version  # already a full channel
+    if source == "charm":
+        return f"{version}/stable"
+    return f"{version}-classic/stable"
+
+
 @click.group()
 def main():
     """Patch-notices updater for Canonical Kubernetes."""
@@ -24,7 +33,7 @@ def main():
 @click.option(
     "--track",
     required=True,
-    help="Snap track to process, e.g. '1.30/stable'.",
+    help="Release version to process, e.g. '1.32'.",
 )
 @click.option(
     "--source",
@@ -45,6 +54,7 @@ def fetch(track: str, source: str):
 
     Writes the raw delta to metadata/delta-<track>.json.
     """
+    track = _expand_track(track, source)
     console.print(f"[bold]Fetching delta for track:[/bold] {track} [dim](source: {source})[/dim]")
     if source == "charm":
         state_key = f"charm:{track}"
@@ -59,7 +69,7 @@ def fetch(track: str, source: str):
 @click.option(
     "--track",
     required=True,
-    help="Snap track to process, e.g. '1.30/stable'.",
+    help="Release version to process, e.g. '1.32'.",
 )
 @click.option(
     "--source",
@@ -70,7 +80,7 @@ def fetch(track: str, source: str):
 )
 @click.option(
     "--output",
-    default="monthly_review.md",
+    default="patch_notices_review.md",
     show_default=True,
     help="Path to write the workbook.",
 )
@@ -81,6 +91,7 @@ def review(track: str, source: str, output: str):
     (diff > body > title), and writes the workbook with Included,
     Verification, and Discarded sections.
     """
+    track = _expand_track(track, source)
     console.print(f"[bold]Running AI triage for track:[/bold] {track} [dim](source: {source})[/dim]")
     load_key = f"charm:{track}" if source == "charm" else f"snap:{track}"
     delta = fetcher.load_delta(load_key)
@@ -93,7 +104,7 @@ def review(track: str, source: str, output: str):
 @click.option(
     "--track",
     required=True,
-    help="Snap track to finalize, e.g. '1.30/stable'.",
+    help="Release version to finalize, e.g. '1.32'.",
 )
 @click.option(
     "--source",
@@ -104,13 +115,13 @@ def review(track: str, source: str, output: str):
 )
 @click.option(
     "--workbook-path",
-    default="monthly_review.md",
+    default="patch_notices_review.md",
     show_default=True,
     help="Path to the edited workbook.",
 )
 @click.option(
     "--export",
-    default="patch-notice-export.md",
+    default="patch_notices_output.md",
     show_default=True,
     help="Path for the clean export snippet.",
 )
@@ -125,6 +136,7 @@ def finalize(track: str, source: str, workbook_path: str, export: str):
     bookmark is still advanced to the last commit in the fetched delta so
     future runs start from the right place.
     """
+    track = _expand_track(track, source)
     console.print(f"[bold]Finalizing track:[/bold] {track} [dim](source: {source})[/dim]")
     state_key = f"charm:{track}" if source == "charm" else f"snap:{track}"
 
@@ -161,7 +173,7 @@ def finalize(track: str, source: str, workbook_path: str, export: str):
 @click.option(
     "--track",
     required=True,
-    help="Track to process, e.g. '1.35-classic/stable' (snap) or '1.35/stable' (charm).",
+    help="Release version to process, e.g. '1.35'.",
 )
 @click.option(
     "--source",
@@ -197,6 +209,7 @@ def generate(track: str, source: str, release_notes: str, summary_out: str, work
     Writes a summary JSON to --summary-out regardless of outcome so that
     pr-body can include all tracks in the PR body table.
     """
+    track = _expand_track(track, source)
     today_dt = _date.today()
     today = f"{today_dt.strftime('%b')} {today_dt.day}, {today_dt.year}"
     state_key = f"charm:{track}" if source == "charm" else f"snap:{track}"

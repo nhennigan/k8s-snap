@@ -55,13 +55,14 @@ export OPENAI_GROUP_MODEL=gpt-4o-mini   # default; change if your endpoint lacks
 
 ## Manual workflow
 
-Snap tracks use the format `<version>-classic/stable`, e.g. `1.32-classic/stable`.
+Pass `--track` as a short version number, e.g. `1.32`. The tool expands this
+to `1.32-classic/stable` for snap (the default) or `1.32/stable` for charm.
 State is stored under the key `snap:1.32-classic/stable` in `patch-metadata.json`.
 
 ### 1. fetch — pull the PR delta
 
 ```bash
-patch-notices fetch --track 1.32-classic/stable
+patch-notices fetch --track 1.32
 ```
 
 Queries the Snap Store for the current stable revision, resolves the build SHA
@@ -72,11 +73,11 @@ Writes a raw delta to `metadata/delta-<track>.json`.
 ### 2. review — run AI triage and open the workbook
 
 ```bash
-patch-notices review --track 1.32-classic/stable
+patch-notices review --track 1.32
 ```
 
 Reads the delta, processes each PR through the AI (diff > body > title),
-and writes `monthly_review.md` in the current directory.
+and writes `patch_notices_review.md` in the current directory.
 Prints the path to the written file.
 
 The workbook has three sections:
@@ -90,12 +91,12 @@ sections. The `<!-- sha:... -->` tags are the only thing `finalize` reads.
 ### 3. finalize — close the loop
 
 ```bash
-patch-notices finalize --track 1.32-classic/stable
+patch-notices finalize --track 1.32
 ```
 
 Parses the workbook for `<!-- sha:... -->` tags, updates
 `metadata/patch-metadata.json` with the latest included SHA and today's date,
-then writes `patch-notice-export.md` — a clean snippet with all internal tags
+then writes `patch_notices_output.md` — a clean snippet with all internal tags
 and verification noise removed.
 
 If all commits were discarded (no included items), the export file is not
@@ -126,9 +127,10 @@ Instead of the Snap Store + Launchpad pipeline, the charm path:
 
 ### Charm track format
 
-Charm tracks use the format `<version>/stable` (no `-classic` suffix), e.g.
-`1.32/stable`. State is stored under the key `charm:1.32/stable` so snap
-and charm entries never collide in `patch-metadata.json`.
+Charm tracks use `<version>/stable` internally (no `-classic` suffix). Passing
+`--source charm --track 1.32` expands to `1.32/stable`. State is stored under
+the key `charm:1.32/stable` so snap and charm entries never collide in
+`patch-metadata.json`.
 
 ### Initial setup
 
@@ -145,13 +147,13 @@ https://github.com/canonical/k8s-operator/releases/tag/k8s-rev<N>
 
 ```bash
 # 1. Pull the commit delta from canonical/k8s-operator
-patch-notices fetch --source charm --track 1.32/stable
+patch-notices fetch --source charm --track 1.32
 
 # 2. Run AI triage with the charm-specific prompt; write the workbook
-patch-notices review --source charm --track 1.32/stable --output charm_review.md
+patch-notices review --source charm --track 1.32 --output charm_review.md
 
 # 3. Update state and export the clean patch notice
-patch-notices finalize --source charm --track 1.32/stable \
+patch-notices finalize --source charm --track 1.32 \
   --workbook-path charm_review.md --export charm-export.md
 ```
 
@@ -161,14 +163,14 @@ when processing both snap and charm tracks in the same session.
 ## Automated workflow (CI)
 
 The `generate` and `pr-body` commands are used by the GitHub Actions workflow
-to process all tracks automatically. See [AUTOMATION.md](AUTOMATION.md) for the
+to process all tracks automatically. See [ARCHITECTURE.md](ARCHITECTURE.md) for the
 full architecture.
 
 ### generate — fetch, triage, and insert in one step
 
 ```bash
 patch-notices generate \
-  --track 1.32-classic/stable \
+  --track 1.32 \
   --release-notes docs/canonicalk8s/releases/snap/1.32.md \
   --summary-out summaries/snap-1.32.json
 ```
@@ -196,4 +198,4 @@ detail sections. Use `--output -` (default) to print to stdout.
 
 [PLAN.md](PLAN.md) — original system specification (snap pipeline only; predates charm support).
 
-[AUTOMATION.md](AUTOMATION.md) — architecture and PR flow for the automated monthly workflow.
+[ARCHITECTURE.md](ARCHITECTURE.md) — architecture and PR flow for the automated monthly workflow.
