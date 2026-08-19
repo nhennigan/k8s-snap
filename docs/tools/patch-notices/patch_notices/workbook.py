@@ -31,6 +31,11 @@ from typing import Any
 SHA_TAG_RE = re.compile(r"<!--\s*sha:([0-9a-f]{7,40})\s*-->")
 
 
+# ---------------------------------------------------------------------------
+# Rendering helpers
+# ---------------------------------------------------------------------------
+
+
 def _group_included(included: list[dict[str, Any]]) -> list[list[dict[str, Any]]]:
     """Return a list of groups. Standalone commits are groups of size 1.
     Commits sharing a non-null group_hint are collected together, in first-seen order.
@@ -60,12 +65,83 @@ CATEGORY_ORDER = [
 ]
 
 
-def write(triage_results: list[dict[str, Any]], output_path: str) -> None:
+_CHANNEL_TAG_RE = re.compile(r"<!-- patch-notices:channel:(.+?) -->")
+
+
+def _best_in_group(group: list[dict[str, Any]]) -> dict[str, Any]:
+    """Return the commit from the group with the highest-priority category."""
+    return min(
+        group,
+        key=lambda r: (
+            CATEGORY_ORDER.index(r["triage"].get("category", ""))
+            if r["triage"].get("category") in CATEGORY_ORDER
+            else len(CATEGORY_ORDER)
+        ),
+    )
+
+
+def _sort_by_category(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    def _key(r: dict[str, Any]) -> int:
+        cat = r["triage"].get("category", "")
+        try:
+            return CATEGORY_ORDER.index(cat)
+        except ValueError:
+            return len(CATEGORY_ORDER)
+
+    return sorted(items, key=_key)
+
+
+def _clean_entry_lines(triage_results: list[dict[str, Any]]) -> list[str]:
+    """Return clean bullet lines from triage results (no sha tags, no category labels).
+
+    Produces the same output as export_clean but directly from triage results,
+    without needing a workbook file on disk.
+    """
+    included = [r for r in triage_results if r["triage"]["action"] == "include"]
+    groups = _group_included(_sort_by_category(included))
+    lines: list[str] = []
+    for group in groups:
+        if len(group) == 1:
+            r = group[0]
+            category = r["triage"].get("category", "")
+            summary = r["triage"].get("summary", "")
+            components = r["triage"].get("components") or []
+            if category == "Component Bump" and components:
+                lines.append("- Version bumps")
+                for component in components:
+                    lines.append(f"    - {component}")
+            else:
+                lines.append(f"- {summary}")
+        else:
+            best = _best_in_group(group)
+            category = best["triage"].get("category", "")
+            summary = best["triage"].get("summary", "")
+            all_components: list[str] = []
+            for r in group:
+                all_components.extend(r["triage"].get("components") or [])
+            if category == "Component Bump" and all_components:
+                lines.append("- Version bumps")
+                for component in all_components:
+                    lines.append(f"    - {component}")
+            else:
+                lines.append(f"- {summary}")
+    return lines
+
+
+# ---------------------------------------------------------------------------
+# Manual workflow
+# ---------------------------------------------------------------------------
+
+
+def write(triage_results: list[dict[str, Any]], output_path: str, channel_key: str = "") -> None:
     """Render triage results into the three-section workbook."""
     included = [r for r in triage_results if r["triage"]["action"] == "include"]
     discarded = [r for r in triage_results if r["triage"]["action"] == "discard"]
 
-    lines: list[str] = ["# Monthly Patch Notice Review\n"]
+    lines: list[str] = []
+    if channel_key:
+        lines.append(f"<!-- patch-notices:channel:{channel_key} -->")
+    lines.append("# Monthly Patch Notice Review\n")
 
     # -- Included ----------------------------------------------------------
     lines.append("## Included\n")
@@ -170,6 +246,18 @@ def parse_included_shas(workbook_path: str) -> list[str]:
     return SHA_TAG_RE.findall(included_section)
 
 
+def read_channel_key(workbook_path: str) -> str:
+    """Return the channel key embedded by write(), e.g. 'snap:1.32-classic/stable'."""
+    text = Path(workbook_path).read_text()
+    m = _CHANNEL_TAG_RE.search(text)
+    if not m:
+        raise ValueError(
+            f"No channel tag found in {workbook_path}. "
+            "Re-run `review` to regenerate the workbook."
+        )
+    return m.group(1)
+
+
 def export_clean(workbook_path: str, export_path: str) -> None:
     """Write a clean copy of the Included section, stripped of all tags."""
     text = Path(workbook_path).read_text()
@@ -187,64 +275,9 @@ def export_clean(workbook_path: str, export_path: str) -> None:
     Path(export_path).write_text(clean)
 
 
-def _best_in_group(group: list[dict[str, Any]]) -> dict[str, Any]:
-    """Return the commit from the group with the highest-priority category."""
-    return min(
-        group,
-        key=lambda r: (
-            CATEGORY_ORDER.index(r["triage"].get("category", ""))
-            if r["triage"].get("category") in CATEGORY_ORDER
-            else len(CATEGORY_ORDER)
-        ),
-    )
-
-
-def _sort_by_category(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    def _key(r: dict[str, Any]) -> int:
-        cat = r["triage"].get("category", "")
-        try:
-            return CATEGORY_ORDER.index(cat)
-        except ValueError:
-            return len(CATEGORY_ORDER)
-
-    return sorted(items, key=_key)
-
-
-def _clean_entry_lines(triage_results: list[dict[str, Any]]) -> list[str]:
-    """Return clean bullet lines from triage results (no sha tags, no category labels).
-
-    Produces the same output as export_clean but directly from triage results,
-    without needing a workbook file on disk.
-    """
-    included = [r for r in triage_results if r["triage"]["action"] == "include"]
-    groups = _group_included(_sort_by_category(included))
-    lines: list[str] = []
-    for group in groups:
-        if len(group) == 1:
-            r = group[0]
-            category = r["triage"].get("category", "")
-            summary = r["triage"].get("summary", "")
-            components = r["triage"].get("components") or []
-            if category == "Component Bump" and components:
-                lines.append("- Version bumps")
-                for component in components:
-                    lines.append(f"    - {component}")
-            else:
-                lines.append(f"- {summary}")
-        else:
-            best = _best_in_group(group)
-            category = best["triage"].get("category", "")
-            summary = best["triage"].get("summary", "")
-            all_components: list[str] = []
-            for r in group:
-                all_components.extend(r["triage"].get("components") or [])
-            if category == "Component Bump" and all_components:
-                lines.append("- Version bumps")
-                for component in all_components:
-                    lines.append(f"    - {component}")
-            else:
-                lines.append(f"- {summary}")
-    return lines
+# ---------------------------------------------------------------------------
+# CI workflow
+# ---------------------------------------------------------------------------
 
 
 def insert_patch_notice(

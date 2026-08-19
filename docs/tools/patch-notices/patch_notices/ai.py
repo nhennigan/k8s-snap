@@ -14,7 +14,7 @@ from typing import Any
 
 import openai
 
-SYSTEM_PROMPT = """\
+SNAP_SYSTEM_PROMPT = """\
 You are a technical writer producing monthly patch notices for Canonical Kubernetes.
 You will be given a git commit: its title, body, and the file diff for that commit.
 
@@ -131,7 +131,7 @@ file diff for that commit.
 ## Tone
 
 Professional, concise, and focused on stability, upgrade safety, security, and
-operator experience. Start summaries with a verb (e.g. "Adds", "Fixes", "Removes").
+operator experience. Start summaries with a verb (e.g. "Add", "Fix", "Remove").
 
 ## Output format
 
@@ -199,7 +199,7 @@ def triage(prs: list[dict[str, Any]], source: str = "snap") -> list[dict[str, An
       export OPENAI_BASE_URL=https://models.inference.ai.azure.com
       export OPENAI_API_KEY=ghp_...
     """
-    system_prompt = CHARM_SYSTEM_PROMPT if source == "charm" else SYSTEM_PROMPT
+    system_prompt = CHARM_SYSTEM_PROMPT if source == "charm" else SNAP_SYSTEM_PROMPT
     client = openai.OpenAI(
         api_key=os.environ["OPENAI_API_KEY"],
         base_url=os.environ.get("OPENAI_BASE_URL"),  # None = use OpenAI default

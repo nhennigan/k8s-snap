@@ -150,15 +150,11 @@ https://github.com/canonical/k8s-operator/releases/tag/k8s-rev<N>
 patch-notices fetch --source charm --track 1.32
 
 # 2. Run AI triage with the charm-specific prompt; write the workbook
-patch-notices review --source charm --track 1.32 --output charm_review.md
+patch-notices review --source charm --track 1.32
 
 # 3. Update state and export the clean patch notice
-patch-notices finalize --source charm --track 1.32 \
-  --workbook-path charm_review.md --export charm-export.md
+patch-notices finalize --source charm --track 1.32
 ```
-
-Use `--output` and `--export` to avoid overwriting your snap workbook files
-when processing both snap and charm tracks in the same session.
 
 ## Automated workflow (CI)
 
@@ -178,9 +174,6 @@ patch-notices generate \
 Combines `fetch` + AI triage + direct insertion into the release notes file.
 Advances the state bookmark on success. Writes a summary JSON to `--summary-out`
 (used by `pr-body`) regardless of outcome.
-
-Use `--workbook <path>` to also write the full Included/Discarded/Verification
-workbook for local inspection — this does not affect the release notes or state.
 
 Works for both snap and charm tracks via `--source charm`.
 

@@ -1,12 +1,17 @@
 # Copyright 2026 Canonical, Ltd.
 # See LICENSE file for licensing details.
 
-"""Fetch the PR delta between the last documented SHA and the current stable SHA.
+"""Fetch the commit delta between the last documented SHA and the current stable SHA.
 
-Pipeline:
+Snap pipeline:
   1. Query Snap Store API  -> current revision number for the track
   2. Query Launchpad API   -> git SHA for that revision's build
-  3. Query GitHub API      -> list of PRs merged between the two SHAs
+  3. Query GitHub API      -> list of commits merged between the two SHAs
+
+Charm pipeline:
+  1. Query Charmhub API    -> current revision number for the track
+  2. Query GitHub API      -> git SHA via the k8s-rev<N> tag
+  3. Query GitHub API      -> list of commits merged between the two SHAs
 """
 
 from __future__ import annotations
@@ -20,7 +25,7 @@ from typing import Any
 
 import requests
 
-from patch_notices import state
+from patch_notices import metadata
 
 SNAP_STORE_API = "https://api.snapcraft.io/v2/snaps/info/k8s"
 LAUNCHPAD_API = "https://api.launchpad.net/devel"
@@ -37,6 +42,11 @@ METADATA_DIR = pathlib.Path(__file__).parent.parent / "metadata"
 
 # PR number embedded in squash-merge commit subject, e.g. "fix: something (#2131)"
 _PR_IN_SUBJECT_RE = re.compile(r"\(#(\d+)\)$")
+
+
+# ---------------------------------------------------------------------------
+# Snap pipeline helpers
+# ---------------------------------------------------------------------------
 
 
 def _snap_store_revision(track: str) -> int:
@@ -112,6 +122,11 @@ def _launchpad_sha(track: str, revision: int) -> str:
         f"No Launchpad build found for snap '{snap_name}' with store revision {revision}. "
         "The build may still be in progress, or the snap name may have changed."
     )
+
+
+# ---------------------------------------------------------------------------
+# GitHub / shared helpers
+# ---------------------------------------------------------------------------
 
 
 def _github_commit_diff(sha: str, repo: str, headers: dict) -> str:
@@ -196,6 +211,11 @@ def _github_commits(base_sha: str, head_sha: str, repo: str = GITHUB_REPO) -> li
     return entries
 
 
+# ---------------------------------------------------------------------------
+# Charm pipeline helpers
+# ---------------------------------------------------------------------------
+
+
 def _charmhub_revision(track: str) -> int:
     """Return the current amd64 revision number published on *track* for the k8s charm.
 
@@ -248,68 +268,86 @@ def _charm_github_sha(revision: int) -> str:
     return sha
 
 
-def fetch_charm_delta(state_key: str) -> list[dict[str, Any]]:
+# ---------------------------------------------------------------------------
+# Storage helpers
+# ---------------------------------------------------------------------------
+
+
+def delta_path(channel_key: str) -> pathlib.Path:
+    """Return the path for a track's saved delta file."""
+    safe = channel_key.replace(":", "-").replace("/", "-")
+    return METADATA_DIR / f"delta-{safe}.json"
+
+
+def _save_delta(channel_key: str, prs: list[dict[str, Any]]) -> None:
+    """Persist delta to metadata/delta-<safe-track>.json."""
+    METADATA_DIR.mkdir(exist_ok=True)
+    path = delta_path(channel_key)
+    path.write_text(json.dumps(prs, indent=2))
+
+
+def load_delta(channel_key: str) -> list[dict[str, Any]]:
+    """Load a previously saved delta from disk."""
+    path = delta_path(channel_key)
+    if not path.exists():
+        raise FileNotFoundError(
+            f"No delta file found for '{channel_key}'. Run `fetch` first."
+        )
+    return json.loads(path.read_text())
+
+
+# ---------------------------------------------------------------------------
+# Public API
+# ---------------------------------------------------------------------------
+
+
+def fetch_charm_delta(channel_key: str) -> list[dict[str, Any]]:
     """Full charm pipeline: Charmhub -> GitHub tag -> GitHub commits. Returns commit list.
 
-    *state_key* must be in the form 'charm:<channel>', e.g. 'charm:1.32/stable'.
+    *channel_key* must be in the form 'charm:<channel>', e.g. 'charm:1.32/stable'.
     Only '/stable' channels are accepted.
     """
-    if not state_key.startswith("charm:"):
+    if not channel_key.startswith("charm:"):
         raise ValueError(
-            f"state_key must start with 'charm:', got: {state_key!r}"
+            f"channel_key must start with 'charm:', got: {channel_key!r}"
         )
-    channel = state_key[len("charm:"):]
+    channel = channel_key[len("charm:"):]
     if not channel.endswith("/stable"):
         raise ValueError(
             f"Charm patch notices only support '/stable' channels, got: {channel!r}"
         )
 
-    track_state = state.load().get("tracks", {}).get(state_key, {})
-    base_sha = track_state.get("last_documented_sha")
+    channel_metadata = metadata.load().get("tracks", {}).get(channel_key, {})
+    base_sha = channel_metadata.get("last_documented_sha")
     if not base_sha:
         raise ValueError(
-            f"No last_documented_sha for '{state_key}' in patch-metadata.json. "
+            f"No last_documented_sha for '{channel_key}' in patch-metadata.json. "
             "Add an initial entry before running fetch."
         )
 
     revision = _charmhub_revision(channel)
     head_sha = _charm_github_sha(revision)
     commits = _github_commits(base_sha, head_sha, repo=CHARM_GITHUB_REPO)
-    _save_delta(state_key, commits)
+    _save_delta(channel_key, commits)
     return commits
 
 
-def fetch_delta(track: str) -> list[dict[str, Any]]:
+def fetch_snap_delta(channel_key: str) -> list[dict[str, Any]]:
     """Full pipeline: Snap Store -> Launchpad -> GitHub. Returns PR list."""
-    state_key = f"snap:{track}"
-    track_state = state.load().get("tracks", {}).get(state_key, {})
-    base_sha = track_state.get("last_documented_sha")
+    if not channel_key.startswith("snap:"):
+        raise ValueError(
+            f"channel_key must start with 'snap:', got: {channel_key!r}"
+        )
+    track = channel_key[len("snap:"):]
+    channel_metadata = metadata.load().get("tracks", {}).get(channel_key, {})
+    base_sha = channel_metadata.get("last_documented_sha")
     if not base_sha:
         raise ValueError(
-            f"No last_documented_sha for '{state_key}' in patch-metadata.json. "
+            f"No last_documented_sha for '{channel_key}' in patch-metadata.json. "
             "Add an initial entry before running fetch."
         )
     revision = _snap_store_revision(track)
     head_sha = _launchpad_sha(track, revision)
     prs = _github_commits(base_sha, head_sha)
-    _save_delta(state_key, prs)
+    _save_delta(channel_key, prs)
     return prs
-
-
-def _save_delta(track: str, prs: list[dict[str, Any]]) -> None:
-    """Persist delta to metadata/delta-<safe-track>.json."""
-    METADATA_DIR.mkdir(exist_ok=True)
-    safe = track.replace(":", "-").replace("/", "-")
-    path = METADATA_DIR / f"delta-{safe}.json"
-    path.write_text(json.dumps(prs, indent=2))
-
-
-def load_delta(track: str) -> list[dict[str, Any]]:
-    """Load a previously saved delta from disk."""
-    safe = track.replace(":", "-").replace("/", "-")
-    path = METADATA_DIR / f"delta-{safe}.json"
-    if not path.exists():
-        raise FileNotFoundError(
-            f"No delta file found for track '{track}'. Run `fetch` first."
-        )
-    return json.loads(path.read_text())
