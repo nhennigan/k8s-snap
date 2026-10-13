@@ -59,7 +59,7 @@ cluster and provide additional functionality.
 ```{toctree}
 :glob:
 :titlesonly:
-Charm integrations <charm/index.md>
+Charm integrations <charm-integrations.md>
 ```
 
 
