@@ -32,12 +32,6 @@ project's needs with
 **[choosing a {{product}} installation method.](/snap/explanation/installation-methods.md)**
 <!-- markdownlint-restore -->
 
-```{toctree}
-:hidden:
-:titlesonly:
-Canonical Kubernetes documentation <self>
-```
-
 ---
 
 ```{toctree}
