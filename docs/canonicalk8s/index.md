@@ -35,12 +35,6 @@ project's needs with
 ```{toctree}
 :hidden:
 :titlesonly:
-Canonical Kubernetes documentation <self>
-```
-
-```{toctree}
-:hidden:
-:titlesonly:
 :maxdepth: 6
 
 about.md
